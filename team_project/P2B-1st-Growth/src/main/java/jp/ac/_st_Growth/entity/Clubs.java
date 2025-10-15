@@ -1,5 +1,5 @@
 package jp.ac._st_Growth.entity;
 
-public class Entity {
+public class Clubs {
 
 }
