@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ユーザー更新</title>
+	<link th:href="@{/css/user/update.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>ユーザー更新するデータを入力してください</h2>
+        <form th:action="@{/user/updateCheck}" method="post">
+            <label for="userName">ユーザーID</label>
+            <input type="text" name="userId" required>
+
+            <button type="submit" class="update">更新する</button>
+        </form>
+        <form th:action="@{/cancel}">
+        	 <button type="submit" class="cancel">キャンセル</button>
+        </form>
+    </div>
+</body>
+</html>

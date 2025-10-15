@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+    <meta charset="UTF-8">
+	<link th:href="@{/css/login/login.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form th:action="@{/menu}" method="post">
+            <div>
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <div class="button-group">
+                <button type="submit">ログイン</button>
+            </div>
+        </form>
+        
+        <form th:action="@{/user/registInput}" method="get">
+            <div class="button-group">
+                <button type="submit" class="register-button">ユーザー登録</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

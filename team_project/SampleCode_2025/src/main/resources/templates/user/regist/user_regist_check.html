@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ユーザー登録確認</title>
+    <link th:href="@{/css/user/regist.css}" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <form th:action="@{/user/registComplete}" method="post">
+        <h2>ユーザー登録確認</h2>
+        <div class="info">
+            <p><strong>ユーザー名:</strong> <span th:text="${userData.userName}"></span></p>
+            <p><strong>パスワード:</strong> <span th:text="${userData.password}"></span></p>
+            <p><strong>メールアドレス:</strong> <span th:text="${userData.email}"></span></p>
+        </div>
+        <input type="hidden" name="userName" th:value="${userData.userName}">
+        <input type="hidden" name="password" th:value="${userData.password}">
+        <input type="hidden" name="email" th:value="${userData.email}">
+        <button type="submit" class="registBtn">登録</button>
+    </form>
+    <form th:action="@{/cancel}" method="post">
+		  <button type="submit" class="cancel">キャンセル</button>
+    </form>
+</div>
+</body>
+</html>
