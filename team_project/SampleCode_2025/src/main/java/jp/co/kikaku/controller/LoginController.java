@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import jp.co.kikaku.form.UserForm;
 import jp.co.kikaku.repository.UsersRepository;
 
 /*
@@ -22,10 +23,10 @@ public class LoginController {
 	 * 処理内容
 	 * ログイン情報を入力するための画面を出力する
 	 */
-    @RequestMapping(path = "/ログイン画面へ遷移するパス")
+    @RequestMapping(path = "/login")
     public String showLoginPage() {
-        return "ログイン入力画面";
-    }
+        return "login";
+        }
     
     /*
      * 処理内容
@@ -34,9 +35,9 @@ public class LoginController {
      * ・検索結果があればメニュー画面出力のパスへリダイレクト
      * ・検索結果が無ければエラーメッセージとともにログイン入力画面へ遷移させる
      */
-    @RequestMapping(path = "/ログイン情報入力後のパス" ,method = RequestMethod.POST)
-    public String login("チームで作成したFormクラス" form, Model model) {
-    	"User系のEntity名" user = userRepository.findByEmailAndPassword("Formクラス内のid","Formクラス内のpassword");
+    @RequestMapping(path = "/menu" ,method = RequestMethod.POST)
+    public String login(UserForm form, Model model) {
+    	User user = userRepository.findByEmailAndPassword(userId,password);
 
     	//検索結果があれば
         if (user !=null) {
