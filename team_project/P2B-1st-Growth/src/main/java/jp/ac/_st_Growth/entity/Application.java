@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 
 public class Application {
@@ -14,8 +16,16 @@ public class Application {
     @SequenceGenerator(name = "seq_application", sequenceName = "seq_application_id", allocationSize = 1)
     private Integer applyId;
 
+	@ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName ="userId")
+    private User user;
+	
+	@ManyToOne
+    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
+    private  Recruitment recruitment;
+	
     @Column
-    private Integer userId;
+    private Date applyDate;
 
     public Integer getApplyId() {
 		return applyId;
@@ -25,20 +35,20 @@ public class Application {
 		this.applyId = applyId;
 	}
 
-	public Integer getUserId() {
-		return userId;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(Integer userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public Integer getRecruitId() {
-		return recruitId;
+	public Recruitment getRecruitment() {
+		return recruitment;
 	}
 
-	public void setRecruitId(Integer recruitId) {
-		this.recruitId = recruitId;
+	public void setRecruitment(Recruitment recruitment) {
+		this.recruitment = recruitment;
 	}
 
 	public Date getApplyDate() {
@@ -49,10 +59,6 @@ public class Application {
 		this.applyDate = applyDate;
 	}
 
-	@Column
-    private Integer recruitId;
-    
-    @Column
-    private Date applyDate;
+	
 
 }
