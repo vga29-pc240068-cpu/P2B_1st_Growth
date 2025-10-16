@@ -19,7 +19,7 @@ CREATE TABLE clubs (
     --FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 -- 教員テーブル
-CREATE TABLE members ( 
+CREATE TABLE users ( 
     user_id NUMBER(5) PRIMARY KEY,
     school_id NUMBER(5) NOT NULL,
     club_id NUMBER(5) NOT NULL,
@@ -27,13 +27,12 @@ CREATE TABLE members (
     email VARCHAR2(255) NOT NULL UNIQUE,
     phone_number VARCHAR2(15) NOT NULL,
     password VARCHAR2(128) NOT NULL,
-    created_date DATE DEFAULT SYSDATE,
     FOREIGN KEY (school_id) REFERENCES schools(school_id),
     FOREIGN KEY (club_id) REFERENCES clubs(club_id)
 );
 -- 部活テーブルに外部キー制約を追加
 ALTER TABLE clubs ADD CONSTRAINT fk_clubs_user_id 
-    FOREIGN KEY (user_id) REFERENCES members(user_id);
+    FOREIGN KEY (user_id) REFERENCES users(user_id);
 
 --募集テーブル
 CREATE TABLE recruitments (
@@ -43,9 +42,7 @@ CREATE TABLE recruitments (
     match_date DATE NOT NULL,
     match_time VARCHAR2(5) NOT NULL, 
     location VARCHAR2(200) NOT NULL,
-    status VARCHAR2(20) DEFAULT 'OPEN',
-    created_date DATE DEFAULT SYSDATE,
-    FOREIGN KEY (user_id) REFERENCES members(user_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (club_id) REFERENCES clubs(club_id)
 );
 
@@ -55,8 +52,7 @@ CREATE TABLE applications (
    user_id NUMBER(5) NOT NULL,
     recruit_id NUMBER(5) NOT NULL,
     apply_date DATE  NOT NULL,
-    status VARCHAR2(20) DEFAULT 'PENDING',
-   FOREIGN KEY (user_id) REFERENCES members(user_id),
+   FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (recruit_id) REFERENCES recruitments(recruit_id)
 );
 -- チャットテーブル
@@ -68,11 +64,10 @@ CREATE TABLE chats (
     sender_id NUMBER(5) NOT NULL,
     message VARCHAR2(200) NOT NULL,
     transmission_date DATE DEFAULT SYSDATE NOT NULL,
-    read_status VARCHAR2(10) DEFAULT 'UNREAD',
    FOREIGN KEY (apply_id) REFERENCES applications(apply_id),
     FOREIGN KEY (recruit_id) REFERENCES recruitments(recruit_id),
-    FOREIGN KEY (receiver_id) REFERENCES members(user_id),
-    FOREIGN KEY (sender_id) REFERENCES members(user_id)
+    FOREIGN KEY (receiver_id) REFERENCES users(user_id),
+    FOREIGN KEY (sender_id) REFERENCES users(user_id)
 );
 -- シーケンスの作成
 CREATE SEQUENCE seq_school_id START WITH 1 INCREMENT BY 1 NOCACHE;
@@ -85,12 +80,3 @@ CREATE SEQUENCE seq_chat_id START WITH 1 INCREMENT BY 1 NOCACHE;
 COMMIT; 
  
  
-CREATE SEQUENCE seq_school_id START WITH 1 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_member_id START WITH 1 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_club_id START WITH 1 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_recruit_id START WITH 1 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_apply_id START WITH 1 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE seq_chat_id START WITH 1 INCREMENT BY 1 NOCACHE;
- 
-
-COMMIT; 
