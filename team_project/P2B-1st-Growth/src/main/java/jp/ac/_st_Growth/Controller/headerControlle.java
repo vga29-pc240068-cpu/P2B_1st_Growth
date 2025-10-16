@@ -1,5 +1,6 @@
+
 package jp.ac._st_Growth.Controller;
-//ãƒ˜ãƒƒãƒ€
+//ƒwƒbƒ_
 public class headerControlle {
 
 }
