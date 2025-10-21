@@ -1,0 +1,15 @@
+-- 既存のテーブルを削除（依存関係があるので順番に注意）
+DROP TABLE chats CASCADE CONSTRAINTS;
+DROP TABLE applications CASCADE CONSTRAINTS;
+DROP TABLE recruitments CASCADE CONSTRAINTS;
+DROP TABLE members CASCADE CONSTRAINTS;
+DROP TABLE clubs CASCADE CONSTRAINTS;
+DROP TABLE schools CASCADE CONSTRAINTS;
+
+-- 既存のシーケンスを削除
+DROP SEQUENCE seq_school_id;
+DROP SEQUENCE seq_user_id;
+DROP SEQUENCE seq_club_id;
+DROP SEQUENCE seq_recruit_id;
+DROP SEQUENCE seq_apply_id;
+DROP SEQUENCE seq_chat_id;

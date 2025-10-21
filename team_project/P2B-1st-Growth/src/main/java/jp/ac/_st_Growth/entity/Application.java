@@ -1,0 +1,64 @@
+package jp.ac._st_Growth.entity;
+
+import java.sql.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+
+public class Application {
+	@Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_application")
+    @SequenceGenerator(name = "seq_application", sequenceName = "seq_application_id", allocationSize = 1)
+    private Integer applyId;
+
+	@ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName ="userId")
+    private User user;
+	
+	@ManyToOne
+    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
+    private  Recruitment recruitment;
+	
+    @Column
+    private Date applyDate;
+
+    public Integer getApplyId() {
+		return applyId;
+	}
+
+	public void setApplyId(Integer applyId) {
+		this.applyId = applyId;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Recruitment getRecruitment() {
+		return recruitment;
+	}
+
+	public void setRecruitment(Recruitment recruitment) {
+		this.recruitment = recruitment;
+	}
+
+	public Date getApplyDate() {
+		return applyDate;
+	}
+
+	public void setApplyDate(Date applyDate) {
+		this.applyDate = applyDate;
+	}
+
+	
+
+}
