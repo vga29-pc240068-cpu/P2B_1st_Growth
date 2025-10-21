@@ -15,31 +15,33 @@ public class Chat {
 	@Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_chat")
     @SequenceGenerator(name = "seq_chat", sequenceName = "seq_chat_id", allocationSize = 1)
-    private Integer chatId;
+    
+	private Integer chatId;
 
 	@ManyToOne
-    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
+    @JoinColumn(name = "apply_id",referencedColumnName ="applyId")
     private  Application application;
 	
     @ManyToOne
     @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
     private  Recruitment recruitment;
     
+    @ManyToOne
+   @JoinColumn(name = "receiver_id",referencedColumnName ="userId")
+    private  User receiver;
     
-//    applyid receiverid senderid まだです
-    @Column
-    private Integer receiverId;
+   @ManyToOne
+   @JoinColumn(name = "sender_id",referencedColumnName ="userId")
+   private  User sender;
     
-    @Column
-    private Integer senderId;
+   
     @Column
     private String message;
     
     @Column
     private Date transmissionDate;
-    
-    
-    public Integer getChatId() {
+
+	public Integer getChatId() {
 		return chatId;
 	}
 
@@ -47,15 +49,14 @@ public class Chat {
 		this.chatId = chatId;
 	}
 
-	public Integer getApplyId() {
-		return applyId;
+	public Application getApplication() {
+		return application;
 	}
 
-	public void setApplyId(Integer applyId) {
-		this.applyId = applyId;
+	public void setApplication(Application application) {
+		this.application = application;
 	}
 
-	
 	public Recruitment getRecruitment() {
 		return recruitment;
 	}
@@ -64,20 +65,20 @@ public class Chat {
 		this.recruitment = recruitment;
 	}
 
-	public Integer getReceiverId() {
-		return receiverId;
+	public User getReceiver() {
+		return receiver;
 	}
 
-	public void setReceiverId(Integer receiverId) {
-		this.receiverId = receiverId;
+	public void setReceiver(User receiver) {
+		this.receiver = receiver;
 	}
 
-	public Integer getSenderId() {
-		return senderId;
+	public User getSender() {
+		return sender;
 	}
 
-	public void setSenderId(Integer senderId) {
-		this.senderId = senderId;
+	public void setSender(User sender) {
+		this.sender = sender;
 	}
 
 	public String getMessage() {
@@ -95,7 +96,8 @@ public class Chat {
 	public void setTransmissionDate(Date transmissionDate) {
 		this.transmissionDate = transmissionDate;
 	}
-
-	
+    
+    
+    
     
 }
