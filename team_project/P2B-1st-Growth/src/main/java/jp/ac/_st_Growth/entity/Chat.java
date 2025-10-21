@@ -37,6 +37,7 @@ public class Chat {
     
     @Column
     private Date transmissionDate;
+
     
     
     public Integer getChatId() {
