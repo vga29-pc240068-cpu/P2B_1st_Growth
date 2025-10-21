@@ -22,12 +22,15 @@ public class User {
     @Column
     private String phoneNumber;
     
+    @Column
+    private String password;
+    
     @ManyToOne
-    @JoinColumn(name = "school_id",referencedColumnName ="id")
+    @JoinColumn(name = "school_id",referencedColumnName ="schoolId")
     private School school;
     
     @ManyToOne
-    @JoinColumn(name = "club_id",referencedColumnName ="id")
+    @JoinColumn(name = "club_id",referencedColumnName ="clubId")
     private Club club;
 
     public Integer getUserId() {
@@ -58,6 +61,22 @@ public class User {
 		return phoneNumber;
 	}
 
+	public School getSchool() {
+		return school;
+	}
+
+	public void setSchool(School school) {
+		this.school = school;
+	}
+
+	public Club getClub() {
+		return club;
+	}
+
+	public void setClub(Club club) {
+		this.club = club;
+	}
+
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
@@ -70,7 +89,6 @@ public class User {
 		this.password = password;
 	}
 
-	@Column
-    private String password;
+	
 
 }

@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 
 public class Chat {
@@ -15,17 +17,27 @@ public class Chat {
     @SequenceGenerator(name = "seq_chat", sequenceName = "seq_chat_id", allocationSize = 1)
     private Integer chatId;
 
-    @Column
-    private Integer applyId;
+	@ManyToOne
+    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
+    private  Application application;
+	
+    @ManyToOne
+    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
+    private  Recruitment recruitment;
     
-    @Column
-    private Integer recruitId;
     
+//    applyid receiverid senderid まだです
     @Column
     private Integer receiverId;
     
     @Column
     private Integer senderId;
+    @Column
+    private String message;
+    
+    @Column
+    private Date transmissionDate;
+    
     
     public Integer getChatId() {
 		return chatId;
@@ -43,12 +55,13 @@ public class Chat {
 		this.applyId = applyId;
 	}
 
-	public Integer getRecruitId() {
-		return recruitId;
+	
+	public Recruitment getRecruitment() {
+		return recruitment;
 	}
 
-	public void setRecruitId(Integer recruitId) {
-		this.recruitId = recruitId;
+	public void setRecruitment(Recruitment recruitment) {
+		this.recruitment = recruitment;
 	}
 
 	public Integer getReceiverId() {
@@ -83,10 +96,6 @@ public class Chat {
 		this.transmissionDate = transmissionDate;
 	}
 
-	@Column
-    private String message;
-    
-    @Column
-    private Date transmissionDate;
+	
     
 }

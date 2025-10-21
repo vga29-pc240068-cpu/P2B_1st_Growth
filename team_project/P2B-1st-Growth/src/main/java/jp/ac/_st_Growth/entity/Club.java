@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 
 public class Club {
@@ -14,9 +16,10 @@ public class Club {
     @SequenceGenerator(name = "seq_club", sequenceName = "seq_club_id", allocationSize = 1)
     private Integer clubId;
 
-    @Column
-    private Integer userId;
-    
+	@ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName ="userId")
+    private User user;
+	
     @Column
     private Integer clubName;
     
@@ -31,12 +34,15 @@ public class Club {
 		this.clubId = clubId;
 	}
 
-	public Integer getUserId() {
-		return userId;
+	
+	
+
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(Integer userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public Integer getClubName() {

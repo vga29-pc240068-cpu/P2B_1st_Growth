@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 
 public class Recruitment {
@@ -14,11 +16,13 @@ public class Recruitment {
     @SequenceGenerator(name = "seq_recrument", sequenceName = "seq_recrument_id", allocationSize = 1)
     private Integer recruitId;
 
-    @Column
-    private Integer userId;
-
-    @Column
-    private Integer clubId;
+	@ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName ="userId")
+    private User user;
+    
+    @ManyToOne
+    @JoinColumn(name = "club_id",referencedColumnName ="clubId")
+    private Club club;
     
     @Column
     private Date matchDate;
@@ -26,7 +30,23 @@ public class Recruitment {
     @Column
     private String matchTime;
     
-    public Integer getRecruitId() {
+    public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Club getClub() {
+		return club;
+	}
+
+	public void setClub(Club club) {
+		this.club = club;
+	}
+
+	public Integer getRecruitId() {
 		return recruitId;
 	}
 
@@ -34,21 +54,7 @@ public class Recruitment {
 		this.recruitId = recruitId;
 	}
 
-	public Integer getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Integer userId) {
-		this.userId = userId;
-	}
-
-	public Integer getClubId() {
-		return clubId;
-	}
-
-	public void setClubId(Integer clubId) {
-		this.clubId = clubId;
-	}
+	
 
 	public Date getMatchDate() {
 		return matchDate;
