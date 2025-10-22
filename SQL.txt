@@ -1,0 +1,98 @@
+-- 既存のテーブルを削除（依存関係があるので順番に注意）
+DROP TABLE chats CASCADE CONSTRAINTS;
+DROP TABLE applications CASCADE CONSTRAINTS;
+DROP TABLE recruitments CASCADE CONSTRAINTS;
+DROP TABLE members CASCADE CONSTRAINTS;
+DROP TABLE clubs CASCADE CONSTRAINTS;
+DROP TABLE schools CASCADE CONSTRAINTS;
+
+-- 既存のシーケンスを削除
+DROP SEQUENCE seq_school_id;
+DROP SEQUENCE seq_user_id;
+DROP SEQUENCE seq_club_id;
+DROP SEQUENCE seq_recruit_id;
+DROP SEQUENCE seq_apply_id;
+DROP SEQUENCE seq_chat_id;
+
+ALTER SESSION SET CONTAINER = XEPDB1;
+CREATE USER FirstGrowth IDENTIFIED BY systemsss;
+GRANT ALL PRIVILEGES TO FirstGrowth;
+
+
+-- 学校テーブル
+CREATE TABLE schools (
+    school_id NUMBER(5) PRIMARY KEY,
+    school_name VARCHAR2(20) NOT NULL,
+    location VARCHAR2(100) NOT NULL
+);
+
+--部活テーブル
+CREATE TABLE clubs (
+    club_id NUMBER(5) PRIMARY KEY,
+    user_id NUMBER(5) NOT NULL,
+    club_name VARCHAR2(100) NOT NULL,
+    activity_date VARCHAR2(50) NOT NULL
+    --FOREIGN KEY (user_id) REFERENCES members(user_id)
+);
+-- 教員テーブル
+CREATE TABLE users ( 
+    user_id NUMBER(5) PRIMARY KEY,
+    school_id NUMBER(5) NOT NULL,
+    club_id NUMBER(5) NOT NULL,
+    name VARCHAR2(100) NOT NULL,
+    email VARCHAR2(255) NOT NULL UNIQUE,
+    phone_number VARCHAR2(15) NOT NULL,
+    password VARCHAR2(128) NOT NULL,
+    FOREIGN KEY (school_id) REFERENCES schools(school_id),
+    FOREIGN KEY (club_id) REFERENCES clubs(club_id)
+);
+-- 部活テーブルに外部キー制約を追加
+ALTER TABLE clubs ADD CONSTRAINT fk_clubs_user_id 
+    FOREIGN KEY (user_id) REFERENCES users(user_id);
+
+--募集テーブル
+CREATE TABLE recruitments (
+    recruit_id NUMBER(5) PRIMARY KEY,
+    user_id NUMBER(5) NOT NULL,
+    club_id NUMBER(5) NOT NULL,
+    match_date DATE NOT NULL,
+    match_time VARCHAR2(5) NOT NULL, 
+    location VARCHAR2(200) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (club_id) REFERENCES clubs(club_id)
+);
+
+--応募テーブル
+CREATE TABLE applications (
+    apply_id NUMBER(5) PRIMARY KEY,
+   user_id NUMBER(5) NOT NULL,
+    recruit_id NUMBER(5) NOT NULL,
+    apply_date DATE  NOT NULL,
+   FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (recruit_id) REFERENCES recruitments(recruit_id)
+);
+-- チャットテーブル
+CREATE TABLE chats (
+    chat_id NUMBER(5) PRIMARY KEY,
+    apply_id NUMBER(5) NOT NULL,
+    recruit_id NUMBER(5) NOT NULL,
+    receiver_id NUMBER(5) NOT NULL,
+    sender_id NUMBER(5) NOT NULL,
+    message VARCHAR2(200) NOT NULL,
+    transmission_date DATE DEFAULT SYSDATE NOT NULL,
+   FOREIGN KEY (apply_id) REFERENCES applications(apply_id),
+    FOREIGN KEY (recruit_id) REFERENCES recruitments(recruit_id),
+    FOREIGN KEY (receiver_id) REFERENCES users(user_id),
+    FOREIGN KEY (sender_id) REFERENCES users(user_id)
+);
+-- シーケンスの作成
+CREATE SEQUENCE seq_school_id START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE seq_user_id START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE seq_club_id START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE seq_recruit_id START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE seq_apply_id START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE seq_chat_id START WITH 1 INCREMENT BY 1 NOCACHE;
+
+COMMIT; 
+ 
+ 
