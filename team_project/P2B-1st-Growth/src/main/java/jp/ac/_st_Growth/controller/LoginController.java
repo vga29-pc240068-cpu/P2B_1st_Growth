@@ -45,4 +45,10 @@ public class LoginController {
 		return"forgot_password";
 	}
 	
+	//メニュー画面遷移
+	@RequestMapping(path="/menu",method =RequestMethod.GET)
+	public String menu() {
+		return"menu";
+	}
+	//
 }
