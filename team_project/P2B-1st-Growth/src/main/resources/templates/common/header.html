@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
 </head>
 <body>
 	<br><input type="search"name="search"placeholder="search"/>
-	<!-- serach_htmlへ遷移 -->
-	<button onclick="location.href='./serach_html'">検索</button>
+  <!-- searchResult.htmlへ遷移 -->
+  <button onclick th:href="@{/comon/serach/searchResult.html}">検索</button>
 </body>
 </html>
