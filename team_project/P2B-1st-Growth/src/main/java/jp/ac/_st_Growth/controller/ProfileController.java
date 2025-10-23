@@ -1,7 +1,7 @@
 /**
  * 
  */
-package jp.ac._st_Growth.Controller;
+package jp.ac._st_Growth.controller;
 
 /**
  * 

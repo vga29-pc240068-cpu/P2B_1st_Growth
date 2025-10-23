@@ -1,4 +1,4 @@
-package jp.ac._st_Growth.Controller;
+package jp.ac._st_Growth.controller;
 
 import java.text.Normalizer.Form;
 
@@ -25,9 +25,9 @@ public class LoginController {
 	
 	@RequestMapping(path="/login",method = RequestMethod.POST)
 	public String login(Form form, Model model) {
-		String userId = form.getUserId(); 
+		String email = form.getEmail(); 
 	    String password = form.getPassword();
-		User user = userRepository.findByUserIdAndPassword(userId,password);
+		User user = userRepository.findByEmailAndPassword(email,password);
         if (user !=null) {
             return "top";
         } else {
