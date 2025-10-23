@@ -2,9 +2,37 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>募集情報入力画面</title>
+
+
 </head>
 <body>
+	
+	<h1>募集入力フォーム</h1>
+	
+	
+<form th:action="@{}"mrthod="get">
+	
+	<label>部活名:</label><br>
+	<input type="text" name="club" required><br><br>
+	
+	
+	<labele>学校：</labele><br>
+	<input type="text" name="school" required><br><br>
+	
+	
+	<label>所在地:</label><br>
+	<input type="text" name=" location" required><br><br>
+	
+	
+	<label>活動曜日:</label><br>
+	<input type="text" name="activity_date" required><br><br>
+	
+	<label>試合希望日：</label><br>
+	<input type="text" name="match_date" required><br><br>
+	
+	<label>希望時間</label><br>
+	<input type="text" name="match_time" required><br><br>
 
 </body>
 </html>
