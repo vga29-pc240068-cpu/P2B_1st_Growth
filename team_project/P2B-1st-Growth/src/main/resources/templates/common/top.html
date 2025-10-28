@@ -1,29 +1,49 @@
 <!DOCTYPE html>
-<html xmlns="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <meta charset="UTF-8">
+    <title>練習相手募集一覧</title>
+    <link rel="stylesheet" href="/css/style.css"> 
 </head>
 <body>
-	
-	<div>
-		<table>
-			<tr>
-				<th>部活動</th>
-				<th>試合希望日</th>
-				<th>時間</th>
-				<th>場所</th>
-			</tr>
-		<tr th:each="recruitments">
-			<td th:text="${recruitments.club_id}"></td>
-			<td th:text="${recruitments.match_date}"></td>
-			<td th:text="${recruitments.match_time}"></td>
-			<td th:text="${recruitments.location}"></td>
-		</tr>
-		</table>
-	</div>
-	
-	
 
-</body>
+    <h1>練習相手募集一覧</h1>
+
+    <div class="match-list-container">
+        
+        <article class="match-card" th:each="match : ${matches}">
+            
+            <header class="card-header">
+                <h2 th:text="${match.title} + ' ' + ${match.teamName}">
+                    【練習相手募集】xx月xx日(水) xx高校サッカー部
+                </h2>
+                <p class="achievements" th:text="${match.achievements}">
+                    全国大会出場常連校/全国ベスト8/2005年前全国優勝
+                </p>
+            </header>
+            
+            <div class="card-body">
+                <p class="detail-item">
+                    <span th:text="${match.location}">〇〇県△△市 1-2-3</span>
+                </p>
+                <p class="detail-item">
+                    <span th:text="${match.time}">13:30～16:00</span>
+                </p>
+                <p class="detail-item">
+                    <span th:text="${match.groundInfo}">グラウンドを使用しています。</span>
+                </p>
+                <p class="detail-item">
+                    <span th:text="${match.parkingInfo}">駐車場は校門を通り右奥にご用意しております。</span>
+                </p>
+            </div>
+            
+            <footer class="card-footer">
+                <div class="tags-container">
+                    <span class="tag" th:each="tag : ${match.tags}" th:text="${tag}">
+                        〇〇県
+                    </span>
+                </div>
+            </footer>
+            
+        </article> </div> </body>
 </html>
