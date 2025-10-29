@@ -45,7 +45,9 @@ public class LoginController {
 		return"forgot_password";
 	}
 	
-	//メニュー画面遷移
+	//メニュー画面
+	//松浦
+
 	@RequestMapping(path="/menu",method =RequestMethod.GET)
 	public String menu() {
 		return"menu";
