@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import jp.ac._st_Growth.entity.User;
-import jp.ac._st_Growth.form.Form;
 import jp.ac._st_Growth.repository.UsersRepository;
 
 
@@ -54,4 +53,5 @@ public class LoginController {
 		return"menu";
 	}
 	//
+	
 }
