@@ -5,6 +5,92 @@
 <title>Insert title here</title>
 </head>
 <body>
-	
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    select {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    button {
+      width: 48%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .back {
+      background-color: #ccc;
+    }
+    .search {
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>検索</h2>
+
+    <label for="schedule">日程</label>
+    <select id="schedule">
+      <option value="">選択してください</option>
+      <option value="today">今日</option>
+      <option value="this_week">今週</option>
+      <option value="next_week">来週</option>
+    </select>
+
+    <label for="club">部活動</label>
+    <select id="club">
+      <option value="">選択してください</option>
+      <option value="soccer">サッカー部</option>
+      <option value="basketball">バスケ部</option>
+      <option value="tennis">テニス部</option>
+      <option value="brass_band">吹奏楽部</option>
+    </select>
+
+    <label for="time">時間</label>
+    <select id="time">
+      <option value="">選択してください</option>
+      <option value="morning">午前</option>
+      <option value="afternoon">午後</option>
+      <option value="evening">夕方</option>
+    </select>
+
+    <div class="buttons">
+      <button class="back">戻る</button>
+      <button class="search">検索</button>
+    </div>
+  </div>
+
+
 </body>
 </html>
