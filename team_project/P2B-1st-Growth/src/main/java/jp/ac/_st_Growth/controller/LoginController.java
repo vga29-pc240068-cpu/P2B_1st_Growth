@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import jp.ac._st_Growth.entity.User;
+import jp.ac._st_Growth.form.Form;
 import jp.ac._st_Growth.repository.UsersRepository;
 
 
@@ -45,9 +46,9 @@ public class LoginController {
 		return"forgot_password";
 	}
 	
-	//メニュー画面
-	//松浦
-
+	//メニュー画面遷移
+	//チョウ　ウコウ
+	//混んでいるどころ：画像イメージと詳細設計書の機能ちょっと違う
 	@RequestMapping(path="/menu",method =RequestMethod.GET)
 	public String menu() {
 		return"menu";
