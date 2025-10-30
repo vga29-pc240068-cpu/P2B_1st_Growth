@@ -5,6 +5,12 @@
 <title>Insert title here</title>
 </head>
 <body>
+ <div> 部活動 </div>
+ <select name="clubdrop">
+	 <option th:each="club: ${clubs}"
+	 		th:value="${club.id}" th:text="${club.name}"></option>
+
+
 
 
 </body>
