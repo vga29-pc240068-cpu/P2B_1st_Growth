@@ -15,8 +15,8 @@ import jakarta.persistence.Table;
 @Table(name = "recruitments")
 public class Recruitment {
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_recrument")
-    @SequenceGenerator(name = "seq_recrument", sequenceName = "seq_recrument_id", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_recruitment")
+    @SequenceGenerator(name = "seq_recruitment", sequenceName = "seq_recruit_id", allocationSize = 1)
     private Integer recruitId;
 
 	@ManyToOne

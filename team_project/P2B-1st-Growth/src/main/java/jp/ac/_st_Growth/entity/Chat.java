@@ -27,7 +27,7 @@ public class Chat {
     private  Application application;
 	
     @ManyToOne
-    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
+    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitId")
     private  Recruitment recruitment;
     
     @ManyToOne

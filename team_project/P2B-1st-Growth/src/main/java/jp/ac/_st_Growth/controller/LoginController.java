@@ -20,7 +20,7 @@ public class LoginController {
 	
 	@RequestMapping(path="/login")
 	public String showLoginPage() {
-		return "login";
+		return "common/login/login";
 	}
 	
 	@RequestMapping(path="/login",method = RequestMethod.POST)
@@ -56,6 +56,6 @@ public class LoginController {
 	public String login() {
 		return"login";
 	}
-	//
+	
 	
 }

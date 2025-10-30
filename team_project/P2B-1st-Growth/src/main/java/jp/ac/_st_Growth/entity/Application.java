@@ -24,7 +24,7 @@ public class Application {
     private User user;
 	
 	@ManyToOne
-    @JoinColumn(name = "recruitment_id",referencedColumnName ="recruitmentId")
+    @JoinColumn(name = "recruit_id",referencedColumnName ="recruitId")
     private  Recruitment recruitment;
 	
     @Column
