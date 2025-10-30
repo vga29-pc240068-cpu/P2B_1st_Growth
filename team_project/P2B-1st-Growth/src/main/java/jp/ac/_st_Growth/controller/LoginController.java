@@ -1,10 +1,11 @@
 package jp.ac._st_Growth.controller;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -30,7 +31,7 @@ public class LoginController {
 	public String login(Form form, Model model) {
 		String email = form.getEmail(); 
 	    String password = form.getPassword();
-		User user = userRepository.findByEmailAndPassword(email,password);
+		List<User> user = userRepository.findByEmailAndPassword(email,password);
         if (user !=null) {
 
             return "common/top";
