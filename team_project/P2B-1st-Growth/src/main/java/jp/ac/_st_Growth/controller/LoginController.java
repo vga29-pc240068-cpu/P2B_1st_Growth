@@ -4,6 +4,7 @@ package jp.ac._st_Growth.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -17,34 +18,42 @@ import jp.ac._st_Growth.repository.UsersRepository;
 public class LoginController {
 	@Autowired
 	UsersRepository userRepository;
-	
+
 	@GetMapping("common/login/login")
 	public String showLoginForm() {
-		return "login";
+
+		return "common/login/login";
 	}
 	
+
 	@PostMapping("common/login/login")
 	public String login(Form form, Model model) {
 		String email = form.getEmail(); 
 	    String password = form.getPassword();
 		User user = userRepository.findByEmailAndPassword(email,password);
         if (user !=null) {
+
             return "common/top";
         } else {
             model.addAttribute("error", "ユーザーがいません");
+
             return "common/login/login";
         }
     }
 	
 	@GetMapping("user/regist/newUser_regist")
 	public String newUser_regist() {
+
 		return"user/regist/newUser_regist";
 	}
+
 	
 	//メニュー画面遷移
+
 	//チョウ　ウコウ‘
 
 
 	
-	//
+
+	
 }

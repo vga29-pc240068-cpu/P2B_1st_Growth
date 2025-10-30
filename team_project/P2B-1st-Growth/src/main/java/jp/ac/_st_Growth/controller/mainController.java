@@ -7,17 +7,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import jp.ac._st_Growth.repository.RecruitmentsRepository;
 
-
 @Controller
 public class mainController {
 
     @Autowired
     RecruitmentsRepository recruitmentsRepository;
 
-    // 銉堛儍銉椼儦銉笺偢銇у嫙闆嗕竴瑕с倰琛ㄧず
+    // トップページで募集一覧を表示
     @GetMapping("common/top")
     public String showMain(Model model) {
-        // DB銇嬨倝鍏ㄤ欢鍙栧緱
+        // DBから全件取得
         model.addAttribute("recruitments", recruitmentsRepository.findAll());
         return "common/top"; 
     }
