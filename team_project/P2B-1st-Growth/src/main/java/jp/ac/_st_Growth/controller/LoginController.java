@@ -52,5 +52,10 @@ public class LoginController {
 	public String menu() {
 		return"menu";
 	}
+	@RequestMapping(path="/login",method =RequestMethod.GET)
+	public String login() {
+		return"login";
+	}
 	//
+	
 }
