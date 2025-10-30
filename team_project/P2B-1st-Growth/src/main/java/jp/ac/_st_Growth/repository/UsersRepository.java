@@ -1,4 +1,5 @@
 
+
 package jp.ac._st_Growth.repository;
 
 
@@ -10,7 +11,9 @@ import org.springframework.data.repository.query.Param;
 import jp.ac._st_Growth.entity.User;
 
 public interface UsersRepository extends JpaRepository<User, Integer> {
-	List<User> findByEmailAndPassword(String email, String password);
+	User findByEmailAndPassword(String email, String password)
+List<User> findByEmailAndPassword(String email, String password);
+<<<<<<< .mine
 List<User> findByEmail(String email);
     
     List<User> findByNameContaining(String name);
@@ -26,5 +29,22 @@ List<User> findByEmail(String email);
     
     boolean existsByEmail(String email);
     List<User> findAllAdmins();
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 
 }
