@@ -1,49 +1,95 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>練習相手募集一覧</title>
-    <link rel="stylesheet" href="/css/style.css"> 
+  <meta charset="UTF-8">
+  <title>トップページ</title>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 25px;
+      background-color: #f4f7f6;
+      color: #333;
+    }
+
+    h1 {
+      color: #005a9c;
+    }
+    
+    h2 {
+      border-bottom: 2px solid #005a9c;
+      padding-bottom: 5px;
+    }
+
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #ffffff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #e9ecef;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    .empty-message {
+      font-style: italic;
+      color: #888;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+
 </head>
 <body>
+  <h1>ログイン成功！</h1>
+  <p>ようこそ、システムへ</p>
 
-    <h1>練習相手募集一覧</h1>
+  <h2>募集一覧</h2>
 
-    <div class="match-list-container">
-        
-        <article class="match-card" th:each="match : ${matches}">
-            
-            <header class="card-header">
-                <h2 th:text="${match.title} + ' ' + ${match.teamName}">
-                    【練習相手募集】xx月xx日(水) xx高校サッカー部
-                </h2>
-                <p class="achievements" th:text="${match.achievements}">
-                    全国大会出場常連校/全国ベスト8/2005年前全国優勝
-                </p>
-            </header>
-            
-            <div class="card-body">
-                <p class="detail-item">
-                    <span th:text="${match.location}">〇〇県△△市 1-2-3</span>
-                </p>
-                <p class="detail-item">
-                    <span th:text="${match.time}">13:30～16:00</span>
-                </p>
-                <p class="detail-item">
-                    <span th:text="${match.groundInfo}">グラウンドを使用しています。</span>
-                </p>
-                <p class="detail-item">
-                    <span th:text="${match.parkingInfo}">駐車場は校門を通り右奥にご用意しております。</span>
-                </p>
-            </div>
-            
-            <footer class="card-footer">
-                <div class="tags-container">
-                    <span class="tag" th:each="tag : ${match.tags}" th:text="${tag}">
-                        〇〇県
-                    </span>
-                </div>
-            </footer>
-            
-        </article> </div> </body>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>希望日</th>
+        <th>時間</th>
+        <th>場所</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="r : ${recruitments}">
+        <td th:text="${r.recruitId}"></td>
+        <td th:text="${r.matchDate}"></td>
+        <td th:text="${r.matchTime}"></td>
+        <td th:text="${r.location}"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p th:if="${#lists.isEmpty(recruitments)}" class="empty-message">現在、募集はありません。</p>
+
+</body>
 </html>
