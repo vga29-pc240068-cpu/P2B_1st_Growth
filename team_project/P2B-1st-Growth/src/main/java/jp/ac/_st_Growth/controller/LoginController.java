@@ -4,7 +4,6 @@ package jp.ac._st_Growth.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -19,14 +18,14 @@ public class LoginController {
 	@Autowired
 	UsersRepository userRepository;
 
-	@GetMapping("common/login/login")
+	@GetMapping("/login")
 	public String showLoginForm() {
 
 		return "common/login/login";
 	}
 	
 
-	@PostMapping("common/login/login")
+	@PostMapping("/login")
 	public String login(Form form, Model model) {
 		String email = form.getEmail(); 
 	    String password = form.getPassword();
@@ -41,7 +40,7 @@ public class LoginController {
         }
     }
 	
-	@GetMapping("user/regist/newUser_regist")
+	@GetMapping("/newUser_regist")
 	public String newUser_regist() {
 
 		return"user/regist/newUser_regist";
