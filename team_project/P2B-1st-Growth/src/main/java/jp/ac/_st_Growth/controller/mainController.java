@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class mainController {
-	@GetMapping("/matches")
+//	@GetMapping("/matches")
 	
 	
 
