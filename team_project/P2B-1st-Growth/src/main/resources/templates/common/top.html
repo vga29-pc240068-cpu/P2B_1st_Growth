@@ -3,73 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>トップページ</title>
-
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      margin: 0;
-      padding: 25px;
-      background-color: #f4f7f6;
-      color: #333;
-    }
-
-    h1 {
-      color: #005a9c;
-    }
-    
-    h2 {
-      border-bottom: 2px solid #005a9c;
-      padding-bottom: 5px;
-    }
-
-    table {
-      width: 90%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      background-color: #ffffff;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 15px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
-
-    th {
-      background-color: #e9ecef;
-      font-weight: bold;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-    
-    tr:last-child td {
-        border-bottom: none;
-    }
-
-    .empty-message {
-      font-style: italic;
-      color: #888;
-      text-align: center;
-      margin-top: 20px;
-    }
-  </style>
-
 </head>
 <body>
   <h1>ログイン成功！</h1>
   <p>ようこそ、システムへ</p>
-
   <h2>募集一覧</h2>
-
   <table>
     <thead>
       <tr>
@@ -88,7 +26,6 @@
       </tr>
     </tbody>
   </table>
-
   <p th:if="${#lists.isEmpty(recruitments)}" class="empty-message">現在、募集はありません。</p>
 
 </body>
