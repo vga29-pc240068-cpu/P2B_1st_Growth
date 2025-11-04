@@ -1,10 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    
 </head>
 <body>
+    
+                        <h4 class="card-title">Confirm Application</h4>
+                        <p>Are you sure you want to apply for this match?</p>
+                        
+                        <div class="alert alert-info">
+                            <strong>Soccer Club Match</strong><br>
+                            Tokyo High School<br>
+                            2024-02-15 at 14:00
+                        </div>
+                        
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-success" onclick="applyConfirmed()">Yes, Apply</button>
+                            <a href="apply_info.html" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        function applyConfirmed() {
+            alert('Application submitted successfully!');
+            window.location.href = 'apply_list.html';
+        }
+    </script>
 </body>
 </html>
