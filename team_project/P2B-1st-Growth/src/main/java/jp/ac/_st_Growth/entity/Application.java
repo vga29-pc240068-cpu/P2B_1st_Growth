@@ -1,6 +1,7 @@
 package jp.ac._st_Growth.entity;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,7 +33,7 @@ public class Application {
     
     public Application() {}
 
-    public Integer getApplyId() {
+	public Integer getApplyId() {
 		return applyId;
 	}
 
@@ -60,10 +61,16 @@ public class Application {
 		return applyDate;
 	}
 
-	public void setApplyDate(Date localDate) {
-		this.applyDate = localDate;
+	public void setApplyDate(Date applyDate) {
+		this.applyDate = applyDate;
 	}
 
+	public void setApplyDate(LocalDate now) {
+		// TODO 自動生成されたメソッド・スタブ
+		
+	}
+
+    
 	
 
 }

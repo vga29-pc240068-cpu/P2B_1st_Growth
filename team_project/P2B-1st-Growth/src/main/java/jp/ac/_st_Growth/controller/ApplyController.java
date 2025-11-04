@@ -1,7 +1,7 @@
-package com.example.controller;
+package jp.ac._st_Growth.controller;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,33 +16,19 @@ import jp.ac._st_Growth.entity.Recruitment;
 import jp.ac._st_Growth.entity.User;
 import jp.ac._st_Growth.repository.ApplicationsRepository;
 import jp.ac._st_Growth.repository.RecruitmentsRepository;
+import jp.ac._st_Growth.repository.UsersRepository;
 
 @Controller
 public class ApplyController {
 
     @Autowired
-    private ApplicationsRepository applicationRepository;
+    private ApplicationsRepository applicationsRepository;
     
     @Autowired
     private RecruitmentsRepository recruitmentRepository;
-
-    // ==============================
-    // 応募一覧表示
-    // ==============================
-    @GetMapping("/user/apply/list")
-    public String showApplyList(Model model, HttpSession session) {
-        // ログイン中ユーザーIDを取得
-        Long userId = (Long) session.getAttribute("user_id");
-
-        // 応募履歴をDBから取得
-        List<Application> applications = applicationRepository.findByUserId(userId);
-
-        // 画面に渡す
-        model.addAttribute("applications", applications);
-
-        // 応募一覧画面へ遷移
-        return "user/apply/apply_list";
-    }
+    
+    @Autowired
+    private UsersRepository userRepository;
 
     // ==============================
     // 応募確認画面の表示
@@ -53,12 +39,16 @@ public class ApplyController {
             Model model) {
 
         // DBから募集情報を1件取得
-        Recruitment recruitment = recruitmentRepository.findById(recruitId).orElse(null);
+        Optional<Recruitment> recruitmentOpt = recruitmentRepository.findById(recruitId);
+        
+        if (recruitmentOpt.isPresent()) {
+            model.addAttribute("recruitment", recruitmentOpt.get());
+        } else {
+            // エラーハンドリング
+            model.addAttribute("error", "募集情報が見つかりませんでした");
+            return "error";
+        }
 
-        // 確認画面に渡す
-        model.addAttribute("recruitment", recruitment);
-
-        // 応募確認ページへ遷移
         return "user/apply/apply_check";
     }
 
@@ -67,34 +57,72 @@ public class ApplyController {
     // ==============================
     @PostMapping("/user/apply/regist")
     public String applyRecruitment(
-            @RequestParam("recruitId") Recruitment recruitId,
+            @RequestParam("recruitId") Long recruitId,
             HttpSession session,
             Model model) {
 
-        // ログイン中ユーザーのIDを取得
-        User userId = (User) session.getAttribute("user_id");
+        try {
+            // ログイン中ユーザーのIDを取得
+            Long userId = (Long) session.getAttribute("user_id");
+            
+            if (userId == null) {
+                model.addAttribute("error", "ログインしてください");
+                return "login";
+            }
 
-        // 応募情報を新規作成
-        Application application = new Application();
-        application.setRecruitment(recruitId);
-        application.setUser(userId);
-        application.setApplyDate(Date.now());
+            // ユーザー情報を取得
+            List<User> userOpt = userRepository.findById(userId);
+            Optional<Recruitment> recruitmentOpt = recruitmentRepository.findById(recruitId);
+            
+            if (userOpt.isEmpty() || recruitmentOpt.isEmpty()) {
+                model.addAttribute("error", "ユーザーまたは募集情報が見つかりません");
+                return "error";
+            }
 
-        // DBへ保存
-        applicationRepository.save(application);
+            // 応募情報を新規作成
+            Application application = new Application();
+            
+            // DBへ保存
+            applicationsRepository.save(application);
 
-        // 完了メッセージを画面に表示
-        model.addAttribute("message", "応募が完了しました！");
-
-        // 応募完了ページへ遷移
-        return "user/apply/apply_complete";
+            // 応募完了ページへ遷移
+            return "redirect:/user/apply/complete";
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "応募処理中にエラーが発生しました: " + e.getMessage());
+            return "error";
+        }
     }
 
     // ==============================
     // 応募完了画面の表示
     // ==============================
     @GetMapping("/user/apply/complete")
-    public String showApplyComplete() {
+    public String showApplyComplete(Model model) {
+        model.addAttribute("message", "応募が完了しました！");
         return "user/apply/apply_complete";
+    }
+
+    // ==============================
+    // 応募一覧表示
+    // ==============================
+    @GetMapping("/user/apply/list")
+    public String showApplyList(Model model, HttpSession session) {
+        try {
+            Long userId = (Long) session.getAttribute("user_id");
+            
+            if (userId == null) {
+                return "redirect:/login";
+            }
+            
+            List<Application> applications = applicationsRepository.findByUserId(userId);
+            model.addAttribute("applications", applications);
+            
+            return "user/apply/apply_list";
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "応募一覧の取得中にエラーが発生しました: " + e.getMessage());
+            return "error";
+        }
     }
 }
