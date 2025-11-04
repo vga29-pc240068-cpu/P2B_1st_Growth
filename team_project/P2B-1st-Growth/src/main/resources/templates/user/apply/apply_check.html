@@ -1,34 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-    
+  <meta charset="UTF-8">
+  <title>応募登録確認</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .confirmation-box {
+      border: 2px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    .button-secondary {
+      background-color: #6c757d;
+    }
+  </style>
 </head>
 <body>
+  <h1>応募登録確認</h1>
+  
+  <div class="confirmation-box">
+    <p>この内容で応募してよろしいですか？</p>
     
-                        <h4 class="card-title">Confirm Application</h4>
-                        <p>Are you sure you want to apply for this match?</p>
-                        
-                        <div class="alert alert-info">
-                            <strong>Soccer Club Match</strong><br>
-                            Tokyo High School<br>
-                            2024-02-15 at 14:00
-                        </div>
-                        
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-success" onclick="applyConfirmed()">Yes, Apply</button>
-                            <a href="apply_info.html" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div th:if="${recruitment != null}">
+      <h3 th:text="${recruitment.title}"></h3>
+      <p><strong>チーム名:</strong> <span th:text="${recruitment.teamName}"></span></p>
+      <p><strong>日付:</strong> <span th:text="${#temporals.format(recruitment.matchDate, 'M月d日（E）')}"></span></p>
+      <p><strong>時間:</strong> <span th:text="${#temporals.format(recruitment.matchTime, 'HH:mm')}"></span></p>
+      <p><strong>場所:</strong> <span th:text="${recruitment.location}"></span></p>
     </div>
+  </div>
 
-    <script>
-        function applyConfirmed() {
-            alert('Application submitted successfully!');
-            window.location.href = 'apply_list.html';
-        }
-    </script>
+  <form th:action="@{/user/apply/regist}" method="post">
+    <input type="hidden" name="recruitId" th:value="${recruitment.recruit_id}">
+    <button type="submit" class="button">この内容で応募する</button>
+  </form>
+
+  <a th:href="@{/top}" class="button button-secondary">トップページに戻る</a>
 </body>
 </html>

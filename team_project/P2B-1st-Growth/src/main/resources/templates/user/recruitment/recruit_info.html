@@ -5,6 +5,15 @@
 <title>Insert title here</title>
 </head>
 <body>
+	<!-- 募集詳細画面内の応募ボタンセクション -->
+<div class="apply-section">
+  <form th:action="@{/user/apply/check}" method="post">
+    <input type="hidden" name="recruitId" th:value="${recruitment.recruit_id}">
+    <button type="submit" class="apply-button">応募する</button>
+  </form>
+  
+  <a th:href="@{/top}" class="back-button">トップページに戻る</a>
+</div>
 
 </body>
 </html>

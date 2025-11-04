@@ -29,6 +29,8 @@ public class Application {
 	
     @Column
     private Date applyDate;
+    
+    public Application() {}
 
     public Integer getApplyId() {
 		return applyId;
@@ -58,8 +60,8 @@ public class Application {
 		return applyDate;
 	}
 
-	public void setApplyDate(Date applyDate) {
-		this.applyDate = applyDate;
+	public void setApplyDate(Date localDate) {
+		this.applyDate = localDate;
 	}
 
 	
