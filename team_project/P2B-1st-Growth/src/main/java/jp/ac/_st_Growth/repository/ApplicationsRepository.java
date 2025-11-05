@@ -15,5 +15,7 @@ public interface ApplicationsRepository extends JpaRepository<Application, Integ
     
     // Method 2: Using property path (if User entity has getId() method)
     List<Application> findByUser_Id(Long userId);
+
+	List<Application> findPendingApplicationsForUserRecruitments(Integer userId);
 }
 

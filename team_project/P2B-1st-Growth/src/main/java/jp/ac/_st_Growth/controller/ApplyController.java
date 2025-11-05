@@ -30,9 +30,9 @@ public class ApplyController {
     @Autowired
     private UsersRepository userRepository;
 
-    // ==============================
+    
     // 応募確認画面の表示
-    // ==============================
+    
     @PostMapping("/user/apply/check")
     public String confirmApply(
             @RequestParam("recruitId") Long recruitId,
@@ -52,9 +52,9 @@ public class ApplyController {
         return "user/apply/apply_check";
     }
 
-    // ==============================
+    
     // 応募登録処理
-    // ==============================
+    
     @PostMapping("/user/apply/regist")
     public String applyRecruitment(
             @RequestParam("recruitId") Long recruitId,
@@ -94,18 +94,18 @@ public class ApplyController {
         }
     }
 
-    // ==============================
+    
     // 応募完了画面の表示
-    // ==============================
+    
     @GetMapping("/user/apply/complete")
     public String showApplyComplete(Model model) {
         model.addAttribute("message", "応募が完了しました！");
         return "user/apply/apply_complete";
     }
 
-    // ==============================
+   
     // 応募一覧表示
-    // ==============================
+    
     @GetMapping("/user/apply/list")
     public String showApplyList(Model model, HttpSession session) {
         try {
