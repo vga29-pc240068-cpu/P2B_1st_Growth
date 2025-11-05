@@ -1,10 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+  <meta charset="UTF-8">
+  <title>募集登録完了</title>
 </head>
 <body>
+  <!-- ============================= -->
+  <!-- 🌸 募集登録完了画面 -->
+  <!-- 役割：入力された募集情報をDBに登録した後に表示 -->
+  <!-- ============================= -->
+
+  <h1>募集登録が完了しました</h1>
+
+  <p>募集情報の登録が正常に完了しました。</p>
+  <p>確認や修正が必要な場合は、募集項目選択画面から再度アクセスしてください。</p>
+
+  <!-- ============================= -->
+  <!-- 🎯 ボタンエリア -->
+  <!-- ============================= -->
+  <div>
+    <!-- 募集項目選択画面に戻るボタン -->
+    <form th:action="@{/user/select/recrute_select}" method="get">
+      <button type="submit">募集項目選択画面に戻る</button>
+    </form>
+
+    <!-- 新しい募集を登録するボタン -->
+    <form th:action="@{/user/input}" method="get">
+      <button type="submit">新しい募集を登録する</button>
+    </form>
+  </div>
 
 </body>
 </html>

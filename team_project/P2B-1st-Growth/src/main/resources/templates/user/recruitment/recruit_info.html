@@ -13,6 +13,28 @@
   </form>
   
   <a th:href="@{/top}" class="back-button">トップページに戻る</a>
+  
+    <!-- ============================= -->
+  <!-- 🌸 募集詳細画面（recrute_info.html） -->
+  <!-- 役割：DB上の募集1件を表示 -->
+  <!-- ============================= -->
+
+  <h1>募集詳細</h1>
+
+  <!-- 募集データが存在する場合 -->
+  <div th:if="${recruitment != null}">
+    <p>ID：<span th:text="${recruitment.recruit_id}"></span></p>
+    <p>ユーザーID：<span th:text="${recruitment.user_id}"></span></p>
+    <p>クラブID：<span th:text="${recruitment.club_id}"></span></p>
+    <p>希望日：<span th:text="${recruitment.match_date}"></span></p>
+    <p>時間：<span th:text="${recruitment.match_time}"></span></p>
+    <p>場所：<span th:text="${recruitment.location}"></span></p>
+  </div>
+
+  <!-- 募集データが存在しない場合 -->
+  <p th:if="${recruitment == null}">データが見つかりませんでした。</p>
+
+  <p><a th:href="@{/top}">トップページへ戻る</a></p>
 </div>
 
 </body>

@@ -52,7 +52,7 @@ public class LoginController {
 	
 	//メニュー画面遷移
 
-	//チョウ　ウコウ‘
+	//チョウ ウコウ‘
 
 
 	
