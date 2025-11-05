@@ -1,38 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>募集情報入力画面</title>
-
-
+  <meta charset="UTF-8">
+  <title>募集要項確認</title>
 </head>
 <body>
-	
-	<h1>募集入力フォーム</h1>
-	
-	
-<form th:action="@{}"mrthod="get">
-	
-	<label>部活名:</label><br>
-	<input type="text" name="club" required><br><br>
-	
-	
-	<labele>学校：</labele><br>
-	<input type="text" name="school" required><br><br>
-	
-	
-	<label>所在地:</label><br>
-	<input type="text" name=" location" required><br><br>
-	
-	
-	<label>活動曜日:</label><br>
-	<input type="text" name="activity_date" required><br><br>
-	
-	<label>試合希望日：</label><br>
-	<input type="text" name="match_date" required><br><br>
-	
-	<label>希望時間</label><br>
-	<input type="text" name="match_time" required><br><br>
+  <!-- ============================= -->
+  <!-- 🌸 募集入力確認画面 -->
+  <!-- 役割：入力内容を確認して登録に進む -->
+  <!-- ============================= -->
 
+  <h1>募集内容の確認</h1>
+
+  <div>
+    <p>希望日：<span th:text="${match_date}"></span></p>
+    <p>時間：<span th:text="${match_time}"></span></p>
+    <p>場所：<span th:text="${location}"></span></p>
+  </div>
+
+  <form th:action="@{/user/input/complete}" method="post">
+    <!-- hiddenで値を再送信 -->
+    <input type="hidden" name="match_date" th:value="${match_date}">
+    <input type="hidden" name="match_time" th:value="${match_time}">
+    <input type="hidden" name="location" th:value="${location}">
+
+    <!-- 確認ボタン -->
+    <button type="submit">この内容で登録する</button>
+  </form>
+
+  <form th:action="@{/user/input/recrute_input_complete}" method="get">
+    <!-- 修正ボタン -->
+    <button type="submit">修正する</button>
+  </form>
 </body>
 </html>
