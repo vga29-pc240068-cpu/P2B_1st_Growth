@@ -16,4 +16,6 @@ public class RecruitmentController {
 	public String recruitmentInput() {
 		return "/user/input/recrute_input";
 	}
+	
+	
 }
