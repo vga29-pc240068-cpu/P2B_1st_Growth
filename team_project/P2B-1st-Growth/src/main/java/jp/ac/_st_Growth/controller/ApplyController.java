@@ -1,7 +1,6 @@
 package jp.ac._st_Growth.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,16 +34,16 @@ public class ApplyController {
     
     @PostMapping("/user/apply/check")
     public String confirmApply(
-            @RequestParam("recruitId") Long recruitId,
-            Model model) {
+            @RequestParam("recruitId") Integer recruitId,Model model) {
 
-        // DBから募集情報を1件取得
-        Optional<Recruitment> recruitmentOpt = recruitmentRepository.findById(recruitId);
+       
+        List<Recruitment> recruitmentList = recruitmentRepository.findByRecruitId(recruitId);
+
         
-        if (recruitmentOpt.isPresent()) {
-            model.addAttribute("recruitment", recruitmentOpt.get());
+        if (!recruitmentList.isEmpty()) {
+            model.addAttribute("recruitment", recruitmentList.get(0));
         } else {
-            // エラーハンドリング
+            
             model.addAttribute("error", "募集情報が見つかりませんでした");
             return "error";
         }
@@ -57,13 +56,13 @@ public class ApplyController {
     
     @PostMapping("/user/apply/regist")
     public String applyRecruitment(
-            @RequestParam("recruitId") Long recruitId,
+            @RequestParam("recruitId") Integer recruitId,
             HttpSession session,
             Model model) {
 
         try {
             // ログイン中ユーザーのIDを取得
-            Long userId = (Long) session.getAttribute("user_id");
+        	Integer userId = (Integer) session.getAttribute("userId");
             
             if (userId == null) {
                 model.addAttribute("error", "ログインしてください");
@@ -71,16 +70,20 @@ public class ApplyController {
             }
 
             // ユーザー情報を取得
-            List<User> userOpt = userRepository.findById(userId);
-            Optional<Recruitment> recruitmentOpt = recruitmentRepository.findById(recruitId);
+            List<User> userList = userRepository.findByUserId(userId);
+            List<Recruitment> recruitmentList = recruitmentRepository.findByRecruitId(recruitId);
             
-            if (userOpt.isEmpty() || recruitmentOpt.isEmpty()) {
+            if (userList.isEmpty() || recruitmentList.isEmpty()) {
                 model.addAttribute("error", "ユーザーまたは募集情報が見つかりません");
                 return "error";
             }
 
             // 応募情報を新規作成
             Application application = new Application();
+            application.setUser(userList.get(0));
+            application.setRecruitment(recruitmentList.get(0));
+            application.setApplyDate(new java.sql.Date(System.currentTimeMillis()));
+            
             
             // DBへ保存
             applicationsRepository.save(application);
@@ -109,13 +112,13 @@ public class ApplyController {
     @GetMapping("/user/apply/list")
     public String showApplyList(Model model, HttpSession session) {
         try {
-            Long userId = (Long) session.getAttribute("user_id");
+        	Integer userId = (Integer) session.getAttribute("userId");
             
             if (userId == null) {
                 return "redirect:/login";
             }
             
-            List<Application> applications = applicationsRepository.findByUserId(userId);
+            List<Application> applications = applicationsRepository.findByUserUserId(userId);
             model.addAttribute("applications", applications);
             
             return "user/apply/apply_list";

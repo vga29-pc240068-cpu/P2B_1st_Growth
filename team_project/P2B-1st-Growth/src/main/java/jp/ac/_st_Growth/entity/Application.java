@@ -64,13 +64,15 @@ public class Application {
 	public void setApplyDate(Date applyDate) {
 		this.applyDate = applyDate;
 	}
-
 	public void setApplyDate(LocalDate now) {
-		// TODO 自動生成されたメソッド・スタブ
-		
+        this.applyDate = java.sql.Date.valueOf(now);
+    }
+	
 	}
+
+
 
     
 	
 
-}
+

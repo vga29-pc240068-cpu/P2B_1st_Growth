@@ -1,6 +1,7 @@
 package jp.ac._st_Growth.entity;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -98,6 +99,16 @@ public class Chat {
 
 	public void setTransmissionDate(Date transmissionDate) {
 		this.transmissionDate = transmissionDate;
+	}
+
+	public void setReadStatus(String string) {
+		// TODO 自動生成されたメソッド・スタブ
+		
+	}
+
+	public void setTransmissionDate(LocalDateTime now) {
+		// TODO 自動生成されたメソッド・スタブ
+		
 	}
     
    
