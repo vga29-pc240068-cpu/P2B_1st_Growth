@@ -1,4 +1,4 @@
-package jp.ac._st_Growth.controller;
+package jp.ac._st_Growth.Controller;
 
 import java.util.List;
 

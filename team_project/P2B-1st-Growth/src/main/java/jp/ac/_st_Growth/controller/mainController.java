@@ -1,4 +1,4 @@
-package jp.ac._st_Growth.controller;
+package jp.ac._st_Growth.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
