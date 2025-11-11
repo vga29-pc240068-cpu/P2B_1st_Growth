@@ -31,9 +31,8 @@ public class ApplyController {
     private UsersRepository userRepository;
 
     
-    // 応募確認画面の表示
-    
-    @PostMapping("/user/apply/check")
+    // 応募確認画面の表示    
+    @GetMapping("/user/apply/check")
     public String confirmApply(
             @RequestParam("recruitId") Integer recruitId,Model model) {
 
