@@ -2,21 +2,22 @@ package jp.ac._st_Growth.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import jp.ac._st_Growth.repository.RecruitmentsRepository;
+import ch.qos.logback.core.model.Model;
+import jp.ac._st_Growth.repository.RecruitmentRepository;
+
 
 @Controller
 public class mainController {
 
     @Autowired
-    RecruitmentsRepository recruitmentsRepository;
+    RecruitmentRepository recruitmentsRepository;
 
     // 
     @GetMapping("common/top")
     public String showMain(Model model) {
-        // 
+        
         model.addAttribute("recruitments", recruitmentsRepository.findAll());
         return "common/top"; 
     }

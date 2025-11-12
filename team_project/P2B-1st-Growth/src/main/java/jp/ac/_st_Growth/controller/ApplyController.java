@@ -1,6 +1,7 @@
 package jp.ac._st_Growth.Controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -15,7 +16,7 @@ import jp.ac._st_Growth.entity.Application;
 import jp.ac._st_Growth.entity.Recruitment;
 import jp.ac._st_Growth.entity.User;
 import jp.ac._st_Growth.repository.ApplicationsRepository;
-import jp.ac._st_Growth.repository.RecruitmentsRepository;
+import jp.ac._st_Growth.repository.RecruitmentRepository;
 import jp.ac._st_Growth.repository.UsersRepository;
 
 @Controller
@@ -25,7 +26,7 @@ public class ApplyController {
     private ApplicationsRepository applicationsRepository;
     
     @Autowired
-    private RecruitmentsRepository recruitmentRepository;
+    private RecruitmentRepository recruitmentRepository;
     
     @Autowired
     private UsersRepository userRepository;
@@ -33,15 +34,15 @@ public class ApplyController {
     
     // 応募確認画面の表示    
     @GetMapping("/user/apply/check")
-    public String confirmApply(
-            @RequestParam("recruitId") Integer recruitId,Model model) {
+    public String confirmApply(@RequestParam("recruitId") Integer recruitId,Model model) {
 
        
-        List<Recruitment> recruitmentList = recruitmentRepository.findByRecruitId(recruitId);
+    	//Optionalで1件取得
+        Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
 
         
-        if (!recruitmentList.isEmpty()) {
-            model.addAttribute("recruitment", recruitmentList.get(0));
+        if (recruitmentOpt.isPresent()) {
+            model.addAttribute("recruitment", recruitmentOpt.get());
         } else {
             
             model.addAttribute("error", "募集情報が見つかりませんでした");
@@ -66,22 +67,22 @@ public class ApplyController {
             
             if (userId == null) {
                 model.addAttribute("error", "ログインしてください");
-                return "login";
+                return "common/login/login";
             }
 
             // ユーザー情報を取得
-            List<User> userList = userRepository.findByUserId(userId);
-            List<Recruitment> recruitmentList = recruitmentRepository.findByRecruitId(recruitId);
+            Optional<User> userOpt = userRepository.findById(userId);
+            Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
             
-            if (userList.isEmpty() || recruitmentList.isEmpty()) {
+            if (userOpt.isEmpty() || recruitmentOpt.isEmpty()) {
                 model.addAttribute("error", "ユーザーまたは募集情報が見つかりません");
                 return "error";
             }
 
             // 応募情報を新規作成
             Application application = new Application();
-            application.setUser(userList.get(0));
-            application.setRecruitment(recruitmentList.get(0));
+            application.setUser(userOpt.get());
+            application.setRecruitment(recruitmentOpt.get());
             application.setApplyDate(new java.sql.Date(System.currentTimeMillis()));
             
             

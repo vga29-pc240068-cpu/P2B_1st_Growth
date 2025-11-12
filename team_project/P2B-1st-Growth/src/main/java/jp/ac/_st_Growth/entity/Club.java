@@ -1,7 +1,5 @@
 package jp.ac._st_Growth.entity;
 
-import java.sql.Date;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,17 +15,18 @@ public class Club {
 	@Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_club")
     @SequenceGenerator(name = "seq_club", sequenceName = "seq_club_id", allocationSize = 1)
+	@Column(name="club_id")
     private Integer clubId;
 
 	@ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName ="userId")
+    @JoinColumn(name = "user_id",referencedColumnName ="user_id",nullable=false)
     private User user;
 	
-    @Column
-    private Integer clubName;
+    @Column(name="club_name",nullable=false)
+    private String clubName;
     
-    @Column
-    private Date activityDate;
+    @Column(name="activity_date",nullable=false)
+    private String activityDate;
 
 	public Integer getClubId() {
 		return clubId;
@@ -48,19 +47,19 @@ public class Club {
 		this.user = user;
 	}
 
-	public Integer getClubName() {
+	public String getClubName() {
 		return clubName;
 	}
 
-	public void setClubName(Integer clubName) {
+	public void setClubName(String clubName) {
 		this.clubName = clubName;
 	}
 
-	public Date getActivityDate() {
+	public String getActivityDate() {
 		return activityDate;
 	}
 
-	public void setActivityDate(Date activityDate) {
+	public void setActivityDate(String activityDate) {
 		this.activityDate = activityDate;
 	}
     

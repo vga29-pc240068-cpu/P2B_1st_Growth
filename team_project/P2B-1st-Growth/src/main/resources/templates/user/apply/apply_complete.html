@@ -1,46 +1,20 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
+	<link rel="stylesheet" th:href="@{/css/common/common.css}">
+
   <meta charset="UTF-8">
-  <title>応募登録完了</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      text-align: center;
-    }
-    .success-message {
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-    .button {
-      display: inline-block;
-      padding: 12px 24px;
-      background-color: #007bff;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      margin: 10px 5px;
-    }
-  </style>
+  <title>応募完了</title>
 </head>
 <body>
-  <h1>応募登録完了</h1>
-  
-  <div class="success-message">
-    <p>応募情報の登録が正常に完了しました。</p>
-    <p>応募一覧やトップページからご確認ください。</p>
-  </div>
+  <h1>応募完了</h1>
 
-  <div>
-    <a th:href="@{/user/apply/list}" class="button">応募一覧に戻る</a>
-    <a th:href="@{/top}" class="button">トップページに戻る</a>
-  </div>
+  <p th:text="${message}">応募が完了しました！</p>
+
+  <p>
+    <a href="/login">トップに戻る</a>
+    <br>
+    <a href="/user/apply/list">応募一覧を見る</a>
+  </p>
 </body>
 </html>

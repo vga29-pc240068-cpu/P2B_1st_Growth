@@ -9,31 +9,35 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 @Entity
 @Table(name="users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user")
-    @SequenceGenerator(name = "seq_user", sequenceName = "seq_user_id", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user_id")
+    @SequenceGenerator(name = "seq_user_id", sequenceName = "seq_user_id", allocationSize = 1)
+    @Column(name="user_id")
+    
     private Integer userId;
 
-    @Column
+    @Column(name="name",nullable=false)
     private String name;
 
-    @Column
+    @Column(name="email",nullable=false,unique=true)
     private String email;
-    @Column
+    
+    @Column(name="phone_number",nullable=false)
     private String phoneNumber;
     
-    @Column
+    @Column(name="password",nullable=false)
     private String password;
     
     @ManyToOne
-    @JoinColumn(name = "school_id",referencedColumnName ="schoolId")
+    @JoinColumn(name = "school_id",referencedColumnName ="school_id",nullable=false)
     private School school;
     
     @ManyToOne
-    @JoinColumn(name = "club_id",referencedColumnName ="clubId")
+    @JoinColumn(name = "club_id",referencedColumnName ="club_id",nullable=false)
     private Club club;
 
     public Integer getUserId() {

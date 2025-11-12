@@ -1,26 +1,10 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
-
-  <!-- top.html へ遷移 -->
-  <button onclick th:href="@{/common/top.html}">ホーム</button>
-
-  <!-- recrute_input.htmlへ遷移 -->
-  <button onclick th:href="@{/user/input/recrute_input.html}">募集</button>
-
-  <!-- chat.htmlへ遷移 -->
-  <button onclick th:href="@{/user/chat/chat.html}">チャット</button>
-
-  <!-- apply_list.htmlへ遷移 -->
-  <button onclick th:href="@{/user/apply/apply_list.html}">応募</button>
-
-  <!-- menu.htmlへ遷移 -->
-  <button onclick th:href="@{/common/menu/menu.html}">メニュー</button>
-
-	
-</body>
-</html>
+<!-- 共通フッター断片：余計な <!DOCTYPE> / <html> / <head> / <body> は不要 -->
+<div th:fragment="footer">
+  <div class="footer">
+    <a th:href="@{/common/top}" class="footer-btn">ホーム</a>
+    <a th:href="@{/user/input/recrute_input}" class="footer-btn">募集</a>
+    <a th:href="@{/user/apply/list}" class="footer-btn">応募</a>
+	<a th:href="@{/user/chat/chat}" class="footer-btn">チャット</a>
+    <a th:href="@{/common/menu}" class="footer-btn">メニュー</a>
+  </div>
+</div>

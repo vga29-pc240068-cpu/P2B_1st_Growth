@@ -1,0 +1,55 @@
+@charset "UTF-8";
+
+/* 全体設定 */
+body {
+  margin: 0;
+  padding-bottom: 60px; /* フッターの高さ分だけ余白を確保 */
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+/* フッター全体 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #2e7d32; /* 落ち着いた深緑 */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* 各ボタン */
+.footer-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 12px;
+  transition: 0.2s;
+}
+
+.footer-btn:hover {
+  color: #c8e6c9; /* 柔らかい薄緑のハイライト */
+  transform: translateY(-2px);
+}
+
+/* アイコン */
+.footer-btn .icon {
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+/* スマホ対応 */
+@media screen and (max-width: 480px) {
+  .footer-btn span {
+    font-size: 10px;
+  }
+  .footer-btn .icon {
+    font-size: 20px;
+  }
+}

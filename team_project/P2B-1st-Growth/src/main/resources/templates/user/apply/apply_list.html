@@ -1,63 +1,45 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
+	<link rel="stylesheet" th:href="@{/css/common/common.css}">
+
   <meta charset="UTF-8">
   <title>応募一覧</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 20px 0;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    .no-data {
-      text-align: center;
-      padding: 20px;
-      color: #666;
-    }
-    .button {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      margin: 10px 5px;
-    }
-  </style>
 </head>
 <body>
   <h1>応募一覧</h1>
 
-  <!-- 応募がある場合 -->
-  <table th:if="${!#lists.isEmpty(applications)}">
-    <tr>
-      <th>ID</th>
-      <th>応募日</th>
-      <th>ステータス</th>
-    </tr>
-    <tr th:each="a : ${applications}">
-      <td th:text="${a.applyId}"></td>
-      <td th:text="${#temporals.format(a.applyDate, 'yyyy年MM月dd日')}"></td>
-      <td>審査中</td>
-    </tr>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>応募ID</th>
+        <th>募集ID</th>
+        <th>応募日</th>
+        <th>希望日</th>
+        <th>時間</th>
+        <th>場所</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="a : ${applications}">
+        <td th:text="${a.applyId}"></td>
+        <td th:text="${a.recruitment.recruitId}"></td>
+        <td th:text="${a.applyDate}"></td>
+        <td th:text="${a.recruitment.matchDate}"></td>
+        <td th:text="${a.recruitment.matchTime}"></td>
+        <td th:text="${a.recruitment.location}"></td>
+      </tr>
+    </tbody>
   </table>
 
-  <!-- 応募がない場合 -->
-  <div class="no-data" th:if="${#lists.isEmpty(applications)}">
-    <p>現在、応募履歴はありません。</p>
-  </div>
+  <p th:if="${#lists.isEmpty(applications)}">現在、応募はありません。</p>
 
-  <!-- ナビゲーションボタン -->
-  <div>
-    <a th:href="@{/top}" class="button">トップページへ戻る</a>
-  </div>
+  <p>
+    <a href="/login">トップに戻る</a>
+  </p>
+  
+<!--  フッターの追加-->
+  <div th:replace="common/footer :: footer"></div>
+
 </body>
 </html>
