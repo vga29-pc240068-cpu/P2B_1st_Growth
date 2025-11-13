@@ -1,6 +1,5 @@
 package jp.ac._st_Growth.entity;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -43,7 +42,19 @@ public class Chat {
     private String message;
     
     @Column
-    private Date transmissionDate;
+    private LocalDateTime transmissionDate;
+
+    // Constructors
+    public Chat() {}
+
+    public Chat(Application application, Recruitment recruitment, User sender, User receiver, String message) {
+        this.application = application;
+        this.recruitment = recruitment;
+        this.sender = sender;
+        this.receiver = receiver;
+        this.message = message;
+        this.transmissionDate = LocalDateTime.now();
+    }
 
 	public Integer getChatId() {
 		return chatId;
@@ -93,23 +104,14 @@ public class Chat {
 		this.message = message;
 	}
 
-	public Date getTransmissionDate() {
+	public LocalDateTime getTransmissionDate() {
 		return transmissionDate;
 	}
 
-	public void setTransmissionDate(Date transmissionDate) {
+	public void setTransmissionDate(LocalDateTime transmissionDate) {
 		this.transmissionDate = transmissionDate;
 	}
-
-	public void setReadStatus(String string) {
-		// TODO 自動生成されたメソッド・スタブ
-		
-	}
-
-	public void setTransmissionDate(LocalDateTime now) {
-		// TODO 自動生成されたメソッド・スタブ
-		
-	}
+	
     
    
 }
