@@ -1,0 +1,1467 @@
+2025年11月11-12日　19時～08時　開発記録
+
+＜＜①404でアクセスできない問題＞＞
+
+server.servlet.context-path=/1st_growthって書いてあるから、
+アクセスURLは これでないとダメ！👇
+
+http://localhost:1199/1st_growth/login
+
+
+理由
+server.servlet.context-path はアプリ全体の“ルートパス”を決める設定
+/1st_growth をつけないと Spring がルーティングを見つけられない
+
+ログイン成功
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜＜②ログインしたい問題＞＞
+
+ログインするためにデータベースに仮データを登録
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+-- ① 学校を登録
+INSERT INTO schools (school_id, school_name, location)
+VALUES (1, '東京第一高校', '東京都港区');
+COMMIT;
+
+-- ② ユーザーを登録（school_id=1）
+INSERT INTO users (user_id, name, email, phone_number, password, school_id, club_id)
+VALUES (1, 'テスト1', 'test@example.com', '08012345678', 'pass1234', 1, NULL);
+COMMIT;
+
+-- ③ 部活を登録（user_id=1）
+INSERT INTO clubs (club_id, user_id, club_name, activity_date)
+VALUES (1, 1, 'サッカー部', '月・水・金');
+COMMIT;
+
+-- ④ 最後にユーザーの club_id を更新して関連づけ
+UPDATE users SET club_id = 1 WHERE user_id = 1;
+COMMIT;
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+データを入力しログインをする
+ーーーーーーーーーーーーーーーーー
+test@example.com
+pass1234
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+ログイン成功
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜＜③トップ画面に募集リストを表示したい問題＞＞
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞　LoginController
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+@Autowired
+	RecruitmentRepository recruitmentRepository;
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+この条件文👇
+
+if (user != null && !user.isEmpty()) {
+
+「ちゃんとユーザーが見つかったか？」を確認するための安全チェック
+
+
+userRepository.findByEmailAndPassword(email, password) の戻り値は List<User> 
+（該当するユーザーが1件でもいればリストに入る、いなければ空のリストが返る）
+
+🧠 条件の意味を分解してみる
+条件	意味
+user != null	リストそのものが存在してるか（nullじゃないか）
+!user.isEmpty()	リストの中が空じゃないか（1件以上データが入ってるか）
+
+つまりこの2つを組み合わせてる理由は、
+「リストが null でも空でもない」＝「ユーザーが1件以上見つかった」
+という意味
+
+✅ 例えると…
+状況	userの状態	結果
+正しいメール＆パスワード	[User{id=1, name="テスト"}]	条件成立（ログイン成功）
+間違ったメールやパスワード	[]（空のリスト）	条件不成立（エラー表示）
+データベース接続ミス等	null	条件不成立（例外回避）
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+	List<Recruitment> recruitments = recruitmentRepository.findAll();
+			model.addAttribute("recruitments", recruitments);
+
+
+recruitmentRepository は Recruitment テーブルと接続しているリポジトリ。
+findAll() は JPA（Spring Data JPA）の標準メソッドで、
+SELECT * FROM recruitments; と同じ動作をする。
+この1行で、募集テーブルの全データを取得して、
+recruitments というリスト変数に格納している。
+
+model.addAttribute("recruitments", recruitments);
+model は、Java側のデータをHTMLに渡す箱のようなもの。
+"recruitments" はHTMLで参照するときの名前。
+つまり、、「recruitmentsという名前で一覧データを画面に渡す」という意味。
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+model.addAttribute("error", "メールまたはパスワードが間違っています。");
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜追加・修正コード＞　RecruitmentRepository
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+public interface RecruitmentsRepository extends JpaRepository<Recruitment, Integer>
+sを抜いてコントローラーのコード文と合わせる
+→public interface RecruitmentRepository extends JpaRepository<Recruitment, Integer>に変更
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+findByRecruitId の戻り値
+recruitIdは主キーだから、通常は１件しか通らない
+だからList<Recruitment>よりもOptional<Recruitment>にするのが正しい設計
+
+＜捕捉＞
+💡 まず「Optional」ってなに？
+
+Optional は 「値があるかもしれないし、ないかもしれない」 という状況を
+安全に扱うためのラッパークラス（プリミティブ型をオブジェクトとして扱えるようにしたクラス）
+
+つまり、
+
+値が存在する → Optional の中にデータが入る
+
+値が存在しない → Optional.empty() が返る
+
+使用しないとぬるぽが発生し、エラーの原因になる
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+findByUserUserIdの意味
+このメソッドは「募集したユーザーIDをもとに募集一覧を取得するって処理
+つまりRecruitmentエンティティの中にある場合のみ有効
+@ManyToOne
+@JoinColumn(name = "user_id")
+private User user;
+
+これがないとuser.userIdを参照できない
+
+＜修正コード＞
+//主キー検索（１件だけ返す）
+	Optional<Recruitment> findByRecruitId(@Param("recruitId")Integer recruitId);
+//ユーザーIDで募集一覧を取得（例：特定の先生が出した募集一覧）
+	 List<Recruitment> findByUserUserId(@Param("userId") Integer userId);
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞Entity User.java
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+テーブル名は users、外部キーは school_id と club_id。
+なので User.java はこう直すと完全一致
+
+@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user")
+    @SequenceGenerator(name = "seq_user", sequenceName = "seq_user_id", allocationSize = 1)
+
+→
+
+@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user_id")
+    @SequenceGenerator(name = "seq_user_id", sequenceName = "seq_user_id", allocationSize = 1)
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+@Column private String name;
+ @Column private String email; 
+@Column private String phoneNumber;
+ @Column private String password;
+ @ManyToOne @JoinColumn(name = "school_id",referencedColumnName ="schoolId") private School school; @ManyToOne @JoinColumn(name = "club_id",referencedColumnName ="clubId") private Club club;
+
+→
+
+@Column(name="name",nullable=false)
+    private String name;
+
+    @Column(name="email",nullable=false,unique=true)
+    private String email;
+    
+    @Column(name="phoneNumber",nullable=false)
+    private String phoneNumber;
+    
+    @Column(name="password",nullable=false)
+    private String password;
+    
+    @ManyToOne
+    @JoinColumn(name = "school_id",referencedColumnName ="school_id",nullable=false)
+    private School school;
+    
+    @ManyToOne
+    @JoinColumn(name = "club_id",referencedColumnName ="club_id",nullable=false)
+    private Club club;
+
+＜修正理由＞
+・@Table(name = "users")
+    → DB側のテーブル名に合わせた（membersではなくusers）。
+
+・@JoinColumn(..., referencedColumnName = "school_id")
+    → SQL側でschool_id, club_id なので「_id」付きが正しい。
+
+・@Column(name = "phone_number")
+    → DB物理名と一致させるため、キャメルではなくスネークケースを指定。
+
+・nullable = false
+    → SQL定義でNOT NULLのカラムに合わせて追加。
+
+
+nullable = false → 「空（null）ダメ！」
+unique = true → 「同じ値（重複）ダメ！」
+
+
+@Column(name="phone_Number") の大文字修正
+
+SQLでは列名が phone_number だから、
+Java側も小文字に統一しておこう（カラム名の不一致でエラーになりやすい）
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞Entity School.java
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+    @Column(name="school_name",nullable=false)
+	    private String schoolName;
+
+	    @Column(name="location",nullable=false)
+	    private String location;
+
+nullableを追加
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞Entity Club.java
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+ private Integer clubName;
+
+→private String clubName;
+
+部活名は数字じゃなくて文字列（例：サッカー部）
+
+
+
+  private Date activityDate;
+
+→private String activityDate;
+
+DB定義書では「活動曜日（activity_date）」が VARCHAR2 だから
+
+getterとsetterも併せて変更
+
+
+  @JoinColumn(name = "user_id",referencedColumnName ="userId")
+
+→
+
+  @JoinColumn(name = "user_id",referencedColumnName ="user_id",nullable=false)
+
+User.javaを変更したのでこちらも変更
+
+
+ @Column(name="club_name",nullable=false)
+    private String clubName;
+    
+    @Column(name="activity_date",nullable=false)
+    private String activityDate;
+
+nullableを追加
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞Entity Recruitments.java
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+	@ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName ="user_id",nullable=false)
+    private User user;
+    
+    @ManyToOne
+    @JoinColumn(name = "club_id",referencedColumnName ="club_id",nullable=false)
+    private Club club;
+
+User.javaを変更したのでこちらも変更
+nullableを追加
+
+
+
+
+@Column に name をつけておくと安全
+→ DBの列名にきっちり対応できるようにしておくと、将来のバグを防げる
+
+カラム定義の順番をDBと合わせておく
+→ SQLの recruitments テーブル
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+recruit_id NUMBER(5) PRIMARY KEY,
+user_id NUMBER(5) NOT NULL,
+club_id NUMBER(5) NOT NULL,
+match_date DATE NOT NULL,
+match_time VARCHAR2(5) NOT NULL,
+location VARCHAR2(200) NOT NULL
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+    @Column(name="match_date",nullable=false)
+    private Date matchDate;
+    
+    @Column(name="match_time",nullable=false)
+    private String matchTime;
+    
+    @Column(name="location",nullable=false)
+    private String location;
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+実行した結果、エラー発生
+
+エラー内容
+このフィールドは Java側では userId
+でも、@Column(name="user_id") が 指定されてない 
+Hibernate的には “user_id” ってDBカラムが分からない状態
+
+解決方法
+@Column(name="user_id")をUser.javaに追加
+
+他のエンティティで指定しているためUserのカラム名を一致 させる必要がある
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+実行した結果、エラー発生
+
+エラー内容
+Userでuser_idと設定しているがほかでは設定されていない
+
+解決方法
+ApplicationとChatエンティティのUserIDをuser_idに変更
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+実行した結果、エラー発生
+
+
+エラー内容
+Hibernate的には “club_id” ってDBカラムが分からない状態
+
+解決方法
+clubエンティティに@Column(name="club_id")を追加
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+実行した結果、エラー発生
+
+エラー内容
+Hibernate的には “school_id” ってDBカラムが分からない状態
+
+解決方法
+Schoolエンティティに @Column(name="school_id")を追加
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+実行した結果、エラー発生
+
+エラー内容
+ApplyController の中で使ってる RecruitmentsRepository クラスが存在しない or 名前が違う 
+
+解決方法
+複数形から単数に変更する　ｓを取る
+
+import jp.ac._st_Growth.repository.RecruitmentsRepository;
+
+→
+
+import jp.ac._st_Growth.repository.RecruitmentRepository;
+
+
+private ApplicationsRepository applicationsRepository;
+
+→
+
+private ApplicationsRepository applicationRepository;
+
+
+
+追加エラー
+
+エラー内容
+RecruitmentRepository のメソッド定義の戻り値と使い方が合ってない
+
+findByRecruitId() の戻り値は Optional<Recruitment> なのに、
+List<Recruitment> 型の変数に代入してるのがNG
+
+解決方法
+ListからOptionalに統一する
+普通は募集ID（主キー）は1件だけ返すから、Optionalで1件取得のパターンが自然
+
+
+// 応募確認画面の表示 
+@GetMapping("/user/apply/check") 
+public String confirmApply( @RequestParam("recruitId") Integer recruitId,Model model) { 
+List<Recruitment> recruitmentList = recruitmentRepository.findByRecruitId(recruitId); 
+if (!recruitmentList.isEmpty()) {
+ model.addAttribute("recruitment", recruitmentList.get(0));
+ } else { model.addAttribute("error", "募集情報が見つかりませんでした"); return "error"; } return "user/apply/apply_check"; } 
+
+
+→
+
+ 
+    // 応募確認画面の表示    
+    @GetMapping("/user/apply/check")
+    public String confirmApply(@RequestParam("recruitId") Integer recruitId,Model model) {
+
+       
+        Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
+
+        
+        if (recruitmentOpt.isPresent()) {
+            model.addAttribute("recruitment", recruitmentOpt.get());
+        } else {
+            
+            model.addAttribute("error", "募集情報が見つかりませんでした");
+            return "error";
+        }
+
+        return "user/apply/apply_check";
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+ List<User> userList = userRepository.findByUserId(userId);
+            List<Recruitment> recruitmentList = recruitmentRepository.findByRecruitId(recruitId);
+            
+            if (userList.isEmpty() || recruitmentList.isEmpty()) {
+                model.addAttribute("error", "ユーザーまたは募集情報が見つかりません");
+                return "error";
+            }
+
+
+→
+
+
+    List<User> userList = userRepository.findByUserId(userId);
+            Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
+            
+            if (userList.isEmpty() || recruitmentOpt.isPresent()) {
+                model.addAttribute("error", "ユーザーまたは募集情報が見つかりません");
+                return "error";
+            }
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+application.setRecruitment(recruitmentList.get(1));
+
+→
+
+application.setRecruitment(recruitmentOpt.get());
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+実行した結果、成功
+
+Webページ上で問題発生→ログインできない
+
+データベースを確認
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+ログインできなかった理由
+ユーザーデータが存在しない
+入力したはずだがエラーを見落としており、ロールバックが起こった
+
+制約にも問題あり
+CLUB_IDにNULLを入れれない制約とUSER_ID 整合性制約の二重制約によりデータ入力が不可能になっていた
+
+＜整合性制約のエラー内容＞
+ (FIRSTGROWTH.SYS_C008403) に違反しました - 親キーがありません
+
+「SCHOOL_ID = 1 とか CLUB_ID = 1 を入れようとしたけど、
+そのIDを持つ学校 or クラブがまだ登録されてない
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+解決方法
+
+① CLUB_ID を一時的に NULL 許可にする
+ALTER TABLE USERS MODIFY (CLUB_ID NULL);
+
+INSERT INTO SCHOOLS (SCHOOL_ID, SCHOOL_NAME, LOCATION)
+VALUES (1, '東京第一高校', '東京都港区');
+COMMIT;
+
+SELECT * FROM SCHOOLS;
+
+INSERT INTO USERS (USER_ID, NAME, EMAIL, PHONE_NUMBER, PASSWORD, SCHOOL_ID, CLUB_ID)
+VALUES (1, 'テスト1', 'test@example.com', '08012345678', 'pass1234', 1, NULL);
+COMMIT;
+
+INSERT INTO CLUBS (CLUB_ID, USER_ID, CLUB_NAME, ACTIVITY_DATE)
+VALUES (1, 1, 'サッカー部', '月・水・金');
+COMMIT;
+
+UPDATE USERS SET CLUB_ID = 1 WHERE USER_ID = 1;
+COMMIT;
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+データベースに募集データを追加
+
+＜カラム名を調べてくれる＞
+DESC RECRUITMENTS;
+
+
+INSERT INTO RECRUITMENTS (RECRUIT_ID, USER_ID, CLUB_ID,MATCH_DATE, MATCH_TIME, LOCATION)
+VALUES (1, 1, 1, '2025-11-20', '15:00', '東京第一高校グラウンド');
+COMMIT;
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+実行した結果、成功
+ログイン→ホーム画面に募集情報が表示された
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<<④応募機能の実装問題>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+top.htmlに応募機ボタンを作る
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞ top.html
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<table>
+ <thead>
+ <tr>
+ <th>ID</th> 
+<th>希望日</th> 
+<th>時間</th>
+ <th>場所</th>
+ </tr> 
+</thead>
+
+→
+
+<h2>募集一覧</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>希望日</th>
+        <th>時間</th>
+        <th>場所</th>
+		<th>操作</th>
+      </tr>
+    </thead>
+
+border=1でテーブルに線を追加
+応募ボタンをつけるために操作を追加
+
+
+<a th:href="@{/user/apply/check(recruitId=${r.recruitId})}">応募</a>
+応募ボタンの追加
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞ apply_check.html
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+CSSは後付け、htmlに書く必要なし
+<<<全コード書き換えを実行>>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<<前回のコード>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>応募登録確認</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .confirmation-box {
+      border: 2px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    .button-secondary {
+      background-color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <h1>応募登録確認</h1>
+  
+  <div class="confirmation-box">
+    <p>この内容で応募してよろしいですか？</p>
+    
+    <div th:if="${recruitment != null}">
+      <h3 th:text="${recruitment.title}"></h3>
+      <p><strong>チーム名:</strong> <span th:text="${recruitment.teamName}"></span></p>
+      <p><strong>日付:</strong> <span th:text="${#temporals.format(recruitment.matchDate, 'M月d日（E）')}"></span></p>
+      <p><strong>時間:</strong> <span th:text="${#temporals.format(recruitment.matchTime, 'HH:mm')}"></span></p>
+      <p><strong>場所:</strong> <span th:text="${recruitment.location}"></span></p>
+    </div>
+  </div>
+
+  <form th:action="@{/user/apply/regist}" method="post">
+    <input type="hidden" name="recruitId" th:value="${recruitment.recruit_id}">
+    <button type="submit" class="button">この内容で応募する</button>
+  </form>
+
+  <a th:href="@{/top}" class="button button-secondary">トップページに戻る</a>
+</body>
+</html>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜＜改変したコード＞＞
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>応募確認</title>
+</head>
+<body>
+  <h1>応募確認</h1>
+
+  <p>以下の募集に応募しますか？</p>
+
+  <table border="1">
+    <tr>
+      <th>募集ID</th>
+      <td th:text="${recruitment.recruitId}"></td>
+    </tr>
+    <tr>
+      <th>希望日</th>
+      <td th:text="${recruitment.matchDate}"></td>
+    </tr>
+    <tr>
+      <th>時間</th>
+      <td th:text="${recruitment.matchTime}"></td>
+    </tr>
+    <tr>
+      <th>場所</th>
+      <td th:text="${recruitment.location}"></td>
+    </tr>
+  </table>
+
+  <form th:action="@{/user/apply/regist}" method="post">
+    <input type="hidden" name="recruitId" th:value="${recruitment.recruitId}">
+    <button type="submit">応募する</button>
+  </form>
+
+  <p><a href="/login">戻る</a></p>
+</body>
+</html>
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞ apply_cmplete.html
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+CSSは後付け、htmlに書く必要なし
+<<<全コード書き換えを実行>>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<<前回のコード>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>応募登録完了</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .success-message {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin: 10px 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>応募登録完了</h1>
+  
+  <div class="success-message">
+    <p>応募情報の登録が正常に完了しました。</p>
+    <p>応募一覧やトップページからご確認ください。</p>
+  </div>
+
+  <div>
+    <a th:href="@{/user/apply/list}" class="button">応募一覧に戻る</a>
+    <a th:href="@{/top}" class="button">トップページに戻る</a>
+  </div>
+</body>
+</html>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜＜改変したコード＞＞
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>応募完了</title>
+</head>
+<body>
+  <h1>応募完了</h1>
+
+  <p th:text="${message}">応募が完了しました！</p>
+
+  <p>
+    <a href="/login">トップに戻る</a>
+    <br>
+    <a href="/user/apply/list">応募一覧を見る</a>
+  </p>
+</body>
+</html>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞ apply_list.html
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+CSSは後付け、htmlに書く必要なし
+<<<全コード書き換えを実行>>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<<前回のコード>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>応募一覧</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin: 10px 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>応募一覧</h1>
+
+  <!-- 応募がある場合 -->
+  <table th:if="${!#lists.isEmpty(applications)}">
+    <tr>
+      <th>ID</th>
+      <th>応募日</th>
+      <th>ステータス</th>
+    </tr>
+    <tr th:each="a : ${applications}">
+      <td th:text="${a.applyId}"></td>
+      <td th:text="${#temporals.format(a.applyDate, 'yyyy年MM月dd日')}"></td>
+      <td>審査中</td>
+    </tr>
+  </table>
+
+  <!-- 応募がない場合 -->
+  <div class="no-data" th:if="${#lists.isEmpty(applications)}">
+    <p>現在、応募履歴はありません。</p>
+  </div>
+
+  <!-- ナビゲーションボタン -->
+  <div>
+    <a th:href="@{/top}" class="button">トップページへ戻る</a>
+  </div>
+</body>
+</html>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜＜改変したコード＞＞
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>応募一覧</title>
+</head>
+<body>
+  <h1>応募一覧</h1>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>応募ID</th>
+        <th>募集ID</th>
+        <th>応募日</th>
+        <th>希望日</th>
+        <th>時間</th>
+        <th>場所</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="a : ${applications}">
+        <td th:text="${a.applicationId}"></td>
+        <td th:text="${a.recruitment.recruitId}"></td>
+        <td th:text="${a.applyDate}"></td>
+        <td th:text="${a.recruitment.matchDate}"></td>
+        <td th:text="${a.recruitment.matchTime}"></td>
+        <td th:text="${a.recruitment.location}"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p th:if="${#lists.isEmpty(applications)}">現在、応募はありません。</p>
+
+  <p>
+    <a href="/login">トップに戻る</a>
+  </p>
+</body>
+</html>
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜応募テストを実行＞
+応募確認ボタンを押したらエラー発生
+
+エラー内容
+Error resolving template [login]
+template might not exist or might not be accessible
+
+login ってテンプレート（HTMLファイル）が見つからない
+
+src/main/resources/templates/login.html が存在しない（またはパスが違う）状態
+
+解決方法
+修正箇所（ApplyController の中）
+ーーーーーーーーーーーーーーーーーーーーーーーーーーー
+if (userId == null) {
+    model.addAttribute("error", "ログインしてください");
+    return "common/login/login";
+}
+ーーーーーーーーーーーーーーーーーーーーーーーーーーー
+修正完了
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+再度実行、、、、失敗
+応募ボタンを押したらログイン画面に遷移する
+
+原因
+ログイン時に、ログインできたユーザー情報をセッションに保存してない
+
+修正を開始
+LoginController の login() メソッドに以下のコードを編集、セッションにユーザーIDを保存
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+public String login(Form form, Model model, HttpSession session)｛
+
+session.setAttribute("userId", user.get(0).getUserId());
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+HttpSession は「ユーザーごとの一時的な記憶」
+これで一度ログインしたら、応募画面や応募登録時にもuserId を取り出すことが可能
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+再度実行、、、、失敗
+＜＜エラー発生＞＞
+
+エラー内容
+type=ユーザーまたは募集情報が見つかりません
+ApplyController のこの部分でどっちかのデータ（ユーザー or 募集）が nullである
+findByRecruitId() が Optional になってることが原因
+ApplyControllerはListで定義しているためOptionalで定義しているRecruitmentRepositoryと整合性が合わずエラーが発生
+
+修正方法
+OptionalかListのどちらかに統一する
+
+試行結果
+設計だと RECRUIT_ID は主キー
+recruitId は 主キー（1件だけ存在）Optional<Recruitment> を返すメソッドが一番きれいである
+同じIDで複数なんてことはDB設計的に起こりえない
+
+「同じ先生が別日で募集を出して、応募者がそれぞれに応募する」
+その場合でも “同じ ID” は使わない
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜具体例で説明＞
+
+📘 先生（User ID = 1）が出した募集データのイメージ：
+RECRUIT_ID	USER_ID	MATCH_DATE	MATCH_TIME	LOCATION
+1	1	2025-11-20	15:00	東京第一高校
+2	1	2025-11-27	14:00	東京第一高校
+
+、どっちも同じ先生（USER_ID=1） だけど、募集の中身（日付・時間・場所）が違うから、
+RECRUIT_ID は1件ごとにユニーク（＝別番号） にするのが正解
+
+応募側から見た動き
+APPLICATION_ID	USER_ID（応募者）	RECRUIT_ID	APPLY_DATE
+1	2（応募者）	1	2025-11-12
+2	2（応募者）	2	2025-11-13
+
+つまり、応募者（USER_ID=2）は、
+別々の募集（RECRUIT_ID=1, 2）に両方応募できる
+
+「同じIDで複数」とは？
+
+たとえば、もし間違って RECRUIT_ID がどっちも 1 だったら…
+
+RECRUIT_ID	USER_ID	MATCH_DATE	LOCATION
+1	1	2025-11-20	東京第一高校
+1	1	2025-11-27	東京第一高校
+
+これが「同じIDで複数」
+つまり、主キー（RECRUIT_ID）が重複してる
+データベース的には「一意制約違反（ORA-00001）」が出て壊れる可能性あり
+
+ 正しい設計まとめ
+
+RECRUIT_ID：主キー（自動採番 or 手動でユニーク）
+
+USER_ID：誰が募集したか（外部キー）
+
+同じ先生が別日で募集してOK（USER_IDは同じで大丈夫）
+
+応募テーブルは RECRUIT_ID と USER_ID（応募者） の組み合わせでOK
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+以下の理由からOptionalに変更開始
+
+修正を開始
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞ ApplyController.java
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+List<User> userList = userRepository.findByUserId(userId); Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
+
+→
+
+ // ユーザー情報を取得
+            Optional<User> userOpt = userRepository.findById(userId);
+            Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
+
+JpaRepository<User, Integer> と findByUserId() の重複
+JpaRepository 自体に findById() が最初から存在している。そのためuserId が主キーなら findById() を使っても全く同じ動作する
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+if (userList.isEmpty() || recruitmentOpt.isPresent()) { model.addAttribute("error", "ユーザーまたは募集情報が見つかりません"); return "error"; }
+
+
+この条件式、逆になっている「募集情報がある場合」にエラー出している
+→
+
+      if (userOpt.isEmpty() || recruitmentOpt.isEmpty()) {
+                model.addAttribute("error", "ユーザーまたは募集情報が見つかりません");
+                return "error";
+            }
+
+
+isEmpty() … データが見つからなかった場合
+ isPresent() … データが存在する場合
+
+今回は「存在しないとき」にエラーにしたいisEmpty() が最適である
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+修正完了
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+再度実行、、、、失敗
+
+エラーの原因を解析中、、、
+
+解析完了
+
+エラー内容
+シーケンス（順序） が存在しない
+
+解析結果から修正処理を実行
+
+データベースを確認
+
+シーケンスの確認コマンドを実行
+
+SELECT sequence_name FROM user_sequences;
+
+実行結果を提示
+
+SEQUENCE_NAME --------------------------------------------------------------------------------------------------------------------------------
+ SEQ_APPLY_ID
+ SEQ_CHAT_ID 
+SEQ_CLUB_ID
+ SEQ_MEMBER_ID
+ SEQ_RECRUIT_ID
+ SEQ_SCHOOL_ID 
+SEQ_USER_ID 
+7行が選択されました。
+---------------------------------------------------------------
+
+実行結果を元にエラーの原因を再度分析
+
+分析完了
+
+Applicationエンティティに原因があると推測します
+
+@SequenceGenerator(name = "seq_application", sequenceName = "seq_apply_id", allocationSize = 1)
+
+原因を発見
+
+修正方法を試行中、、、、試行完了
+
+application_id → _apply_id に変更が最適解だと判断しました
+
+修正を実行
+
+ @SequenceGenerator(name = "seq_application", sequenceName = "seq_apply_id", allocationSize = 1)
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+修正完了
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+再度実行、、、、成功しました
+
+応募完了画面の表示に成功
+
+続けてデータベース上に応募データがあるかの確認に移ります
+
+確認コマンドをSQL文で作成、、、、
+
+作成完了
+
+次のコードを実行します
+
+SELECT * FROM APPLICATIONS;
+
+実行に成功
+
+データの表示を開始
+
+APPLY_ID	USER_ID	RECRUIT_ID	APPLY_DATE
+1	1	1	2025-11-12
+
+成功しました
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+これでホーム画面上にて募集リストから選択→応募→応募確認→応募登録完了までの流れを実行することが可能です。
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+続いて応募一覧表示画面の構築を開始します
+
+着手手順を試行中、、、
+
+
+試行完了
+
+下記の手順で構築を実行します
+
+１．ホーム画面に固定フッター（ナビバー）を設置
+２.  フッターの応募ボタンを押すと/user/apply/listに遷移→応募一覧ページ（apply_list.html）を表示
+
+構築を開始
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜修正・追加コード＞ _list.html
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+いまのHTMLのボタンだと、th:href は <a>タグ用の属性 なので<button> に書いても実行不可と判断します。
+よってコマンドコード033を実行します
+<<コードの一部改変>>
+実行に伴い、最適解を試行、、、
+
+試行完了
+
+htmlの共通化が最適解だと判断しました
+
+判断結果からコードの構築に挑戦します
+
+成功しました
+
+実行を開始します
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<<前回のコード>>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+  <!-- top.html へ遷移 -->
+  <button onclick th:href="@{/common/top.html}">ホーム</button>
+
+  <!-- recrute_input.htmlへ遷移 -->
+  <button onclick th:href="@{/user/input/recrute_input.html}">募集</button>
+
+  <!-- chat.htmlへ遷移 -->
+  <button onclick th:href="@{/user/chat/chat.html}">チャット</button>
+
+  <!-- apply_list.htmlへ遷移 -->
+  <button onclick th:href="@{/user/apply/apply_list.html}">応募</button>
+
+  <!-- menu.htmlへ遷移 -->
+  <button onclick th:href="@{/common/menu/menu.html}">メニュー</button>
+
+	
+</body>
+</html>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜＜改変したコード＞＞
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<!-- footer.html -->
+<div th:fragment="footer">
+  <div class="footer">
+    <a th:href="@{/common/top}" class="footer-btn">ホーム</a>
+    <a th:href="@{/user/input/recrute_input}" class="footer-btn">募集</a>
+    <a th:href="@{/user/chat/chat}" class="footer-btn">チャット</a>
+    <a th:href="@{/user/apply/list}" class="footer-btn">応募</a>
+    <a th:href="@{/common/menu}" class="footer-btn">メニュー</a>
+  </div>
+</div>
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+共通化に伴い、他のhtmlに呼び出せるようにコードの作成に挑戦
+成功しました
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<div th:replace="common/footer :: footer"></div>
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+コードの作成に伴い、各htmlへのフッターの追加を実行中
+成功しました
+
+5つのhtmlにフッターの追加を実行しました
+--------------------------------------------
+top.html
+-------------------------------------------
+recrute_input.html
+------------------------------------------
+chat.html
+-----------------------------------------
+apply_list.html
+----------------------------------------
+menu.html
+----------------------------------------
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+構築完了
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+再度実行、、、、、成功しました
+フッターの追加に成功、これによりフッターのボタンから各htmlに遷移できるようになりました
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+続いて、応募一覧画面の構築を開始します
+
+現在の状況把握のため、再度実行を行います、、、画面の表示に成功しました
+
+続けてフッターボタンからの遷移を実行、、、、失敗しました
+
+エラーの検出を確認
+
+原因の解析を開始します、、、、
+
+解析完了
+
+エラーの内容
+Application エンティティには applicationId というフィールドが存在しない 
+
+解析内容を元に解決方法を試行します、、、、
+
+試行完了
+
+Application エンティティでは ID のフィールド名
+
+→private Integer applyId;
+
+Thymeleaf側のコード
+→<td th:text="${a.applicationId}"></td>
+
+名前の不一致を確認
+
+よって次の方法が最適解だと判断し修正処理を実行します
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+apply_list.htmlの修正
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<td th:text="${a.applicationId}"></td>
+
+→  <td th:text="${a.applyId}"></td> 
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+修正完了
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+再度実行、、、、、成功しました
+これによりホーム画面のフッターから応募ボタンをタップ→応募一覧に遷移に成功
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+続いてフッターの固定をCSSをプロトタイプとして構築・実行します
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+構築に伴い下記のパスを構築
+
+src/main/resources/static/css/footer/footer.css
+
+css,footer,footer.cssファイルの追加を実行
+
+footer.cssにcssコードを構築中、、、
+
+成功しました
+
+コードの表示を実行
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+footer.css
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+@charset "UTF-8";
+
+/* 全体設定 */
+body {
+  margin: 0;
+  padding-bottom: 60px; /* フッターの高さ分だけ余白を確保 */
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+/* フッター全体 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #2e7d32; /* 落ち着いた深緑 */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* 各ボタン */
+.footer-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 12px;
+  transition: 0.2s;
+}
+
+.footer-btn:hover {
+  color: #c8e6c9; /* 柔らかい薄緑のハイライト */
+  transform: translateY(-2px);
+}
+
+/* アイコン */
+.footer-btn .icon {
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+/* スマホ対応 */
+@media screen and (max-width: 480px) {
+  .footer-btn span {
+    font-size: 10px;
+  }
+  .footer-btn .icon {
+    font-size: 20px;
+  }
+}
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+それに伴いhtmlとlinkさせるコードの構築を開始します
+
+成功しました
+
+htmlとcssの接続を実行するコードを表示
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<head>の中に書くことを推奨します
+ーーーーーーーーーーーーーーーーーーーーーーーー
+実験としてこのコードをtop.htmlに実装を行います
+
+実装完了
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+再度実行、、、、、失敗しました
+
+エラーコードなし、、、
+原因が不明のため解析コード333を実行します
+
+解析を実行中、、、、
+
+パスを確認、、、異常なし
+
+htmlのlinkを確認＆<head>の中に入ってるかの確認、、、異常なし
+
+
+分析不可、、、検索コード555を実行します
+
+検索結果
+
+キャッシュが残ってたり、静的リソースのルートがずれてたせいでブラウザに正しく配信されない可能性あり
+
+こちらを問題の定義と仮定、対処を行います
+
+対処方法を試行中、、、、、
+
+成功しました
+
+最も最適である対処方法を表示します
+
+application.propertiesに下記の内容を追加
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+spring.web.resources.static-locations=classpath:/static/
+spring.web.resources.cache.period=0
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+必要な理由を提示
+
+Spring Bootはデフォルトで「静的ファイル（CSS・JS・画像）」をclasspath:/static/ や classpath:/public/ などから探しますが
+たまに プロジェクト構成やIDEの挙動 で読み込み先を見失うことがあります。
+
+
+特に今回はsrc/main/resources/static/css/footer/footer.cssという構成で、Thymeleaf経由でアクセスする時に
+キャッシュが残ってたり、静的リソースのルートがずれてた せいでブラウザに正しく配信されなかった可能性が高いです。
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+＜＜この設定にする目的＞＞
+spring.web.resources.static-locations=classpath:/static/
+
+→ Springに「静的リソースはこのフォルダから読む」と明示的に教えている。（デフォルトと同じ場所ですが、確実に固定する意味があります）
+
+
+spring.web.resources.cache.period=0
+
+→ ブラウザやSpring側のキャッシュを完全に無効化。　CSSを変更しても、古いバージョンが残らなくなる。
+
+この2行は本番環境ではキャッシュ設定を変えることもありますが、開発環境では入れっぱなしが良いと判断しました。
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+続いて全体のCSSをプロトタイプとして構築・実行を行います
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+構築に伴い下記のパスを構築
+
+src/main/resources/static/css/common/commonr.css
+
+common,common.cssファイルの追加を実行
+
+common.cssにcssコードを構築中、、、
+
+成功しました
+
+コードの表示を実行
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+common.css
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+@charset "UTF-8";
+
+/* 全体の基本設定 */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f8fff8; /* 優しい緑がかった白 */
+  color: #333;
+  font-family: "Noto Sans JP", sans-serif;
+  line-height: 1.6;
+}
+
+/* ページタイトル */
+h1, h2, h3 {
+  color: #2e7d32; /* メインカラーの深緑 */
+  border-left: 6px solid #2e7d32;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+/* リンク */
+a {
+  color: #2e7d32;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+a:hover {
+  color: #1b5e20;
+  text-decoration: underline;
+}
+
+/* ボタン */
+button, .btn {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover, .btn:hover {
+  background-color: #1b5e20;
+}
+
+/* テーブル */
+table {
+  border-collapse: collapse;
+  width: 90%;
+  margin: 20px auto;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+th, td {
+  border: 1px solid #c8e6c9;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+/* ページ全体の余白 */
+.container {
+  padding: 20px;
+  max-width: 800px;
+  margin: auto;
+}
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+それに伴いhtmlとlinkさせるコードの構築を開始します
+
+成功しました
+
+htmlとcssの接続を実行するコードを表示
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<link rel="stylesheet" th:href="@{/css/common/common.css}">
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+<head>の中に書くことを推奨します
+ーーーーーーーーーーーーーーーーーーーーーーーー
+このコードを
+top.html
+login.html
+apply_check.html
+apply_complete.html
+apply_list
+
+に実装を行います
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
