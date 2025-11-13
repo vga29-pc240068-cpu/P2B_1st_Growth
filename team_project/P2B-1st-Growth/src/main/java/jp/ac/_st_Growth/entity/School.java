@@ -15,12 +15,13 @@ public class School {
 	    @Id
 	    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_school")
 	    @SequenceGenerator(name = "seq_school", sequenceName = "seq_school_id", allocationSize = 1)
+	    @Column(name="school_id")
 	    private Integer schoolId;
 
-	    @Column
+	    @Column(name="school_name",nullable=false)
 	    private String schoolName;
 
-	    @Column
+	    @Column(name="location",nullable=false)
 	    private String location;
 
 		public Integer getSchoolId() {

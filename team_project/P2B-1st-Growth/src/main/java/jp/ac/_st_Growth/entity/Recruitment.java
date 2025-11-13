@@ -20,18 +20,21 @@ public class Recruitment {
     private Integer recruitId;
 
 	@ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName ="userId")
+    @JoinColumn(name = "user_id",referencedColumnName ="user_id",nullable=false)
     private User user;
     
     @ManyToOne
-    @JoinColumn(name = "club_id",referencedColumnName ="clubId")
+    @JoinColumn(name = "club_id",referencedColumnName ="club_id",nullable=false)
     private Club club;
     
-    @Column
+    @Column(name="match_date",nullable=false)
     private Date matchDate;
     
-    @Column
+    @Column(name="match_time",nullable=false)
     private String matchTime;
+    
+    @Column(name="location",nullable=false)
+    private String location;
     
     public User getUser() {
 		return user;
@@ -83,8 +86,7 @@ public class Recruitment {
 		this.location = location;
 	}
 
-	@Column
-    private String location;
+
     
 
 

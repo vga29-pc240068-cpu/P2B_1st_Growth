@@ -1,57 +1,41 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
+	<link rel="stylesheet" th:href="@{/css/common/common.css}">
+
   <meta charset="UTF-8">
-  <title>応募登録確認</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .confirmation-box {
-      border: 2px solid #ddd;
-      padding: 20px;
-      margin: 20px 0;
-      border-radius: 8px;
-    }
-    .button {
-      display: inline-block;
-      padding: 12px 24px;
-      background-color: #007bff;
-      color: white;
-      text-decoration: none;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin: 10px 5px;
-    }
-    .button-secondary {
-      background-color: #6c757d;
-    }
-  </style>
+  <title>応募確認</title>
+  
 </head>
 <body>
-  <h1>応募登録確認</h1>
-  
-  <div class="confirmation-box">
-    <p>この内容で応募してよろしいですか？</p>
-    
-    <div th:if="${recruitment != null}">
-      <h3 th:text="${recruitment.title}"></h3>
-      <p><strong>チーム名:</strong> <span th:text="${recruitment.teamName}"></span></p>
-      <p><strong>日付:</strong> <span th:text="${#temporals.format(recruitment.matchDate, 'M月d日（E）')}"></span></p>
-      <p><strong>時間:</strong> <span th:text="${#temporals.format(recruitment.matchTime, 'HH:mm')}"></span></p>
-      <p><strong>場所:</strong> <span th:text="${recruitment.location}"></span></p>
-    </div>
-  </div>
+  <h1>応募確認</h1>
+
+  <p>以下の募集に応募しますか？</p>
+
+  <table border="1">
+    <tr>
+      <th>募集ID</th>
+      <td th:text="${recruitment.recruitId}"></td>
+    </tr>
+    <tr>
+      <th>希望日</th>
+      <td th:text="${recruitment.matchDate}"></td>
+    </tr>
+    <tr>
+      <th>時間</th>
+      <td th:text="${recruitment.matchTime}"></td>
+    </tr>
+    <tr>
+      <th>場所</th>
+      <td th:text="${recruitment.location}"></td>
+    </tr>
+  </table>
 
   <form th:action="@{/user/apply/regist}" method="post">
-    <input type="hidden" name="recruitId" th:value="${recruitment.recruit_id}">
-    <button type="submit" class="button">この内容で応募する</button>
+    <input type="hidden" name="recruitId" th:value="${recruitment.recruitId}">
+    <button type="submit">応募する</button>
   </form>
 
-  <a th:href="@{/top}" class="button button-secondary">トップページに戻る</a>
+  <p><a href="/login">戻る</a></p>
 </body>
 </html>

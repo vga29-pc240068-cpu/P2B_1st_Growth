@@ -1,0 +1,74 @@
+@charset "UTF-8";
+
+/* 全体の基本設定 */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f8fff8; /* 優しい緑がかった白 */
+  color: #333;
+  font-family: "Noto Sans JP", sans-serif;
+  line-height: 1.6;
+}
+
+/* ページタイトル */
+h1, h2, h3 {
+  color: #2e7d32; /* メインカラーの深緑 */
+  border-left: 6px solid #2e7d32;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+/* リンク */
+a {
+  color: #2e7d32;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+a:hover {
+  color: #1b5e20;
+  text-decoration: underline;
+}
+
+/* ボタン */
+button, .btn {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover, .btn:hover {
+  background-color: #1b5e20;
+}
+
+/* テーブル */
+table {
+  border-collapse: collapse;
+  width: 90%;
+  margin: 20px auto;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+th, td {
+  border: 1px solid #c8e6c9;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+/* ページ全体の余白 */
+.container {
+  padding: 20px;
+  max-width: 800px;
+  margin: auto;
+}

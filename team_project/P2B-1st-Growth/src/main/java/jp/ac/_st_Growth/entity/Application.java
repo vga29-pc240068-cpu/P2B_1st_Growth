@@ -17,11 +17,11 @@ import jakarta.persistence.Table;
 public class Application {
 	@Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_application")
-    @SequenceGenerator(name = "seq_application", sequenceName = "seq_application_id", allocationSize = 1)
+    @SequenceGenerator(name = "seq_application", sequenceName = "seq_apply_id", allocationSize = 1)
     private Integer applyId;
 
 	@ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName ="userId")
+    @JoinColumn(name = "user_id",referencedColumnName ="user_id")
     private User user;
 	
 	@ManyToOne

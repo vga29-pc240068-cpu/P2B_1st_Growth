@@ -31,11 +31,11 @@ public class Chat {
     private  Recruitment recruitment;
     
     @ManyToOne
-   @JoinColumn(name = "receiver_id",referencedColumnName ="userId")
+   @JoinColumn(name = "receiver_id",referencedColumnName ="user_id")
     private  User receiver;
     
    @ManyToOne
-   @JoinColumn(name = "sender_id",referencedColumnName ="userId")
+   @JoinColumn(name = "sender_id",referencedColumnName ="user_id")
    private  User sender;
     
     @Column
