@@ -1,10 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <meta charset="UTF-8">
+    <title>募集項目入力</title>
 </head>
 <body>
+    <h1>募集項目入力</h1>
 
+    <form th:action="@{/recruitment/confirm}" method="post">
+        <p>学校名：<input type="text" th:value="${user?.school?.schoolName}" readonly></p>
+        
+        <p>部活動名：
+            <select name="clubId" required>
+                <option value="">選択してください</option>
+                <option th:each="club : ${user.club}" 
+                        th:value="${club.clubId}" 
+                        th:text="${club.clubName}"></option>
+            </select>
+        </p>
+
+        <p>希望日：<input type="date" name="matchDate" required></p>
+        
+        <p>時間：<input type="time" name="matchTime" required></p>
+        
+        <p>場所：<input type="text" name="location" required placeholder="練習試合場所を入力"></p>
+        
+        <p>人数規模：<input type="number" name="scale" placeholder="名"></p>
+        
+        <p>備考：<textarea name="remarks" rows="3" placeholder="備考があれば入力してください"></textarea></p>
+
+        <button type="reset">クリア</button>
+        <button type="submit">確認画面へ進む</button>
+    </form>
+
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 </body>
 </html>

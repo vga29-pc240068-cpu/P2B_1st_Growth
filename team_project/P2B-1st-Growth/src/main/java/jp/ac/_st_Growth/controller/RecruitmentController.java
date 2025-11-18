@@ -70,6 +70,8 @@ public class RecruitmentController {
             @RequestParam("matchDate") String matchDate,
             @RequestParam("matchTime") String matchTime,
             @RequestParam("location") String location,
+            @RequestParam("scale") Integer scale,
+            @RequestParam(value = "remarks", required = false) String remarks,
             HttpSession session,
             Model model) {
         try {
@@ -92,12 +94,16 @@ public class RecruitmentController {
             model.addAttribute("matchDate", matchDate);
             model.addAttribute("matchTime", matchTime);
             model.addAttribute("location", location);
+            model.addAttribute("scale", scale);
+            model.addAttribute("remarks", remarks);
             
             // Store in session for registration
             session.setAttribute("tempClubId", clubId);
             session.setAttribute("tempMatchDate", matchDate);
             session.setAttribute("tempMatchTime", matchTime);
             session.setAttribute("tempLocation", location);
+            session.setAttribute("tempScale", scale);
+            session.setAttribute("tempRemarks", remarks);
 
             return "user/recruitment/recruitment_confirm";
             
@@ -121,6 +127,8 @@ public class RecruitmentController {
             String matchDateStr = (String) session.getAttribute("tempMatchDate");
             String matchTime = (String) session.getAttribute("tempMatchTime");
             String location = (String) session.getAttribute("tempLocation");
+            Integer scale = (Integer) session.getAttribute("tempScale");
+            String remarks = (String) session.getAttribute("tempRemarks");
 
             // Get user and club
             Optional<User> userOpt = userRepository.findById(userId);
@@ -138,6 +146,8 @@ public class RecruitmentController {
             recruitment.setMatchDate(Date.valueOf(matchDateStr));
             recruitment.setMatchTime(matchTime);
             recruitment.setLocation(location);
+//            recruitment.setScale(scale);
+//            recruitment.setRemarks(remarks);
 
             // Save to database
             recruitmentRepository.save(recruitment);
@@ -147,6 +157,8 @@ public class RecruitmentController {
             session.removeAttribute("tempMatchDate");
             session.removeAttribute("tempMatchTime");
             session.removeAttribute("tempLocation");
+            session.removeAttribute("tempScale");
+            session.removeAttribute("tempRemarks");
 
             redirectAttributes.addFlashAttribute("success", "募集情報が正常に登録されました");
             return "redirect:/recruitment/complete";

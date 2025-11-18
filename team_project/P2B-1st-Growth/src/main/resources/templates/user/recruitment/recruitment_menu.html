@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <meta charset="UTF-8">
+    <title>募集要項メニュー</title>
 </head>
 <body>
+    <h1>募集要項メニュー</h1>
+    <p>募集情報の入力・確認ができます。</p>
 
+    <a th:href="@{/recruitment/input}">募集入力</a><br>
+    <a th:href="@{/recruitment/my-recruitments}">募集確認</a><br>
+    <a th:href="@{/common/top}">トップページへ戻る</a>
+
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 </body>
 </html>

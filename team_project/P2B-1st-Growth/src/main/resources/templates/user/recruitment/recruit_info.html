@@ -1,41 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <meta charset="UTF-8">
+    <title>募集詳細情報</title>
 </head>
 <body>
-	<!-- 募集詳細画面内の応募ボタンセクション -->
-<div class="apply-section">
-  <form th:action="@{/user/apply/check}" method="post">
-    <input type="hidden" name="recruitId" th:value="${recruitment.recruit_id}">
-    <button type="submit" class="apply-button">応募する</button>
-  </form>
-  
-  <a th:href="@{/top}" class="back-button">トップページに戻る</a>
-  
-    <!-- ============================= -->
-  <!-- 🌸 募集詳細画面（recrute_info.html） -->
-  <!-- 役割：DB上の募集1件を表示 -->
-  <!-- ============================= -->
+    <h1>募集詳細情報</h1>
+    <a th:href="@{/recruitment/list}">← 一覧に戻る</a>
 
-  <h1>募集詳細</h1>
-
-  <!-- 募集データが存在する場合 -->
-  <div th:if="${recruitment != null}">
-    <p>ID：<span th:text="${recruitment.recruit_id}"></span></p>
-    <p>ユーザーID：<span th:text="${recruitment.user_id}"></span></p>
-    <p>クラブID：<span th:text="${recruitment.club_id}"></span></p>
-    <p>希望日：<span th:text="${recruitment.match_date}"></span></p>
-    <p>時間：<span th:text="${recruitment.match_time}"></span></p>
+    <h2>基本情報</h2>
+    <p>学校名：<span th:text="${recruitment.club.school.schoolName}"></span></p>
+    <p>部活動名：<span th:text="${recruitment.club.clubName}"></span></p>
+    <p>開催日：<span th:text="${#temporals.format(recruitment.matchDate, 'yyyy年MM月dd日 (E)')}"></span></p>
+    <p>時間：<span th:text="${recruitment.matchTime}"></span></p>
     <p>場所：<span th:text="${recruitment.location}"></span></p>
-  </div>
 
-  <!-- 募集データが存在しない場合 -->
-  <p th:if="${recruitment == null}">データが見つかりませんでした。</p>
+    <h2>募集要項</h2>
+    <p>募集対象：高校生チーム</p>
+    <p>参加人数：15～20名程度</p>
+    <p>競技レベル：中級～上級</p>
+    <p>試合形式：練習試合</p>
 
-  <p><a th:href="@{/top}">トップページへ戻る</a></p>
-</div>
+    <h2>施設情報</h2>
+    <ul>
+        <li>駐車場あり (10台程度)</li>
+        <li>更衣室・シャワー完備</li>
+        <li>飲料水自動販売機あり</li>
+        <li>救急キット完備</li>
+    </ul>
 
+    <h2>連絡先・注意事項</h2>
+    <p>連絡先：<span th:text="${recruitment.user.name} + '先生'"></span></p>
+    <p>電話番号：<span th:text="${recruitment.user.phoneNumber}"></span></p>
+
+    <h3>注意事項</h3>
+    <ul>
+        <li>開始時間の10分前までにご集合ください</li>
+        <li>ユニフォーム、スパイク等は各自でご準備ください</li>
+        <li>雨天の場合は中止となります</li>
+        <li>傷害保険には各自でご加入ください</li>
+    </ul>
+
+    <a th:href="@{/user/apply/check(recruitId=${recruitment.recruitId})}">この募集に応募する</a>
+    <a th:href="@{/recruitment/list}">他の募集を見る</a>
+
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 </body>
 </html>
