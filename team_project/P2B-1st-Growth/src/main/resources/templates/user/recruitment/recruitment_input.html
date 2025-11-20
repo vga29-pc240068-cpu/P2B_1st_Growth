@@ -20,19 +20,24 @@
             </select>
         </p>
 
-        <p>希望日：<input type="date" name="matchDate" required></p>
+        <p>希望日：<input type="date" name="matchDate" placeholder="未定でも可"></p>
         
-        <p>時間：<input type="time" name="matchTime" required></p>
+        <p>時間：<input type="time" name="matchTime" placeholder="未定でも可"></p>
         
-        <p>場所：<input type="text" name="location" required placeholder="練習試合場所を入力"></p>
+        <p>場所：<input type="text" name="location" placeholder="未定でも可"></p>
         
-        <p>人数規模：<input type="number" name="scale" placeholder="名"></p>
+        <p>人数規模：<input type="number" name="scale" placeholder="未定でも可" min="1"></p>
         
         <p>備考：<textarea name="remarks" rows="3" placeholder="備考があれば入力してください"></textarea></p>
 
         <button type="reset">クリア</button>
         <button type="submit">確認画面へ進む</button>
     </form>
+
+    <p style="color: #666; font-size: 0.9em;">
+        ※日時、場所、人数規模は後で決めることもできます。<br>
+        ※部活動名のみ必須入力です。
+    </p>
 
     <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 </body>

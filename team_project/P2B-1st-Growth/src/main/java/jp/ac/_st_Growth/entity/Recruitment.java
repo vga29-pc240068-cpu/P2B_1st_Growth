@@ -27,15 +27,15 @@ public class Recruitment {
     @JoinColumn(name = "club_id",referencedColumnName ="club_id")
     private Club club;
     
-    @Column
+    @Column(name = "match_date", nullable = true) 
     private LocalDate matchDate;
     
-    @Column
+    @Column(name = "match_time", nullable = true)
     private String matchTime;
     
-    @Column
+    @Column(nullable = true) 
     private String location;
-    @Column
+    @Column(nullable = true) 
     private Integer scale; 
     
     @Column(length = 4000)

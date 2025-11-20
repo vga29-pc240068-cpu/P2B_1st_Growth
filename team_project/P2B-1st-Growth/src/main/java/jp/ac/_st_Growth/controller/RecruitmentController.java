@@ -1,6 +1,7 @@
 package jp.ac._st_Growth.controller;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,13 +68,14 @@ public class RecruitmentController {
     @PostMapping("/confirm")
     public String confirmRecruitment(
             @RequestParam("clubId") Integer clubId,
-            @RequestParam("matchDate") String matchDate,
-            @RequestParam("matchTime") String matchTime,
-            @RequestParam("location") String location,
-            @RequestParam("scale") Integer scale,
+            @RequestParam(value = "matchDate", required = false) String matchDate,  // required=false
+            @RequestParam(value = "matchTime", required = false) String matchTime,  // required=false
+            @RequestParam(value = "location", required = false) String location,    // required=false
+            @RequestParam(value = "scale", required = false) String scale,          // required=false
             @RequestParam(value = "remarks", required = false) String remarks,
             HttpSession session,
             Model model) {
+    	  
         try {
             Integer userId = (Integer) session.getAttribute("userId");
             if (userId == null) {
@@ -88,13 +90,16 @@ public class RecruitmentController {
                 model.addAttribute("error", "ユーザーまたは部活動情報が見つかりません");
                 return "user/recruitment/recruitment_input";
             }
+            
+            	
+            
 
             // Add data to model for confirmation page
             model.addAttribute("club", clubOpt.get());
-            model.addAttribute("matchDate", matchDate);
-            model.addAttribute("matchTime", matchTime);
-            model.addAttribute("location", location);
-            model.addAttribute("scale", scale);
+            model.addAttribute("matchDate", matchDate != null ? matchDate : "未定");
+            model.addAttribute("matchTime", matchTime != null ? matchTime : "未定");
+            model.addAttribute("location", location != null ? location : "未定");
+            model.addAttribute("scale", scale != null ? scale : "未定");
             model.addAttribute("remarks", remarks);
             
             // Store in session for registration
@@ -105,6 +110,7 @@ public class RecruitmentController {
             session.setAttribute("tempScale", scale);
             session.setAttribute("tempRemarks", remarks);
 
+            
             return "user/recruitment/recruitment_confirm";
             
         } catch (Exception e) {
@@ -113,7 +119,6 @@ public class RecruitmentController {
         }
     }
 
-    // 募集登録処理 - Recruitment Registration
     @PostMapping("/regist")
     public String registerRecruitment(HttpSession session, RedirectAttributes redirectAttributes) {
         try {
@@ -127,7 +132,7 @@ public class RecruitmentController {
             String matchDateStr = (String) session.getAttribute("tempMatchDate");
             String matchTimeStr = (String) session.getAttribute("tempMatchTime");
             String location = (String) session.getAttribute("tempLocation");
-            Integer scale = (Integer) session.getAttribute("tempScale");
+            String scaleStr = (String) session.getAttribute("tempScale");
             String remarks = (String) session.getAttribute("tempRemarks");
 
             // Get user and club
@@ -139,17 +144,34 @@ public class RecruitmentController {
                 return "redirect:/recruitment/input";
             }
 
+            // String to Integer conversion (optional)
+            Integer scale = null;
+            if (scaleStr != null && !scaleStr.trim().isEmpty()) {
+                try {
+                    scale = Integer.parseInt(scaleStr.trim());
+                } catch (NumberFormatException e) {
+                    // scale က optional ဖြစ်တဲ့အတွက် error မပြတော့ပါ
+                }
+            }
+
             // Create new recruitment
             Recruitment recruitment = new Recruitment();
             recruitment.setUser(userOpt.get());
             recruitment.setClub(clubOpt.get());
-            recruitment.setMatchDate(LocalDate.parse(matchDateStr)); // LocalDate ပြောင်းပါ
-            recruitment.setMatchTime(matchTimeStr); // LocalTime ပြောင်းပါ
-            recruitment.setLocation(location);
-            recruitment.setScale(scale);
-            recruitment.setRemarks(remarks);
-
-
+            
+            // Optional date parsing
+            if (matchDateStr != null && !matchDateStr.trim().isEmpty()) {
+                try {
+                    recruitment.setMatchDate(LocalDate.parse(matchDateStr));
+                } catch (DateTimeParseException e) {
+                    // date က optional ဖြစ်တဲ့အတွက် error မပြတော့ပါ
+                }
+            }
+            
+            recruitment.setMatchTime(matchTimeStr);  // can be null
+            recruitment.setLocation(location);       // can be null
+            recruitment.setScale(scale);             // can be null
+            recruitment.setRemarks(remarks);         // can be null
 
             // Save to database
             recruitmentRepository.save(recruitment);
