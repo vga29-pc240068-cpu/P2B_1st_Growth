@@ -1,6 +1,6 @@
 package jp.ac._st_Growth.controller;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,7 +125,7 @@ public class RecruitmentController {
             // Get temporary data from session
             Integer clubId = (Integer) session.getAttribute("tempClubId");
             String matchDateStr = (String) session.getAttribute("tempMatchDate");
-            String matchTime = (String) session.getAttribute("tempMatchTime");
+            String matchTimeStr = (String) session.getAttribute("tempMatchTime");
             String location = (String) session.getAttribute("tempLocation");
             Integer scale = (Integer) session.getAttribute("tempScale");
             String remarks = (String) session.getAttribute("tempRemarks");
@@ -143,11 +143,13 @@ public class RecruitmentController {
             Recruitment recruitment = new Recruitment();
             recruitment.setUser(userOpt.get());
             recruitment.setClub(clubOpt.get());
-            recruitment.setMatchDate(Date.valueOf(matchDateStr));
-            recruitment.setMatchTime(matchTime);
+            recruitment.setMatchDate(LocalDate.parse(matchDateStr)); // LocalDate ပြောင်းပါ
+            recruitment.setMatchTime(matchTimeStr); // LocalTime ပြောင်းပါ
             recruitment.setLocation(location);
-//            recruitment.setScale(scale);
-//            recruitment.setRemarks(remarks);
+            recruitment.setScale(scale);
+            recruitment.setRemarks(remarks);
+
+
 
             // Save to database
             recruitmentRepository.save(recruitment);

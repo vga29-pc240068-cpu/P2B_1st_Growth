@@ -13,7 +13,7 @@
     <p>希望日：<span th:text="${matchDate}"></span></p>
     <p>時間：<span th:text="${matchTime}"></span></p>
     <p>場所：<span th:text="${location}"></span></p>
-	<p>人数規模：<span th:text="${number}"></span></p>
+	<p>人数規模：<span th:text="${scale}"></span>名</p>
 	<p th:if="${remarks}">備考：<span th:text="${remarks}"></span></p>
     <hr>
 
@@ -27,7 +27,7 @@
         <input type="hidden" name="remarks" th:value="${remarks}">
         
         <button type="submit">この内容で登録する</button>
-        <button type="submit">この内容で登録する</button>
+        
     </form>
     <a th:href="@{/recruitment/input}">修正する</a>
 

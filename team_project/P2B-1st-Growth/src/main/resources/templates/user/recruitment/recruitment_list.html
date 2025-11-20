@@ -17,6 +17,7 @@
         <h3 th:text="${recruitment.club.clubName} + ' - ' + ${recruitment.club.school.schoolName}"></h3>
         <p>日時：<span th:text="${#temporals.format(recruitment.matchDate, 'M月d日(E)')}"></span> <span th:text="${recruitment.matchTime}"></span>〜</p>
         <p>場所：<span th:text="${recruitment.location}"></span></p>
+         <p>人数規模：<span th:text="${recruitment.scale}"></span>名</p> 
         <p th:if="${recruitment.location.contains('駐車場')}">駐車場をご用意しています</p>
         
         <a th:href="@{/recruitment/detail(recruitId=${recruitment.recruitId})}">詳細</a>
