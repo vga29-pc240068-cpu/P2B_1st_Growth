@@ -1,9 +1,7 @@
-package jp.ac._st_Growth.Controller;
+package jp.ac._st_Growth.controller;
 
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,11 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpSession;
 import jp.ac._st_Growth.entity.Application;
 import jp.ac._st_Growth.entity.Recruitment;
 import jp.ac._st_Growth.entity.User;
 import jp.ac._st_Growth.repository.ApplicationsRepository;
-import jp.ac._st_Growth.repository.RecruitmentRepository;
+import jp.ac._st_Growth.repository.RecruitmentsRepository;
 import jp.ac._st_Growth.repository.UsersRepository;
 
 @Controller
@@ -26,7 +25,7 @@ public class ApplyController {
     private ApplicationsRepository applicationsRepository;
     
     @Autowired
-    private RecruitmentRepository recruitmentRepository;
+    private RecruitmentsRepository recruitmentRepository;
     
     @Autowired
     private UsersRepository userRepository;
@@ -37,7 +36,7 @@ public class ApplyController {
     public String confirmApply(@RequestParam("recruitId") Integer recruitId,Model model) {
 
        
-    	//Optionalで1件取得
+     //Optionalで1件取得
         Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
 
         
@@ -63,7 +62,7 @@ public class ApplyController {
 
         try {
             // ログイン中ユーザーのIDを取得
-        	Integer userId = (Integer) session.getAttribute("userId");
+         Integer userId = (Integer) session.getAttribute("userId");
             
             if (userId == null) {
                 model.addAttribute("error", "ログインしてください");
@@ -114,7 +113,7 @@ public class ApplyController {
     @GetMapping("/user/apply/list")
     public String showApplyList(Model model, HttpSession session) {
         try {
-        	Integer userId = (Integer) session.getAttribute("userId");
+         Integer userId = (Integer) session.getAttribute("userId");
             
             if (userId == null) {
                 return "redirect:/login";

@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import jp.ac._st_Growth.entity.Recruitment;
 
-public interface RecruitmentRepository extends JpaRepository<Recruitment, Integer> {
+public interface RecruitmentsRepository extends JpaRepository<Recruitment, Integer> {
 	 
 
 	
@@ -16,7 +16,8 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Intege
 	Optional<Recruitment> findByRecruitId(@Param("recruitId")Integer recruitId);
 //ユーザーIDで募集一覧を取得（例：特定の先生が出した募集一覧）
 	 List<Recruitment> findByUserUserId(@Param("userId") Integer userId);
-	 
+	  
+	  List<Recruitment> findByClubClubId(@Param("clubId") Integer clubId);
 }
 
 

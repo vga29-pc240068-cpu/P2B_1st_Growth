@@ -1,8 +1,6 @@
-package jp.ac._st_Growth.Controller;
+package jp.ac._st_Growth.controller;
 
 import java.util.List;
-
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,10 +8,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import jakarta.servlet.http.HttpSession;
 import jp.ac._st_Growth.entity.Recruitment;
 import jp.ac._st_Growth.entity.User;
 import jp.ac._st_Growth.form.Form;
-import jp.ac._st_Growth.repository.RecruitmentRepository;
+import jp.ac._st_Growth.repository.RecruitmentsRepository;
 import jp.ac._st_Growth.repository.UsersRepository;
 
 @Controller
@@ -23,7 +22,7 @@ public class LoginController {
 	UsersRepository userRepository;
 
 	@Autowired
-	RecruitmentRepository recruitmentRepository;
+	RecruitmentsRepository recruitmentRepository;
 
 	//ログイン画面表示
 	@GetMapping("/login")

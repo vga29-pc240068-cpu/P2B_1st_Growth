@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <meta charset="UTF-8">
+    <title>募集項目入力</title>
+</head>
+<body>
+    <h1>募集項目入力</h1>
+
+    <form th:action="@{/recruitment/confirm}" method="post">
+        <p>学校名：<input type="text" th:value="${user?.school?.schoolName}" readonly></p>
+        
+        <p>部活動名：
+            <select name="clubId" required>
+                <option value="">選択してください</option>
+                <option th:each="club : ${user.club}" 
+                        th:value="${club.clubId}" 
+                        th:text="${club.clubName}"></option>
+            </select>
+        </p>
+
+        <p>希望日：<input type="date" name="matchDate" placeholder="未定でも可"></p>
+        
+        <p>時間：<input type="time" name="matchTime" placeholder="未定でも可"></p>
+        
+        <p>場所：<input type="text" name="location" placeholder="未定でも可"></p>
+        
+        <p>人数規模：<input type="number" name="scale" placeholder="未定でも可" min="1"></p>
+        
+        <p>備考：<textarea name="remarks" rows="3" placeholder="備考があれば入力してください"></textarea></p>
+
+        <button type="reset">クリア</button>
+        <button type="submit">確認画面へ進む</button>
+    </form>
+
+    <p style="color: #666; font-size: 0.9em;">
+        ※日時、場所、人数規模は後で決めることもできます。<br>
+        ※部活動名のみ必須入力です。
+    </p>
+
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+</body>
+</html>

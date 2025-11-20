@@ -1,6 +1,6 @@
 package jp.ac._st_Growth.entity;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,23 +20,36 @@ public class Recruitment {
     private Integer recruitId;
 
 	@ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName ="user_id",nullable=false)
+    @JoinColumn(name = "user_id",referencedColumnName ="user_id")
     private User user;
     
     @ManyToOne
-    @JoinColumn(name = "club_id",referencedColumnName ="club_id",nullable=false)
+    @JoinColumn(name = "club_id",referencedColumnName ="club_id")
     private Club club;
     
-    @Column(name="match_date",nullable=false)
-    private Date matchDate;
+    @Column(name = "match_date", nullable = true) 
+    private LocalDate matchDate;
     
-    @Column(name="match_time",nullable=false)
+    @Column(name = "match_time", nullable = true)
     private String matchTime;
     
-    @Column(name="location",nullable=false)
+    @Column(nullable = true) 
     private String location;
+    @Column(nullable = true) 
+    private Integer scale; 
     
-    public User getUser() {
+    @Column(length = 4000)
+    private String remarks;
+
+	public Integer getRecruitId() {
+		return recruitId;
+	}
+
+	public void setRecruitId(Integer recruitId) {
+		this.recruitId = recruitId;
+	}
+
+	public User getUser() {
 		return user;
 	}
 
@@ -52,21 +65,11 @@ public class Recruitment {
 		this.club = club;
 	}
 
-	public Integer getRecruitId() {
-		return recruitId;
-	}
-
-	public void setRecruitId(Integer recruitId) {
-		this.recruitId = recruitId;
-	}
-
-	
-
-	public Date getMatchDate() {
+	public LocalDate getMatchDate() {
 		return matchDate;
 	}
 
-	public void setMatchDate(Date matchDate) {
+	public void setMatchDate(LocalDate matchDate) {
 		this.matchDate = matchDate;
 	}
 
@@ -86,9 +89,24 @@ public class Recruitment {
 		this.location = location;
 	}
 
+	public Integer getScale() {
+		return scale;
+	}
 
-    
+	public void setScale(Integer scale) {
+		this.scale = scale;
+	}
 
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	
+	
 
 
 }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <meta charset="UTF-8">
+    <title>自分の募集一覧</title>
+</head>
+<body>
+    <h1>自分の募集一覧</h1>
+
+    <div th:if="${recruitments.empty}">
+        <p>現在、募集情報はありません。</p>
+        <a th:href="@{/recruitment/input}">新しい募集を作成</a>
+    </div>
+
+    <div th:each="recruitment : ${recruitments}">
+        <hr>
+        <h3 th:text="${recruitment.club.clubName}"></h3>
+        <p>日時：<span th:text="${#temporals.format(recruitment.matchDate, 'yyyy年MM月dd日')}"></span> <span th:text="${recruitment.matchTime}"></span></p>
+        <p>場所：<span th:text="${recruitment.location}"></span></p>
+         <p>人数規模：<span th:text="${recruitment.scale}"></span>名</p>  
+        <p th:if="${recruitment.remarks}">備考：<span th:text="${recruitment.remarks}"></span></p>
+        
+        <a th:href="@{/recruitment/detail(recruitId=${recruitment.recruitId})}">詳細確認</a>
+        <a th:href="@{/chat/list/possibility}">応募者確認</a>
+    </div>
+
+    <hr>
+    <a th:href="@{/recruitment/menu}">メニューに戻る</a>
+    <a th:href="@{/recruitment/input}">新しい募集を作成</a>
+
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+</body>
+</html>
