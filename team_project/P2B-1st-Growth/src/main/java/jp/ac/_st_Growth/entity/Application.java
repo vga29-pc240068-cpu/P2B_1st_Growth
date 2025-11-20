@@ -31,11 +31,18 @@ public class Application {
     @Column
     private Date applyDate;
     
+	private Integer status;
+	//0=まだ
+	//1=承認済
+	//2=拒否
+    
     public Application() {}
 
 	public Integer getApplyId() {
 		return applyId;
+		
 	}
+	
 
 	public void setApplyId(Integer applyId) {
 		this.applyId = applyId;
@@ -67,6 +74,16 @@ public class Application {
 	public void setApplyDate(LocalDate now) {
         this.applyDate = java.sql.Date.valueOf(now);
     }
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+	
+	
 	
 	}
 

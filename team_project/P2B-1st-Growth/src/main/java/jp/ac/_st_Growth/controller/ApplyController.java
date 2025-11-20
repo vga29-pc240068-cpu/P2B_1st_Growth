@@ -83,6 +83,7 @@ public class ApplyController {
             application.setUser(userOpt.get());
             application.setRecruitment(recruitmentOpt.get());
             application.setApplyDate(new java.sql.Date(System.currentTimeMillis()));
+            application.setStatus(0);
             
             
             // DBへ保存
@@ -127,5 +128,41 @@ public class ApplyController {
             model.addAttribute("error", "応募一覧の取得中にエラーが発生しました: " + e.getMessage());
             return "error";
         }
+        
+    }
+        
+   
+     // 応募承認
+        @PostMapping("/user/apply/approve")
+        public String approve(@RequestParam("applyId") Integer applyId) {
+
+            Optional<Application> appOpt = applicationsRepository.findById(applyId);
+
+            if (appOpt.isPresent()) {
+                Application app = appOpt.get();
+                app.setStatus(1); // 承認
+                applicationsRepository.save(app);
+            }
+
+            return "redirect:/user/apply/possibility?applyId=" + applyId;
+        }
+
+        // 応募拒否
+        @PostMapping("/user/apply/deny")
+        public String deny(@RequestParam("applyId") Integer applyId) {
+
+            Optional<Application> appOpt = applicationsRepository.findById(applyId);
+
+            if (appOpt.isPresent()) {
+                Application app = appOpt.get();
+                app.setStatus(2); // 拒否
+                applicationsRepository.save(app);
+            }
+
+            return "redirect:/user/apply/possibility?applyId=" + applyId;
+            
+    
+
+        
     }
 }

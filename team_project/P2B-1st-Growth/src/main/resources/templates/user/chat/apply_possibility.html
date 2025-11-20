@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>応募確認</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+</head>
+<body>
+
+<h2>応募の承認・拒否</h2>
+
+<div class="apply-box">
+
+    <p>以下の応募内容を確認してください。</p>
+
+    <hr>
+
+    <p>
+<!--		<strong>募集者:	</strong>-->
+<!--     <span th:text="${application.recruitment.club.clubName}"></span>-->
+    </p>
+
+  
+		<p>
+		    <strong>応募者：</strong>
+		    <span th:text="${application.user != null ? application.user.name : '応募者情報なし'}"></span>
+		</p>
+
+    <p>
+        <strong>応募日：</strong>
+        <span th:text="${application.applyDate}"></span>
+    </p>
+
+    <hr>
+
+    <div style="margin-top:20px;">
+
+		<!-- 承認ボタン -->
+		<form th:action="@{'/user/chat/approve'(applyId=${application.applyId})}" method="get" style="display:inline;">
+		    <button type="submit" class="btn-approve">承認する</button>
+		</form>
+
+		<!-- 拒否ボタン -->
+		<form th:action="@{'/user/chat/deny'(applyId=${application.applyId})}" method="get" style="display:inline;">
+		    <button type="submit" class="btn-deny">拒否する</button>
+		</form>
+
+    </div>
+
+</div>
+
+<!--テスト用コマンド-->
+<div style="color:red;">
+    applyId: <span th:text="${application.applyId}"></span>
+</div>
+
+
+<!--テスト用-->
+<span th:text="${application.recruitment != null 
+    ? (application.recruitment.club != null 
+       ? application.recruitment.club.clubName 
+       : 'クラブ未設定') 
+    : '募集情報なし'}"></span>
+
+<!--  フッターの追加-->
+  <div th:replace="common/footer :: footer"></div>
+</body>
+</html>
