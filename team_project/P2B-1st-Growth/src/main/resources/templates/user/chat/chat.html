@@ -1,12 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>チャット</title>
+<link rel="stylesheet" th:href="@{/css/common/common.css}">
 </head>
 <body>
-<!--	フッターの追加-->
-	<div th:replace="common/footer :: footer"></div>
+
+	<!-- タイトル＋承認拒否ボタン -->
+	<div style="display:flex; justify-content:space-between; align-items:center;">
+
+	    <h2>チャットルーム</h2>
+
+	    <!-- 募集者だけ承認/拒否できるように条件 -->
+	    <div th:if="${loginUserId == application.recruitment.user.userId}">
+	        <a th:href="@{/user/chat/approve(applyId=${application.applyId})}">承認</a>
+	        <a th:href="@{/user/chat/deny(applyId=${application.applyId})}">拒否</a>
+	    </div>
+	</div>
+
+    <!-- 応募情報 -->
+    <p>
+		    募集名: <span th:text="${application.recruitment.club.clubName}"></span><br>
+		    応募者: <span th:text="${application.user.name}"></span>
+		
+
+    </p>
+
+    <hr>
+
+    <!-- チャット一覧 -->
+    <div>
+        <div th:each="c:${chats}">
+            <p>
+                <strong th:text="${c.sender.name}"></strong>:
+                <span th:text="${c.message}"></span><br>
+                <small th:text="${c.transmissionDate}"></small>
+            </p>
+            <hr>
+        </div>
+    </div>
+
+    <!-- メッセージ送信 -->
+    <form th:action="@{/user/chat/send}" method="post">
+        <input type="hidden" name="applyId" th:value="${application.applyId}">
+        <textarea name="message" rows="3" cols="40" placeholder="メッセージを入力"></textarea><br>
+        <button type="submit">送信</button>
+    </form>
+
+    <!-- フッターの追加 -->
+    <div th:replace="common/footer :: footer"></div>
 
 </body>
 </html>
