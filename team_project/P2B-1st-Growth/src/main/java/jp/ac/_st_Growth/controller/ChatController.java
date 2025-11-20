@@ -58,7 +58,8 @@ public class ChatController {
       //承認チェックを入れる　未確認→確認ページ 
         if (application.getStatus() == 0) {
             model.addAttribute("message", "この応募はまだ承認されていません。");
-            return "user/chat/apply_possibility";  // ← 未承認ビュー（apply_possibility.html）
+            model.addAttribute("application", application); 
+            return "redirect:/user/chat/apply_possibility?applyId=" + applyId; // ← 未承認ビュー（apply_possibility.html）
         }
 
        //拒否された場合
@@ -132,8 +133,8 @@ public class ChatController {
     }
 
 
- // ★ここに追加！！！★
-    @GetMapping("/user/chat/apply_possibillity")
+ // ここに追加
+    @GetMapping("/user/chat/apply_possibility")
     public String applyPossibility(@RequestParam("applyId") Integer applyId, Model model) {
 
         Application application = applicationsRepository
@@ -147,7 +148,7 @@ public class ChatController {
 
         model.addAttribute("application", application);
 
-        return "user/chat/apply_possibillity";  
+        return "user/chat/apply_possibility"; 
     }
 
     
@@ -163,6 +164,7 @@ public class ChatController {
         		.findByUserUserIdOrRecruitmentUserUserId(userId, userId);
 
         model.addAttribute("applications", applications);
+        model.addAttribute("loginUserId", userId); // ここ追加
 
         return "user/chat/list_chat";
     }

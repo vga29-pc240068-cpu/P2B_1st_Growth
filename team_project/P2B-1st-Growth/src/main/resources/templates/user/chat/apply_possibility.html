@@ -16,14 +16,15 @@
     <hr>
 
     <p>
-		<strong>募集者:	</strong>
-     <span th:text="${application.recruitment.club.clubName}"></span>-->
+<!--		<strong>募集者:	</strong>-->
+<!--     <span th:text="${application.recruitment.club.clubName}"></span>-->
     </p>
 
-    <p>
-        <strong>応募者：</strong>
-        <span th:text="${application.user.name}"></span>
-    </p>
+  
+		<p>
+		    <strong>応募者：</strong>
+		    <span th:text="${application.user != null ? application.user.name : '応募者情報なし'}"></span>
+		</p>
 
     <p>
         <strong>応募日：</strong>
@@ -34,15 +35,13 @@
 
     <div style="margin-top:20px;">
 
-        <!-- 承認ボタン -->
-		<form th:action="@{/user/chat/approve}" method="post" style="display:inline;">
-		    <input type="hidden" name="applyId" th:value="${application.applyId}">
+		<!-- 承認ボタン -->
+		<form th:action="@{'/user/chat/approve'(applyId=${application.applyId})}" method="get" style="display:inline;">
 		    <button type="submit" class="btn-approve">承認する</button>
 		</form>
 
-		<!--拒否ボタン-->
-		<form th:action="@{/user/chat/deny}" method="post" style="display:inline;">
-		    <input type="hidden" name="applyId" th:value="${application.applyId}">
+		<!-- 拒否ボタン -->
+		<form th:action="@{'/user/chat/deny'(applyId=${application.applyId})}" method="get" style="display:inline;">
 		    <button type="submit" class="btn-deny">拒否する</button>
 		</form>
 
@@ -50,11 +49,18 @@
 
 </div>
 
-<!--<span th:text="${application.recruitment != null -->
-<!--    ? (application.recruitment.club != null -->
-<!--        ? application.recruitment.club.clubName -->
-<!--        : 'クラブ未設定') -->
-<!--    : '募集情報なし'}"></span>-->
+<!--テスト用コマンド-->
+<div style="color:red;">
+    applyId: <span th:text="${application.applyId}"></span>
+</div>
+
+
+<!--テスト用-->
+<span th:text="${application.recruitment != null 
+    ? (application.recruitment.club != null 
+       ? application.recruitment.club.clubName 
+       : 'クラブ未設定') 
+    : '募集情報なし'}"></span>
 
 <!--  フッターの追加-->
   <div th:replace="common/footer :: footer"></div>
