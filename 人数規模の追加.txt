@@ -1,0 +1,142 @@
+//人数規模の追加
+ALTER TABLE recruitments ADD scale NUMBER;
+
+//備考
+ALTER TABLE recruitments ADD remarks VARCHAR2(4000);
+
+ALTER TABLE recruitments DROP COLUMN scale;
+
+ALTER TABLE recruitments ADD purpose VARCHAR2(50);
+
+ALTER TABLE recruitments ADD skill_level VARCHAR2(50);
+
+ALTER TABLE recruitments ADD conditions VARCHAR2(4000);
+
+CREATE SEQUENCE RECRUIT_SEQ
+ START WITH 1
+ INCREMENT BY 1
+ NOMAXVALUE;
+
+SELECT MAX(RECRUIT_ID) FROM RECRUITMENTS;
+
+DROP SEQUENCE RECRUIT_SEQ;
+
+CREATE SEQUENCE RECRUIT_SEQ
+  START WITH 2
+  INCREMENT BY 1;
+  
+
+
+
+CREATE TABLE CLUB_MASTER (
+    CLUB_ID NUMBER PRIMARY KEY,
+    CLUB_NAME VARCHAR2(50) NOT NULL
+);
+
+INSERT INTO CLUB_MASTER VALUES (1, 'サッカー部');
+INSERT INTO CLUB_MASTER VALUES (2, '野球部');
+INSERT INTO CLUB_MASTER VALUES (3, 'バスケ部');
+
+SELECT * FROM CLUB_MASTER;
+
+ALTER TABLE USERS ADD (SCHOOL VARCHAR2(100));
+
+ALTER TABLE USERS DROP COLUMN SCHOOL_ID;
+
+SELECT * FROM FirstGrowth.CLUB_MASTER;
+
+SELECT * FROM FIRSTGROWTH.CLUB_MASTER;
+
+
+SELECT constraint_name, table_name, r_constraint_name
+FROM user_constraints
+WHERE table_name = 'USERS'
+  AND constraint_type = 'R';
+  
+  SELECT table_name
+FROM user_constraints
+WHERE constraint_name = 'SYS_C008403';
+
+SELECT constraint_name, r_constraint_name, delete_rule
+FROM user_constraints
+WHERE table_name = 'USERS'
+AND constraint_type = 'R';
+
+SELECT constraint_name, table_name, column_name
+FROM user_cons_columns
+WHERE constraint_name = 'SYS_C008393';
+
+ALTER TABLE USERS
+DROP CONSTRAINT SYS_C008403;
+
+ALTER TABLE USERS
+ADD CONSTRAINT fk_users_club
+FOREIGN KEY (club_id)
+REFERENCES CLUB_MASTER (club_id);
+
+SELECT user_id, name, email, phone_number, school, club_id
+FROM USERS
+ORDER BY user_id DESC;
+
+
+
+
+DROP SEQUENCE seq_user_id;
+
+CREATE SEQUENCE seq_user_id
+  START WITH 2
+  INCREMENT BY 1
+  NOCACHE;
+
+DELETE FROM USERS WHERE USER_ID = 3;
+COMMIT;
+
+SELECT * FROM APPLICATIONS;
+
+SELECT * FROM APPLICATIONS;
+
+SELECT * FROM USERS;
+
+SELECT * FROM Applications WHERE APPLY_ID = 6;
+
+SELECT * FROM applications WHERE user_id = {userId};
+SELECT * FROM applications WHERE apply_id = {applyId};
+
+SELECT * FROM application WHERE apply_id = 6;
+
+SELECT APPLY_ID, USER_ID FROM Applications WHERE APPLY_ID = 6;
+
+SELECT * FROM Users WHERE USER_ID = 2;
+
+DELETE FROM applications;
+COMMIT;
+
+SELECT * FROM RECRUITMENTS ORDER BY RECRUIT_ID;
+
+DELETE FROM RECRUITMENTS;
+COMMIT;
+
+DROP SEQUENCE RECRUIT_SEQ;
+
+CREATE SEQUENCE RECRUIT_SEQ
+ START WITH 1
+ INCREMENT BY 1;
+ 
+ SELECT RECRUIT_SEQ.nextval FROM dual;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
