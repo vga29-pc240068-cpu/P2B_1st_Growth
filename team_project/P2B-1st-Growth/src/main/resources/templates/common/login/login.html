@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<link rel="stylesheet" th:href="@{/css/common/common.css}">
-
-  <meta charset="UTF-8">
-  <title>ログイン / 新規登録</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <meta charset="UTF-8">
+    <title>ログイン / 新規登録</title>
 </head>
 <body>
     <h1>ログイン</h1>
 
-  <form th:action="@{/login}" method="post">
-    <p>メールアドレス：<input type="email" name="email" required></p>
-    <p>パスワード：<input type="password" name="password" required></p>
-    <button type="submit">ログイン</button>
-  </form>
+    <form th:action="@{/login}" method="post">
+        <p>メールアドレス：<input type="email" name="email" required></p>
+        <p>パスワード：<input type="password" name="password" required></p>
+        <button type="submit">ログイン</button>
+    </form>
 
-    <button>新規登録</button>
+    <!-- ★ 新規登録ボタン（リンク付き） -->
+	<form th:action="@{/register}" method="get">
+	    <button type="submit">新規登録</button>
+	</form>
 
-  <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 </body>
 </html>

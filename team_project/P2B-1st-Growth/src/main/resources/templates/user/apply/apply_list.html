@@ -2,7 +2,6 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<link rel="stylesheet" th:href="@{/css/common/common.css}">
-
   <meta charset="UTF-8">
   <title>応募一覧</title>
 </head>
@@ -18,6 +17,7 @@
         <th>希望日</th>
         <th>時間</th>
         <th>場所</th>
+        <th>操作</th>
       </tr>
     </thead>
     <tbody>
@@ -28,6 +28,13 @@
         <td th:text="${a.recruitment.matchDate}"></td>
         <td th:text="${a.recruitment.matchTime}"></td>
         <td th:text="${a.recruitment.location}"></td>
+
+        <!-- ★ ここ追加（応募確認画面へ） -->
+        <td>
+            <a th:href="@{/user/chat/apply_possibility(applyId=${a.applyId})}">
+                確認する
+            </a>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -37,8 +44,8 @@
   <p>
     <a href="/login">トップに戻る</a>
   </p>
-  
-<!--  フッターの追加-->
+
+<!--  フッター-->
   <div th:replace="common/footer :: footer"></div>
 
 </body>

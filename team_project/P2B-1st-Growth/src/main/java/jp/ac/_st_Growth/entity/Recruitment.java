@@ -15,9 +15,10 @@ import jakarta.persistence.Table;
 @Table(name = "recruitments")
 public class Recruitment {
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_recruitment")
-    @SequenceGenerator(name = "seq_recruitment", sequenceName = "seq_recruit_id", allocationSize = 1)
-    private Integer recruitId;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RECRUIT_SEQ")
+	@SequenceGenerator(name = "RECRUIT_SEQ", sequenceName = "RECRUIT_SEQ", allocationSize = 1)
+	@Column(name = "RECRUIT_ID")
+	private Integer recruitId;
 
 	@ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName ="user_id")
@@ -27,17 +28,32 @@ public class Recruitment {
     @JoinColumn(name = "club_id",referencedColumnName ="club_id")
     private Club club;
     
+    //希望日時
     @Column(name = "match_date", nullable = true) 
     private LocalDate matchDate;
     
+    //希望時間
     @Column(name = "match_time", nullable = true)
     private String matchTime;
     
+    //希望場所
     @Column(nullable = true) 
     private String location;
-    @Column(nullable = true) 
-    private Integer scale; 
     
+    //-----------------------------追記
+    //募集の目的
+    @Column(nullable=true)
+    private String purpose;
+    
+    //活動レベル
+    @Column(name="skill_level",nullable=true)
+    private String skilllevel;
+    
+    //参加条件
+    @Column(nullable=true)
+    private String conditions;
+    
+    //備考
     @Column(length = 4000)
     private String remarks;
 
@@ -89,13 +105,6 @@ public class Recruitment {
 		this.location = location;
 	}
 
-	public Integer getScale() {
-		return scale;
-	}
-
-	public void setScale(Integer scale) {
-		this.scale = scale;
-	}
 
 	public String getRemarks() {
 		return remarks;
@@ -104,6 +113,31 @@ public class Recruitment {
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
+
+	public String getPurpose() {
+		return purpose;
+	}
+
+	public void setPurpose(String purpose) {
+		this.purpose = purpose;
+	}
+
+	public String getSkill_level() {
+		return skilllevel;
+	}
+
+	public void setSkill_level(String skill_level) {
+		this.skilllevel = skill_level;
+	}
+
+	public String getConditions() {
+		return conditions;
+	}
+
+	public void setConditions(String conditions) {
+		this.conditions = conditions;
+	}
+	
 
 	
 	

@@ -32,13 +32,13 @@ public class User {
     @Column(name="password",nullable=false)
     private String password;
     
-    @ManyToOne
-    @JoinColumn(name = "school_id",referencedColumnName ="school_id",nullable=false)
-    private School school;
+    @Column(name="school",nullable=false)
+    private String school;
+    
     
     @ManyToOne
     @JoinColumn(name = "club_id",referencedColumnName ="club_id",nullable=false)
-    private Club club;
+    private ClubMaster club;
 
     public Integer getUserId() {
 		return userId;
@@ -68,19 +68,19 @@ public class User {
 		return phoneNumber;
 	}
 
-	public School getSchool() {
+	public String getSchool() {
 		return school;
 	}
 
-	public void setSchool(School school) {
+	public void setSchool(String school) {
 		this.school = school;
 	}
 
-	public Club getClub() {
+	public ClubMaster getClub() {
 		return club;
 	}
 
-	public void setClub(Club club) {
+	public void setClub(ClubMaster club) {
 		this.club = club;
 	}
 
@@ -95,6 +95,8 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
+
 
 	
 

@@ -16,17 +16,22 @@ import jakarta.persistence.Table;
 @Table(name = "Applications")
 public class Application {
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_application")
-    @SequenceGenerator(name = "seq_application", sequenceName = "seq_apply_id", allocationSize = 1)
-    private Integer applyId;
+	@Column(name = "APPLY_ID")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_application")
+	@SequenceGenerator(name = "seq_application", sequenceName = "seq_apply_id", allocationSize = 1)
+	private Integer applyId;
+
 
 	@ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName ="user_id")
-    private User user;
-	
+	@JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID")
+	private User user;
+
 	@ManyToOne
-    @JoinColumn(name = "recruit_id",referencedColumnName ="recruitId")
-    private  Recruitment recruitment;
+	@JoinColumn(name = "RECRUIT_ID", referencedColumnName = "RECRUIT_ID")
+	private Recruitment recruitment;
+
+
+
 	
     @Column
     private Date applyDate;

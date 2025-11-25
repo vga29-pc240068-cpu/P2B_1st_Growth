@@ -3,6 +3,8 @@ package jp.ac._st_Growth.controller;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jakarta.servlet.http.HttpSession;
 import jp.ac._st_Growth.entity.Application;
 import jp.ac._st_Growth.entity.Recruitment;
 import jp.ac._st_Growth.entity.User;
@@ -110,31 +111,37 @@ public class ApplyController {
    
     // 応募一覧表示
     
+ // 応募一覧表示
     @GetMapping("/user/apply/list")
-    public String showApplyList(Model model, HttpSession session) {
+    public String ApplyList(Model model, HttpSession session) {
         try {
-         Integer userId = (Integer) session.getAttribute("userId");
-            
+            Integer userId = (Integer) session.getAttribute("userId");
+
+            // userIdが取得できているかログに出力
+            System.out.println("userId: " + userId);  // ここにログ出力を追加
+
             if (userId == null) {
-                return "redirect:/login";
+                return "redirect:/login";  // userIdがnullならログイン画面にリダイレクト
             }
-            
+
+            // userIdに基づいて応募データを取得
             List<Application> applications = applicationsRepository.findByUserUserId(userId);
-            model.addAttribute("applications", applications);
-            
-            return "user/apply/apply_list";
-            
+            model.addAttribute("applications", applications);  // 取得した応募データをモデルにセット
+
+            return "user/apply/apply_list";  // 応募一覧ページに遷移
+
         } catch (Exception e) {
             model.addAttribute("error", "応募一覧の取得中にエラーが発生しました: " + e.getMessage());
-            return "error";
+            return "error";  // エラー発生時の処理
         }
+    
         
-    }
-        
-   
+    }  
      // 応募承認
-        @PostMapping("/user/apply/approve")
+        @GetMapping("/user/apply/approve")
         public String approve(@RequestParam("applyId") Integer applyId) {
+        	
+        	 System.out.println("applyId: " + applyId);  // ここでログ確認
 
             Optional<Application> appOpt = applicationsRepository.findById(applyId);
 
@@ -148,7 +155,7 @@ public class ApplyController {
         }
 
         // 応募拒否
-        @PostMapping("/user/apply/deny")
+        @GetMapping("/user/apply/deny")
         public String deny(@RequestParam("applyId") Integer applyId) {
 
             Optional<Application> appOpt = applicationsRepository.findById(applyId);
@@ -161,8 +168,31 @@ public class ApplyController {
 
             return "redirect:/user/apply/possibility?applyId=" + applyId;
             
-    
 
-        
+             
     }
+        
+     // 応募内容確認（承認・拒否画面）
+        @GetMapping("/user/apply/possibility")
+        public String ApplyPossibility(@RequestParam("applyId") Integer applyId, Model model) {
+
+            Optional<Application> appOpt = applicationsRepository.findById(applyId);
+
+            if (appOpt.isEmpty()) {
+                model.addAttribute("error", "応募情報が見つかりません");
+                return "error";
+            }
+
+            model.addAttribute("application", appOpt.get());
+
+            return "user/chat/apply_possibility";
+
+
+ 
+
+
+
+
+        }
+
 }

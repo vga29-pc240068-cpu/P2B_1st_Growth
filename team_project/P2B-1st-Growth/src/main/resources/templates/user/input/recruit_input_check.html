@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>募集内容の確認</title>
+</head>
+<body>
+
+<h2>募集内容の確認</h2>
+
+<p>部活動：<span th:text="${club.clubName}"></span></p>
+<p>希望日：<span th:text="${matchDate}"></span></p>
+<p>時間：<span th:text="${matchTime}"></span></p>
+<p>場所：<span th:text="${location}"></span></p>
+
+<p>募集の目的：<span th:text="${purpose}"></span></p>
+<p>活動レベル：<span th:text="${skillLevel}"></span></p>
+<p>参加条件：<span th:text="${conditions}"></span></p>
+
+<p>備考：<span th:text="${remarks}"></span></p>
+
+<form th:action="@{/recruitment/regist}" method="post">
+    <button type="submit">この内容で登録する</button>
+</form>
+
+<form th:action="@{/recruitment/input}" method="get">
+    <button type="submit">修正する</button>
+</form>
+
+<!-- フッター -->
+<div th:replace="common/footer :: footer"></div>
+
+</body>
+</html>

@@ -5,6 +5,8 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpSession;
 import jp.ac._st_Growth.entity.Club;
 import jp.ac._st_Growth.entity.Recruitment;
 import jp.ac._st_Growth.entity.User;
@@ -28,241 +29,176 @@ public class RecruitmentController {
 
     @Autowired
     private RecruitmentsRepository recruitmentRepository;
-    
+
     @Autowired
     private UsersRepository userRepository;
-    
+
     @Autowired
     private ClubsRepository clubsRepository;
 
-    // 募集項目選択画面 - Recruitment Menu Screen
-    @GetMapping("/menu")
-    public String showRecruitmentMenu() {
-        return "user/recruitment/recruitment_menu";
-    }
-
-    // 募集入力画面 - Recruitment Input Form
+ // 入力画面
     @GetMapping("/input")
     public String showRecruitmentInputForm(HttpSession session, Model model) {
-        try {
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (userId == null) {
-                return "redirect:/login";
-            }
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
 
-            // Get user info for display
-            Optional<User> userOpt = userRepository.findById(userId);
-            if (userOpt.isPresent()) {
-                model.addAttribute("user", userOpt.get());
-            }
+        userRepository.findById(userId).ifPresent(u -> model.addAttribute("user", u));
 
-            return "user/recruitment/recruitment_input";
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "画面の読み込みに失敗しました");
-            return "user/recruitment/recruitment_input";
-        }
+        // ★ ここ追加！クラブ一覧をHTMLへ渡す
+        model.addAttribute("clubs", clubsRepository.findAll());
+
+        return "user/input/recruit_input";
     }
 
-    // 募集入力確認画面 - Recruitment Confirmation Screen
+
+
+    // 入力確認画面
     @PostMapping("/confirm")
     public String confirmRecruitment(
             @RequestParam("clubId") Integer clubId,
-            @RequestParam(value = "matchDate", required = false) String matchDate,  // required=false
-            @RequestParam(value = "matchTime", required = false) String matchTime,  // required=false
-            @RequestParam(value = "location", required = false) String location,    // required=false
-            @RequestParam(value = "scale", required = false) String scale,          // required=false
+            @RequestParam(value = "matchDate", required = false) String matchDate,
+            @RequestParam(value = "matchTime", required = false) String matchTime,
+            @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "remarks", required = false) String remarks,
+
+            // ★ 新規追加項目
+            @RequestParam(value = "purpose", required = false) String purpose,
+            @RequestParam(value = "skill_level", required = false) String skillLevel,
+            @RequestParam(value = "conditions", required = false) String conditions,
+
             HttpSession session,
             Model model) {
-    	  
-        try {
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (userId == null) {
-                return "redirect:/login";
-            }
 
-            // Get user and club information for display
-            Optional<User> userOpt = userRepository.findById(userId);
-            Optional<Club> clubOpt = clubsRepository.findByClubId(clubId);
-            
-            if (userOpt.isEmpty() || clubOpt.isEmpty()) {
-                model.addAttribute("error", "ユーザーまたは部活動情報が見つかりません");
-                return "user/recruitment/recruitment_input";
-            }
-            
-            	
-            
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
 
-            // Add data to model for confirmation page
-            model.addAttribute("club", clubOpt.get());
-            model.addAttribute("matchDate", matchDate != null ? matchDate : "未定");
-            model.addAttribute("matchTime", matchTime != null ? matchTime : "未定");
-            model.addAttribute("location", location != null ? location : "未定");
-            model.addAttribute("scale", scale != null ? scale : "未定");
-            model.addAttribute("remarks", remarks);
-            
-            // Store in session for registration
-            session.setAttribute("tempClubId", clubId);
-            session.setAttribute("tempMatchDate", matchDate);
-            session.setAttribute("tempMatchTime", matchTime);
-            session.setAttribute("tempLocation", location);
-            session.setAttribute("tempScale", scale);
-            session.setAttribute("tempRemarks", remarks);
+        Optional<User> userOpt = userRepository.findById(userId);
+        Optional<Club> clubOpt = clubsRepository.findByClubId(clubId);
 
-            
-            return "user/recruitment/recruitment_confirm";
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "確認画面の読み込みに失敗しました");
-            return "user/recruitment/recruitment_input";
+        if (userOpt.isEmpty() || clubOpt.isEmpty()) {
+            model.addAttribute("error", "ユーザーまたは部活動情報が見つかりません");
+            return "user/input/recruit_input";
         }
+
+        model.addAttribute("club", clubOpt.get());
+        model.addAttribute("matchDate", matchDate != null ? matchDate : "未定");
+        model.addAttribute("matchTime", matchTime != null ? matchTime : "未定");
+        model.addAttribute("location", location != null ? location : "未定");
+        model.addAttribute("remarks", remarks);
+
+        // ★ 新項目をモデルに渡す
+        model.addAttribute("purpose", purpose);
+        model.addAttribute("skillLevel", skillLevel);
+        model.addAttribute("conditions", conditions);
+
+        // ★ セッションにも保存
+        session.setAttribute("tempClubId", clubId);
+        session.setAttribute("tempMatchDate", matchDate);
+        session.setAttribute("tempMatchTime", matchTime);
+        session.setAttribute("tempLocation", location);
+        session.setAttribute("tempRemarks", remarks);
+
+        session.setAttribute("tempPurpose", purpose);
+        session.setAttribute("tempSkillLevel", skillLevel);
+        session.setAttribute("tempConditions", conditions);
+
+        return "user/input/recruit_input_check";
     }
 
+
+    // 登録処理
     @PostMapping("/regist")
     public String registerRecruitment(HttpSession session, RedirectAttributes redirectAttributes) {
-        try {
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (userId == null) {
-                return "redirect:/login";
-            }
 
-            // Get temporary data from session
-            Integer clubId = (Integer) session.getAttribute("tempClubId");
-            String matchDateStr = (String) session.getAttribute("tempMatchDate");
-            String matchTimeStr = (String) session.getAttribute("tempMatchTime");
-            String location = (String) session.getAttribute("tempLocation");
-            String scaleStr = (String) session.getAttribute("tempScale");
-            String remarks = (String) session.getAttribute("tempRemarks");
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
 
-            // Get user and club
-            Optional<User> userOpt = userRepository.findById(userId);
-            Optional<Club> clubOpt = clubsRepository.findByClubId(clubId);
-            
-            if (userOpt.isEmpty() || clubOpt.isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "ユーザーまたは部活動情報が見つかりません");
-                return "redirect:/recruitment/input";
-            }
+        Integer clubId = (Integer) session.getAttribute("tempClubId");
+        String matchDateStr = (String) session.getAttribute("tempMatchDate");
+        String matchTimeStr = (String) session.getAttribute("tempMatchTime");
+        String location = (String) session.getAttribute("tempLocation");
+        String remarks = (String) session.getAttribute("tempRemarks");
 
-            // String to Integer conversion (optional)
-            Integer scale = null;
-            if (scaleStr != null && !scaleStr.trim().isEmpty()) {
-                try {
-                    scale = Integer.parseInt(scaleStr.trim());
-                } catch (NumberFormatException e) {
-                    // scale က optional ဖြစ်တဲ့အတွက် error မပြတော့ပါ
-                }
-            }
+        // ★ 新項目を受け取る
+        String purpose = (String) session.getAttribute("tempPurpose");
+        String skillLevel = (String) session.getAttribute("tempSkillLevel");
+        String conditions = (String) session.getAttribute("tempConditions");
 
-            // Create new recruitment
-            Recruitment recruitment = new Recruitment();
-            recruitment.setUser(userOpt.get());
-            recruitment.setClub(clubOpt.get());
-            
-            // Optional date parsing
-            if (matchDateStr != null && !matchDateStr.trim().isEmpty()) {
-                try {
-                    recruitment.setMatchDate(LocalDate.parse(matchDateStr));
-                } catch (DateTimeParseException e) {
-                    // date က optional ဖြစ်တဲ့အတွက် error မပြတော့ပါ
-                }
-            }
-            
-            recruitment.setMatchTime(matchTimeStr);  // can be null
-            recruitment.setLocation(location);       // can be null
-            recruitment.setScale(scale);             // can be null
-            recruitment.setRemarks(remarks);         // can be null
+        Optional<User> userOpt = userRepository.findById(userId);
+        Optional<Club> clubOpt = clubsRepository.findByClubId(clubId);
 
-            // Save to database
-            recruitmentRepository.save(recruitment);
-
-            // Clear temporary session data
-            session.removeAttribute("tempClubId");
-            session.removeAttribute("tempMatchDate");
-            session.removeAttribute("tempMatchTime");
-            session.removeAttribute("tempLocation");
-            session.removeAttribute("tempScale");
-            session.removeAttribute("tempRemarks");
-
-            redirectAttributes.addFlashAttribute("success", "募集情報が正常に登録されました");
-            return "redirect:/recruitment/complete";
-            
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "募集登録に失敗しました: " + e.getMessage());
+        if (userOpt.isEmpty() || clubOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "データ取得に失敗しました");
             return "redirect:/recruitment/input";
         }
+
+        Recruitment recruitment = new Recruitment();
+        recruitment.setUser(userOpt.get());
+        recruitment.setClub(clubOpt.get());
+
+        if (matchDateStr != null && !matchDateStr.isBlank()) {
+            try {
+                recruitment.setMatchDate(LocalDate.parse(matchDateStr));
+            } catch (DateTimeParseException e) {}
+        }
+
+        recruitment.setMatchTime(matchTimeStr);
+        recruitment.setLocation(location);
+        recruitment.setRemarks(remarks);
+
+        // ★ 新項目をセット
+        recruitment.setPurpose(purpose);
+        recruitment.setSkill_level(skillLevel);
+        recruitment.setConditions(conditions);
+
+        recruitmentRepository.save(recruitment);
+
+        // セッション削除
+        session.removeAttribute("tempClubId");
+        session.removeAttribute("tempMatchDate");
+        session.removeAttribute("tempMatchTime");
+        session.removeAttribute("tempLocation");
+        session.removeAttribute("tempRemarks");
+
+        session.removeAttribute("tempPurpose");
+        session.removeAttribute("tempSkillLevel");
+        session.removeAttribute("tempConditions");
+
+        return "user/input/recruit_input_complete";
     }
 
-    // 募集登録完了画面 - Recruitment Completion Screen
-    @GetMapping("/complete")
-    public String showRecruitmentComplete() {
-        return "user/recruitment/recruitment_complete";
-    }
-
-    // 募集一覧表示 - Recruitment List
+ //  自分の募集一覧表示
     @GetMapping("/list")
-    public String showRecruitmentList(Model model, HttpSession session) {
-        try {
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (userId == null) {
-                return "redirect:/login";
-            }
+    public String MyRecruitList(HttpSession session, Model model) {
 
-            // Get all recruitments
-            List<Recruitment> recruitments = recruitmentRepository.findAll();
-            model.addAttribute("recruitments", recruitments);
-            
-            return "user/recruitment/recruitment_list";
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "募集一覧の読み込みに失敗しました");
-            return "user/recruitment/recruitment_list";
-        }
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        // ログインしているユーザーの募集だけ取得
+        List<Recruitment> recruitments =
+                recruitmentRepository.findByUserUserId(userId);
+
+        model.addAttribute("recruitments", recruitments);
+        return "user/input/recruit_list";  // ← 新しく作るHTMLへ
     }
-
-    // 募集詳細表示 - Recruitment Details
+    
+    
+ // ★ 募集の詳細表示
     @GetMapping("/detail")
-    public String showRecruitmentDetail(@RequestParam("recruitId") Integer recruitId, 
-                                      Model model, 
-                                      HttpSession session) {
-        try {
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (userId == null) {
-                return "redirect:/login";
-            }
+    public String RecruitDetail(
+            @RequestParam("id") Integer id,
+            Model model
+    ) {
 
-            Optional<Recruitment> recruitmentOpt = recruitmentRepository.findByRecruitId(recruitId);
-            if (recruitmentOpt.isPresent()) {
-                model.addAttribute("recruitment", recruitmentOpt.get());
-                return "user/recruitment/recruitment_detail";
-            }
-            
-            model.addAttribute("error", "募集情報が見つかりません");
-            return "redirect:/recruitment/list";
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "詳細の読み込みに失敗しました");
+        Optional<Recruitment> opt = recruitmentRepository.findById(id);
+
+        if (opt.isEmpty()) {
             return "redirect:/recruitment/list";
         }
+
+        model.addAttribute("recruitment", opt.get());
+        return "user/input/recruit_detail"; 
     }
 
-    // 募集確認画面 (自分の募集) - My Recruitments
-    @GetMapping("/my-recruitments")
-    public String showMyRecruitments(HttpSession session, Model model) {
-        try {
-            Integer userId = (Integer) session.getAttribute("userId");
-            if (userId == null) {
-                return "redirect:/login";
-            }
 
-            List<Recruitment> myRecruitments = recruitmentRepository.findByUserUserId(userId);
-            model.addAttribute("recruitments", myRecruitments);
-            
-            return "user/recruitment/my_recruitments";
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "募集情報の読み込みに失敗しました");
-            return "user/recruitment/my_recruitments";
-        }
-    }
 }

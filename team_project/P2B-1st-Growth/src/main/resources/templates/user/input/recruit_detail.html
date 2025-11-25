@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>募集詳細</title>
+</head>
+<body>
+
+<h2>募集の詳細</h2>
+
+<table border="1">
+    <tr><th>ID</th><td th:text="${recruitment.recruitId}"></td></tr>
+    <tr><th>クラブ</th><td th:text="${recruitment.club.clubName}"></td></tr>
+    <tr><th>希望日</th><td th:text="${recruitment.matchDate}"></td></tr>
+    <tr><th>時間</th><td th:text="${recruitment.matchTime}"></td></tr>
+    <tr><th>場所</th><td th:text="${recruitment.location}"></td></tr>
+    <tr><th>目的</th><td th:text="${recruitment.purpose}"></td></tr>
+	<tr><th>活動レベル</th>	<td th:text="${recruitment.skill_level}"></td></tr>
+    <tr><th>参加条件</th><td th:text="${recruitment.conditions}"></td></tr>
+    <tr><th>備考</th><td th:text="${recruitment.remarks}"></td></tr>
+</table>
+
+<br>
+
+<a th:href="@{/recruitment/list}">
+    <button>一覧へ戻る</button>
+</a>
+
+<!-- フッター -->
+<div th:replace="common/footer :: footer"></div>
+
+</body>
+</html>

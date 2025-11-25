@@ -26,3 +26,127 @@ DESC RECRUITMENTS;
 INSERT INTO RECRUITMENTS (RECRUIT_ID, USER_ID, CLUB_ID,MATCH_DATE, MATCH_TIME, LOCATION)
 VALUES (1, 1, 1, '2025-11-20', '15:00', '東京第一高校グラウンド');
 COMMIT;
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+2025/11/20-21
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+募集入力情報の追加
+
+人数規模の追加
+ALTER TABLE recruitments ADD scale NUMBER;
+
+備考
+ALTER TABLE recruitments ADD remarks VARCHAR2(4000);
+
+人数規模の削除
+ALTER TABLE recruitments DROP COLUMN scale;
+
+募集目的の追加
+ALTER TABLE recruitments ADD purpose VARCHAR2(50);
+活動レベルの追加
+ALTER TABLE recruitments ADD skill_level VARCHAR2(50);
+参加条件の追加
+ALTER TABLE recruitments ADD conditions VARCHAR2(4000);
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+自動採番
+シーケンスの作成
+
+CREATE SEQUENCE RECRUIT_SEQ
+ START WITH 1
+ INCREMENT BY 1
+ NOMAXVALUE;
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+テーブルの最大ID確認
+
+SELECT MAX(RECRUIT_ID) FROM RECRUITMENTS;
+
+ まず今の SEQUENCE 消す
+
+DROP SEQUENCE RECRUIT_SEQ;
+
+MAX(recruit_id)=1 なので、2 から始める SEQUENCE を作り直す
+
+CREATE SEQUENCE RECRUIT_SEQ
+  START WITH 2
+  INCREMENT BY 1;
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+CLUB＿MASTEテーブルの作成
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+CREATE TABLE CLUB_MASTER (
+    CLUB_ID NUMBER PRIMARY KEY,
+    CLUB_NAME VARCHAR2(50) NOT NULL
+);
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+初期データ挿入
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+INSERT INTO CLUB_MASTER VALUES (1, 'サッカー部');
+INSERT INTO CLUB_MASTER VALUES (2, '野球部');
+INSERT INTO CLUB_MASTER VALUES (3, 'バスケ部');
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+
+
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+SCHOOLカラムの追加
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+ALTER TABLE USERS ADD (SCHOOL VARCHAR2(100));
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+
+
+
+
+
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+SCHOOL_IDカラムを先所
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+ALTER TABLE USERS DROP COLUMN SCHOOL_ID;
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+外部キーを CLUB_MASTER に張り替える
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+今の外部キー（USERS → CLUBS）を削除
+ーーーーーーーーーーーーーーーーーーーーーーー
+ALTER TABLE USERS
+DROP CONSTRAINT SYS_C008403;
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+正しい CLUB_MASTER に外部キーを張り直す
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+ALTER TABLE USERS
+ADD CONSTRAINT FK_USERS_CLUB_MASTER
+FOREIGN KEY (club_id)
+REFERENCES CLUB_MASTER (club_id);
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
+
+
+
+
+
+

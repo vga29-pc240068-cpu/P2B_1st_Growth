@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>新規ユーザー登録</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+</head>
+<body>
+
+<h2>新規登録</h2>
+
+<!-- エラーメッセージ -->
+<p th:if="${error}" style="color:red;" th:text="${error}"></p>
+
+<form th:action="@{/register}" method="post">
+
+    <!-- 名前 -->
+    <label>名前：</label><br>
+    <input type="text" name="name" required><br><br>
+	
+
+	<!-- 所属学校 -->
+	<label>所属学校：</label><br>
+	<input type="text" name="school" required><br><br>
+	
+	
+	<!-- 部活動 -->
+	<label>部活動：</label><br>
+	<select name="clubId" required>
+	    <option value="">選択してください</option>
+	    <option th:each="c : ${clubMasterList}"
+	            th:value="${c.clubId}"
+	            th:text="${c.clubName}">
+	    </option>
+	</select><br><br>
+	
+	
+	<!-- 電話番号 -->
+	   <label>電話番号：</label><br>
+	   <input type="text" name="phoneNumber" required><br><br>
+	
+
+    <!-- メール -->
+    <label>メールアドレス：</label><br>
+    <input type="email" name="email" required><br><br>
+
+    <!-- パスワード -->
+    <label>パスワード：</label><br>
+    <input type="password" name="password" required><br><br>
+
+   
+
+
+
+	
+	
+
+	   
+
+    <button type="submit">登録する</button>
+</form>
+
+<br>
+<a th:href="@{/login}">ログイン画面へ</a>
+
+<!-- フッター -->
+<div th:replace="common/footer :: footer"></div>
+
+</body>
+</html>

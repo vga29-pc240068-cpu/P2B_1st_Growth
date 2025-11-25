@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>あなたの募集一覧</title>
+</head>
+<body>
+
+<h2>あなたの募集一覧</h2>
+
+<!-- 募集がない場合 -->
+<p th:if="${#lists.isEmpty(recruitments)}">現在、募集はありません。</p>
+
+<!-- 募集がある場合 -->
+<table border="1" th:if="${!#lists.isEmpty(recruitments)}">
+    <tr>
+        <th>ID</th>
+        <th>希望日</th>
+        <th>時間</th>
+        <th>場所</th>
+        <th>操作</th>
+    </tr>
+
+	<tr th:each="r : ${recruitments}">
+	    <td th:text="${r.recruitId}"></td>
+	    <td th:text="${r.matchDate}"></td>
+	    <td th:text="${r.matchTime}"></td>
+	    <td th:text="${r.location}"></td>
+	    
+	    <td>
+	        <a th:href="@{/recruitment/detail(id=${r.recruitId})}">
+	            詳細
+	        </a>
+	    </td>
+	</tr>
+
+	
+</table>
+
+<br>
+
+<!-- 新しい募集 -->
+<a th:href="@{/recruitment/input}">
+    <button>新しい募集を作成する</button>
+</a>
+
+<!-- フッター -->
+<div th:replace="common/footer :: footer"></div>
+
+</body>
+</html>

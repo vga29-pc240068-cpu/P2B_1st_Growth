@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>募集項目入力</title>
+</head>
+<body>
+
+<h2>募集項目入力</h2>
+
+<form th:action="@{/recruitment/confirm}" method="post">
+
+  
+    <div>
+        <label>部活動名：</label>
+        <select name="clubId">
+            <option th:each="club : ${clubs}"
+                    th:value="${club.clubId}"
+                    th:text="${club.clubName}">
+            </option>
+        </select>
+    </div>
+
+    <div>
+        <label>希望日：</label>
+        <input type="date" name="matchDate">
+    </div>
+
+    <div>
+        <label>時間：</label>
+        <input type="time" name="matchTime">
+    </div>
+
+    <div>
+        <label>場所：</label>
+        <input type="text" name="location">
+    </div>
+
+    <!-- ★追加：募集の目的 -->
+    <div>
+        <label>募集の目的：</label>
+        <select name="purpose">
+            <option value="">選択してください</option>
+            <option value="練習試合">練習試合</option>
+            <option value="合同練習">合同練習</option>
+            <option value="練習相手募集">練習相手募集</option>
+            <option value="交流試合">交流試合</option>
+            <option value="その他">その他</option>
+        </select>
+    </div>
+
+    <!-- ★追加：活動レベル -->
+    <div>
+        <label>活動レベル：</label>
+        <select name="skill_level">
+            <option value="">選択してください</option>
+            <option value="初心者">初心者</option>
+            <option value="中級者">中級者</option>
+            <option value="上級者">上級者</option>
+        </select>
+    </div>
+
+    <!-- ★追加：参加条件 -->
+    <div>
+        <label>参加条件：</label>
+        <input type="text" name="conditions" placeholder="例：男女混合OK / 顧問同伴必須など">
+    </div>
+
+    <div>
+        <label>備考：</label>
+        <textarea name="remarks"></textarea>
+    </div>
+
+    <div>
+        <button type="reset">クリア</button>
+        <button type="submit">確認画面へ進む</button>
+    </div>
+
+</form>
+
+<p>※日時、場所、条件は後で調整可能です。</p>
+
+
+
+
+<!-- フッター -->
+<div th:replace="common/footer :: footer"></div>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>募集登録完了</title>
+</head>
+<body>
+
+<h2>募集登録が完了しました</h2>
+
+<p>募集情報の登録が正常に完了しました。</p>
+<p>確認や修正が必要な場合は、募集項目選択画面から再度アクセスしてください。</p>
+
+<div>
+    <button onclick="location.href='/1st_growth/recruitment/input'">新しい募集を登録する</button>
+</div>
+
+<div>
+    <button onclick="history.back()">募集項目選択画面に戻る</button>
+</div>
+
+<!-- フッター -->
+<div th:replace="common/footer :: footer"></div>
+
+</body>
+</html>

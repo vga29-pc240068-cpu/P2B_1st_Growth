@@ -36,14 +36,16 @@
     <div style="margin-top:20px;">
 
 		<!-- 承認ボタン -->
-		<form th:action="@{'/user/chat/approve'(applyId=${application.applyId})}" method="get" style="display:inline;">
+		<form th:action="@{/user/apply/approve(applyId=${application.applyId})}" method="get" style="display:inline;">
 		    <button type="submit" class="btn-approve">承認する</button>
 		</form>
 
 		<!-- 拒否ボタン -->
-		<form th:action="@{'/user/chat/deny'(applyId=${application.applyId})}" method="get" style="display:inline;">
+		<form th:action="@{/user/apply/deny(applyId=${application.applyId})}" method="get" style="display:inline;">
 		    <button type="submit" class="btn-deny">拒否する</button>
 		</form>
+
+		
 
     </div>
 
