@@ -11,136 +11,126 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "recruitments")
 public class Recruitment {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RECRUIT_SEQ")
-	@SequenceGenerator(name = "RECRUIT_SEQ", sequenceName = "RECRUIT_SEQ", allocationSize = 1)
-	@Column(name = "RECRUIT_ID")
-	private Integer recruitId;
 
-	@ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName ="user_id")
-    private User user;
-    
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RECRUIT_SEQ")
+    @SequenceGenerator(name = "RECRUIT_SEQ", sequenceName = "RECRUIT_SEQ", allocationSize = 1)
+    @Column(name = "RECRUIT_ID")
+    private Integer recruitId;
+
     @ManyToOne
-    @JoinColumn(name = "club_id",referencedColumnName ="club_id")
-    private Club club;
-    
-    //希望日時
-    @Column(name = "match_date", nullable = true) 
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "club_id", referencedColumnName = "club_id")
+    private ClubMaster clubMaster;
+
+    @Column(name = "match_date", nullable = true)
     private LocalDate matchDate;
-    
-    //希望時間
+
     @Column(name = "match_time", nullable = true)
     private String matchTime;
-    
-    //希望場所
-    @Column(nullable = true) 
+
+    @Column(nullable = true)
     private String location;
-    
-    //-----------------------------追記
-    //募集の目的
-    @Column(nullable=true)
+
+    @Column(nullable = true)
     private String purpose;
-    
-    //活動レベル
-    @Column(name="skill_level",nullable=true)
+
+    @Column(name = "skill_level", nullable = true)
     private String skilllevel;
-    
-    //参加条件
-    @Column(nullable=true)
+
+    @Column(nullable = true)
     private String conditions;
-    
-    //備考
+
     @Column(length = 4000)
     private String remarks;
 
-	public Integer getRecruitId() {
-		return recruitId;
-	}
 
-	public void setRecruitId(Integer recruitId) {
-		this.recruitId = recruitId;
-	}
+    // ===== Getter / Setter =====
 
-	public User getUser() {
-		return user;
-	}
+    public Integer getRecruitId() {
+        return recruitId;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public void setRecruitId(Integer recruitId) {
+        this.recruitId = recruitId;
+    }
 
-	public Club getClub() {
-		return club;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setClub(Club club) {
-		this.club = club;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public LocalDate getMatchDate() {
-		return matchDate;
-	}
+    public ClubMaster getClubMaster() {
+        return clubMaster;
+    }
 
-	public void setMatchDate(LocalDate matchDate) {
-		this.matchDate = matchDate;
-	}
+    public void setClubMaster(ClubMaster clubMaster) {
+        this.clubMaster = clubMaster;
+    }
 
-	public String getMatchTime() {
-		return matchTime;
-	}
+    public LocalDate getMatchDate() {
+        return matchDate;
+    }
 
-	public void setMatchTime(String matchTime) {
-		this.matchTime = matchTime;
-	}
+    public void setMatchDate(LocalDate matchDate) {
+        this.matchDate = matchDate;
+    }
 
-	public String getLocation() {
-		return location;
-	}
+    public String getMatchTime() {
+        return matchTime;
+    }
 
-	public void setLocation(String location) {
-		this.location = location;
-	}
+    public void setMatchTime(String matchTime) {
+        this.matchTime = matchTime;
+    }
 
+    public String getLocation() {
+        return location;
+    }
 
-	public String getRemarks() {
-		return remarks;
-	}
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
-	}
+    public String getRemarks() {
+        return remarks;
+    }
 
-	public String getPurpose() {
-		return purpose;
-	}
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 
-	public void setPurpose(String purpose) {
-		this.purpose = purpose;
-	}
+    public String getPurpose() {
+        return purpose;
+    }
 
-	public String getSkill_level() {
-		return skilllevel;
-	}
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
 
-	public void setSkill_level(String skill_level) {
-		this.skilllevel = skill_level;
-	}
+    public String getSkill_level() {
+        return skilllevel;
+    }
 
-	public String getConditions() {
-		return conditions;
-	}
+    public void setSkill_level(String skilllevel) {
+        this.skilllevel = skilllevel;
+    }
 
-	public void setConditions(String conditions) {
-		this.conditions = conditions;
-	}
-	
+    public String getConditions() {
+        return conditions;
+    }
 
-	
-	
-
-
+    public void setConditions(String conditions) {
+        this.conditions = conditions;
+    }
 }

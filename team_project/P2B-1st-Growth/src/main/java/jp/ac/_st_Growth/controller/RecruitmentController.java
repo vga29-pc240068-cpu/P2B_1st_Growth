@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jp.ac._st_Growth.entity.Club;
+import jp.ac._st_Growth.entity.ClubMaster;
 import jp.ac._st_Growth.entity.Recruitment;
 import jp.ac._st_Growth.entity.User;
-import jp.ac._st_Growth.repository.ClubsRepository;
+import jp.ac._st_Growth.repository.ClubMasterRepository;
 import jp.ac._st_Growth.repository.RecruitmentsRepository;
 import jp.ac._st_Growth.repository.UsersRepository;
 
@@ -34,25 +34,47 @@ public class RecruitmentController {
     private UsersRepository userRepository;
 
     @Autowired
-    private ClubsRepository clubsRepository;
+    private ClubMasterRepository clubMasterRepository;
 
- // 入力画面
+    // ★ 入力画面
     @GetMapping("/input")
-    public String showRecruitmentInputForm(HttpSession session, Model model) {
-        Integer userId = (Integer) session.getAttribute("userId");
+    public String showRecruitmentInputForm(
+            @RequestParam(value = "userId", required = false) Integer userIdParam,
+            @RequestParam(value = "clubId", required = false) Integer clubId,
+            @RequestParam(value = "matchDate", required = false) String matchDate,
+            @RequestParam(value = "matchTime", required = false) String matchTime,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "remarks", required = false) String remarks,
+            @RequestParam(value = "purpose", required = false) String purpose,
+            @RequestParam(value = "skillLevel", required = false) String skillLevel,
+            @RequestParam(value = "conditions", required = false) String conditions,
+            HttpSession session,
+            Model model) {
+
+        Integer userId = (userIdParam != null)
+                ? userIdParam
+                : (Integer) session.getAttribute("userId");
+
         if (userId == null) return "redirect:/login";
 
         userRepository.findById(userId).ifPresent(u -> model.addAttribute("user", u));
 
-        // ★ ここ追加！クラブ一覧をHTMLへ渡す
-        model.addAttribute("clubs", clubsRepository.findAll());
+        List<ClubMaster> clubs = clubMasterRepository.findAll();
+        model.addAttribute("clubs", clubs);
+
+        model.addAttribute("clubId", clubId);
+        model.addAttribute("matchDate", matchDate);
+        model.addAttribute("matchTime", matchTime);
+        model.addAttribute("location", location);
+        model.addAttribute("remarks", remarks);
+        model.addAttribute("purpose", purpose);
+        model.addAttribute("skillLevel", skillLevel);
+        model.addAttribute("conditions", conditions);
 
         return "user/input/recruit_input";
     }
 
-
-
-    // 入力確認画面
+    // ★ 確認画面
     @PostMapping("/confirm")
     public String confirmRecruitment(
             @RequestParam("clubId") Integer clubId,
@@ -60,44 +82,44 @@ public class RecruitmentController {
             @RequestParam(value = "matchTime", required = false) String matchTime,
             @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "remarks", required = false) String remarks,
-
-            // ★ 新規追加項目
             @RequestParam(value = "purpose", required = false) String purpose,
-            @RequestParam(value = "skill_level", required = false) String skillLevel,
+            @RequestParam(value = "skillLevel", required = false) String skillLevel,
             @RequestParam(value = "conditions", required = false) String conditions,
-
             HttpSession session,
             Model model) {
 
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) return "redirect:/login";
 
+        // ★ 未選択 clubId=0 の処理
+        if (clubId == 0) {
+            model.addAttribute("error", "部活動を選択してください");
+            return "user/input/recruit_input";
+        }
+
         Optional<User> userOpt = userRepository.findById(userId);
-        Optional<Club> clubOpt = clubsRepository.findByClubId(clubId);
+        Optional<ClubMaster> clubOpt = clubMasterRepository.findByClubId(clubId);
 
         if (userOpt.isEmpty() || clubOpt.isEmpty()) {
             model.addAttribute("error", "ユーザーまたは部活動情報が見つかりません");
             return "user/input/recruit_input";
         }
 
+        model.addAttribute("user", userOpt.get());
         model.addAttribute("club", clubOpt.get());
-        model.addAttribute("matchDate", matchDate != null ? matchDate : "未定");
-        model.addAttribute("matchTime", matchTime != null ? matchTime : "未定");
-        model.addAttribute("location", location != null ? location : "未定");
+        model.addAttribute("matchDate", matchDate);
+        model.addAttribute("matchTime", matchTime);
+        model.addAttribute("location", location);
         model.addAttribute("remarks", remarks);
-
-        // ★ 新項目をモデルに渡す
         model.addAttribute("purpose", purpose);
         model.addAttribute("skillLevel", skillLevel);
         model.addAttribute("conditions", conditions);
 
-        // ★ セッションにも保存
         session.setAttribute("tempClubId", clubId);
         session.setAttribute("tempMatchDate", matchDate);
         session.setAttribute("tempMatchTime", matchTime);
         session.setAttribute("tempLocation", location);
         session.setAttribute("tempRemarks", remarks);
-
         session.setAttribute("tempPurpose", purpose);
         session.setAttribute("tempSkillLevel", skillLevel);
         session.setAttribute("tempConditions", conditions);
@@ -105,10 +127,11 @@ public class RecruitmentController {
         return "user/input/recruit_input_check";
     }
 
-
-    // 登録処理
+    // ★ 登録処理
     @PostMapping("/regist")
-    public String registerRecruitment(HttpSession session, RedirectAttributes redirectAttributes) {
+    public String registerRecruitment(
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
 
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) return "redirect:/login";
@@ -118,14 +141,12 @@ public class RecruitmentController {
         String matchTimeStr = (String) session.getAttribute("tempMatchTime");
         String location = (String) session.getAttribute("tempLocation");
         String remarks = (String) session.getAttribute("tempRemarks");
-
-        // ★ 新項目を受け取る
         String purpose = (String) session.getAttribute("tempPurpose");
         String skillLevel = (String) session.getAttribute("tempSkillLevel");
         String conditions = (String) session.getAttribute("tempConditions");
 
         Optional<User> userOpt = userRepository.findById(userId);
-        Optional<Club> clubOpt = clubsRepository.findByClubId(clubId);
+        Optional<ClubMaster> clubOpt = clubMasterRepository.findByClubId(clubId);
 
         if (userOpt.isEmpty() || clubOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "データ取得に失敗しました");
@@ -134,7 +155,7 @@ public class RecruitmentController {
 
         Recruitment recruitment = new Recruitment();
         recruitment.setUser(userOpt.get());
-        recruitment.setClub(clubOpt.get());
+        recruitment.setClubMaster(clubOpt.get());
 
         if (matchDateStr != null && !matchDateStr.isBlank()) {
             try {
@@ -145,21 +166,18 @@ public class RecruitmentController {
         recruitment.setMatchTime(matchTimeStr);
         recruitment.setLocation(location);
         recruitment.setRemarks(remarks);
-
-        // ★ 新項目をセット
         recruitment.setPurpose(purpose);
         recruitment.setSkill_level(skillLevel);
         recruitment.setConditions(conditions);
 
         recruitmentRepository.save(recruitment);
 
-        // セッション削除
+        // ★ セッション削除
         session.removeAttribute("tempClubId");
         session.removeAttribute("tempMatchDate");
         session.removeAttribute("tempMatchTime");
         session.removeAttribute("tempLocation");
         session.removeAttribute("tempRemarks");
-
         session.removeAttribute("tempPurpose");
         session.removeAttribute("tempSkillLevel");
         session.removeAttribute("tempConditions");
@@ -167,28 +185,23 @@ public class RecruitmentController {
         return "user/input/recruit_input_complete";
     }
 
- //  自分の募集一覧表示
+    // ★ 自分の募集一覧
     @GetMapping("/list")
     public String MyRecruitList(HttpSession session, Model model) {
-
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) return "redirect:/login";
 
-        // ログインしているユーザーの募集だけ取得
-        List<Recruitment> recruitments =
-                recruitmentRepository.findByUserUserId(userId);
-
+        List<Recruitment> recruitments = recruitmentRepository.findByUserUserId(userId);
         model.addAttribute("recruitments", recruitments);
-        return "user/input/recruit_list";  // ← 新しく作るHTMLへ
+
+        return "user/input/recruit_list";
     }
-    
-    
- // ★ 募集の詳細表示
+
+    // ★ 詳細画面
     @GetMapping("/detail")
     public String RecruitDetail(
             @RequestParam("id") Integer id,
-            Model model
-    ) {
+            Model model) {
 
         Optional<Recruitment> opt = recruitmentRepository.findById(id);
 
@@ -197,8 +210,6 @@ public class RecruitmentController {
         }
 
         model.addAttribute("recruitment", opt.get());
-        return "user/input/recruit_detail"; 
+        return "user/input/recruit_detail";
     }
-
-
 }

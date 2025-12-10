@@ -19,15 +19,27 @@
 
 <p>備考：<span th:text="${remarks}"></span></p>
 
+<!-- 登録ボタン -->
 <form th:action="@{/recruitment/regist}" method="post">
     <button type="submit">この内容で登録する</button>
 </form>
 
+<!-- 修正ボタン（必要な値だけ戻す） -->
 <form th:action="@{/recruitment/input}" method="get">
+
+    <input type="hidden" name="clubId" th:value="${club.clubId}">
+    <input type="hidden" name="matchDate" th:value="${matchDate}">
+    <input type="hidden" name="matchTime" th:value="${matchTime}">
+    <input type="hidden" name="location" th:value="${location}">
+    <input type="hidden" name="remarks" th:value="${remarks}">
+    
+    <input type="hidden" name="purpose" th:value="${purpose}">
+    <input type="hidden" name="skillLevel" th:value="${skillLevel}">
+    <input type="hidden" name="conditions" th:value="${conditions}">
+
     <button type="submit">修正する</button>
 </form>
 
-<!-- フッター -->
 <div th:replace="common/footer :: footer"></div>
 
 </body>

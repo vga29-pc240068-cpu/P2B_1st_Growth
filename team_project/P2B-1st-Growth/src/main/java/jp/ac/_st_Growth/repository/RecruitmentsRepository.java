@@ -17,7 +17,8 @@ public interface RecruitmentsRepository extends JpaRepository<Recruitment, Integ
 //ユーザーIDで募集一覧を取得（例：特定の先生が出した募集一覧）
 	 List<Recruitment> findByUserUserId(@Param("userId") Integer userId);
 	  
-	  List<Recruitment> findByClubClubId(@Param("clubId") Integer clubId);
+	 List<Recruitment> findByClubMasterClubId(Integer clubId);
+
 }
 
 

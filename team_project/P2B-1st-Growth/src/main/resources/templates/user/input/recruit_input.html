@@ -10,65 +10,77 @@
 
 <form th:action="@{/recruitment/confirm}" method="post">
 
-  
-    <div>
-        <label>部活動名：</label>
-        <select name="clubId">
-            <option th:each="club : ${clubs}"
-                    th:value="${club.clubId}"
-                    th:text="${club.clubName}">
-            </option>
-        </select>
-    </div>
+	<div>
+	    <label>部活動名：</label>
+		<select name="clubId" required>
+
+		    <!-- value=0 に変更、disabled削除 -->
+		    <option value="0" th:selected="${clubId == null}">
+		        選択してください
+		    </option>
+
+		    <option th:each="club : ${clubs}"
+		            th:value="${club.clubId}"
+		            th:selected="${club.clubId == clubId}"
+		            th:text="${club.clubName}">
+		    </option>
+
+		</select>
+
+		
+	</div>
+
+	
 
     <div>
         <label>希望日：</label>
-        <input type="date" name="matchDate">
+        <input type="date" name="matchDate" th:value="${matchDate}">
     </div>
 
     <div>
         <label>時間：</label>
-        <input type="time" name="matchTime">
+        <input type="time" name="matchTime" th:value="${matchTime}">
     </div>
 
     <div>
         <label>場所：</label>
-        <input type="text" name="location">
+        <input type="text" name="location" th:value="${location}">
     </div>
 
-    <!-- ★追加：募集の目的 -->
+    <!-- 募集の目的 -->
     <div>
         <label>募集の目的：</label>
         <select name="purpose">
             <option value="">選択してください</option>
-            <option value="練習試合">練習試合</option>
-            <option value="合同練習">合同練習</option>
-            <option value="練習相手募集">練習相手募集</option>
-            <option value="交流試合">交流試合</option>
-            <option value="その他">その他</option>
+            <option value="練習試合" th:selected="${purpose == '練習試合'}">練習試合</option>
+            <option value="合同練習" th:selected="${purpose == '合同練習'}">合同練習</option>
+            <option value="練習相手募集" th:selected="${purpose == '練習相手募集'}">練習相手募集</option>
+            <option value="交流試合" th:selected="${purpose == '交流試合'}">交流試合</option>
+            <option value="その他" th:selected="${purpose == 'その他'}">その他</option>
         </select>
     </div>
 
-    <!-- ★追加：活動レベル -->
+    <!-- 活動レベル -->
     <div>
         <label>活動レベル：</label>
-        <select name="skill_level">
+        <select name="skillLevel">
             <option value="">選択してください</option>
-            <option value="初心者">初心者</option>
-            <option value="中級者">中級者</option>
-            <option value="上級者">上級者</option>
+            <option value="初心者" th:selected="${skillLevel == '初心者'}">初心者</option>
+            <option value="中級者" th:selected="${skillLevel == '中級者'}">中級者</option>
+            <option value="上級者" th:selected="${skillLevel == '上級者'}">上級者</option>
         </select>
     </div>
 
-    <!-- ★追加：参加条件 -->
+    <!-- 参加条件 -->
     <div>
         <label>参加条件：</label>
-        <input type="text" name="conditions" placeholder="例：男女混合OK / 顧問同伴必須など">
+        <input type="text" name="conditions" th:value="${conditions}" placeholder="例：男女混合OK / 顧問同伴必須など">
     </div>
 
+    <!-- 備考 -->
     <div>
         <label>備考：</label>
-        <textarea name="remarks"></textarea>
+        <textarea name="remarks" th:text="${remarks}"></textarea>
     </div>
 
     <div>
@@ -80,10 +92,6 @@
 
 <p>※日時、場所、条件は後で調整可能です。</p>
 
-
-
-
-<!-- フッター -->
 <div th:replace="common/footer :: footer"></div>
 
 </body>
