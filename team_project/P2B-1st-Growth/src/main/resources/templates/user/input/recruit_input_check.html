@@ -3,41 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <title>募集内容の確認</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
 </head>
 <body>
 
-<h2>募集内容の確認</h2>
+<div class="container">
+    <h2>募集内容の確認</h2>
 
-<p>部活動：<span th:text="${club.clubName}"></span></p>
-<p>希望日：<span th:text="${matchDate}"></span></p>
-<p>時間：<span th:text="${matchTime}"></span></p>
-<p>場所：<span th:text="${location}"></span></p>
+    <div class="confirm-card">
+        <table class="confirm-table">
+            <tr>
+                <th>部活動</th>
+                <td th:text="${club.clubName}"></td>
+            </tr>
+            <tr>
+                <th>希望日</th>
+                <td th:text="${matchDate}"></td>
+            </tr>
+            <tr>
+                <th>時間</th>
+                <td th:text="${matchTime}"></td>
+            </tr>
+            <tr>
+                <th>場所</th>
+                <td th:text="${location}"></td>
+            </tr>
+            <tr>
+                <th>募集の目的</th>
+                <td th:text="${purpose}"></td>
+            </tr>
+            <tr>
+                <th>活動レベル</th>
+                <td th:text="${skillLevel}"></td>
+            </tr>
+            <tr>
+                <th>参加条件</th>
+                <td th:text="${conditions}"></td>
+            </tr>
+            <tr>
+                <th>備考</th>
+                <td th:text="${remarks}"></td>
+            </tr>
+        </table>
 
-<p>募集の目的：<span th:text="${purpose}"></span></p>
-<p>活動レベル：<span th:text="${skillLevel}"></span></p>
-<p>参加条件：<span th:text="${conditions}"></span></p>
+        <div class="confirm-actions">
+            <!-- 登録ボタン -->
+            <form th:action="@{/recruitment/regist}" method="post">
+                <input type="hidden" name="clubId"     th:value="${club.clubId}">
+                <input type="hidden" name="matchDate"  th:value="${matchDate}">
+                <input type="hidden" name="matchTime"  th:value="${matchTime}">
+                <input type="hidden" name="location"   th:value="${location}">
+                <input type="hidden" name="purpose"    th:value="${purpose}">
+                <input type="hidden" name="skillLevel" th:value="${skillLevel}">
+                <input type="hidden" name="conditions" th:value="${conditions}">
+                <input type="hidden" name="remarks"    th:value="${remarks}">
+                <button type="submit">この内容で登録する</button>
+            </form>
 
-<p>備考：<span th:text="${remarks}"></span></p>
+            <!-- 修正ボタン -->
+            <form th:action="@{/recruitment/input}" method="get">
+                <button type="submit" class="btn-sub">修正する</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-<form th:action="@{/recruitment/regist}" method="post">
-    <!-- ★ ここが登録用の値たち -->
-    <input type="hidden" name="clubId" th:value="${club.clubId}">
-    <input type="hidden" name="matchDate" th:value="${matchDate}">
-    <input type="hidden" name="matchTime" th:value="${matchTime}">
-    <input type="hidden" name="location" th:value="${location}">
-    <input type="hidden" name="purpose" th:value="${purpose}">
-    <input type="hidden" name="skillLevel" th:value="${skillLevel}">
-    <input type="hidden" name="conditions" th:value="${conditions}">
-    <input type="hidden" name="remarks" th:value="${remarks}">
-    <!-- userId はセッションから取るから hidden いらんでもOK -->
-
-    <button type="submit">この内容で登録する</button>
-</form>
-
-<form th:action="@{/recruitment/input}" method="get">
-    <button type="submit">修正する</button>
-</form>
-
+<!-- フッター -->
 <div th:replace="common/footer :: footer"></div>
 
 </body>

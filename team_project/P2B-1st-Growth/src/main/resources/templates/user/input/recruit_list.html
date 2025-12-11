@@ -3,46 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <title>あなたの募集一覧</title>
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
 </head>
 <body>
 
-<h2>あなたの募集一覧</h2>
+<div class="list-container">
+    <div class="list-card">
 
-<!-- 募集がない場合 -->
-<p th:if="${#lists.isEmpty(recruitments)}">現在、募集はありません。</p>
+        <h2>あなたの募集一覧</h2>
 
-<!-- 募集がある場合 -->
-<table border="1" th:if="${!#lists.isEmpty(recruitments)}">
-    <tr>
-        <th>ID</th>
-        <th>希望日</th>
-        <th>時間</th>
-        <th>場所</th>
-        <th>操作</th>
-    </tr>
+        <!-- 募集がない場合 -->
+        <p th:if="${#lists.isEmpty(recruitments)}">現在、募集はありません。</p>
 
-	<tr th:each="r : ${recruitments}">
-	    <td th:text="${r.recruitId}"></td>
-	    <td th:text="${r.matchDate}"></td>
-	    <td th:text="${r.matchTime}"></td>
-	    <td th:text="${r.location}"></td>
-	    
-	    <td>
-	        <a th:href="@{/recruitment/detail(id=${r.recruitId})}">
-	            詳細
-	        </a>
-	    </td>
-	</tr>
+        <!-- 募集がある場合 -->
+        <table th:if="${!#lists.isEmpty(recruitments)}">
+            <tr>
+                <th>ID</th>
+                <th>希望日</th>
+                <th>時間</th>
+                <th>場所</th>
+                <th>操作</th>
+            </tr>
 
-	
-</table>
+            <tr th:each="r : ${recruitments}">
+                <td th:text="${r.recruitId}"></td>
+                <td th:text="${r.matchDate}"></td>
+                <td th:text="${r.matchTime}"></td>
+                <td th:text="${r.location}"></td>
 
-<br>
+                <td>
+                    <a th:href="@{/recruitment/detail(id=${r.recruitId})}">
+                        詳細
+                    </a>
+                </td>
+            </tr>
+        </table>
 
-<!-- 新しい募集 -->
-<a th:href="@{/recruitment/input}">
-    <button>新しい募集を作成する</button>
-</a>
+        <div class="list-actions">
+            <a th:href="@{/recruitment/input}" class="btn">
+                新しい募集を作成する
+            </a>
+        </div>
+
+    </div>
+</div>
 
 <!-- フッター -->
 <div th:replace="common/footer :: footer"></div>

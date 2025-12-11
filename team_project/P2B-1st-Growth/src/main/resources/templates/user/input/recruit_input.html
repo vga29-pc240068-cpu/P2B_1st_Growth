@@ -3,100 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <title>募集項目入力</title>
+
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
 </head>
 <body>
 
-<h2>募集項目入力</h2>
+<div class="container">
+    <h2>募集項目入力</h2>
 
-<!-- エラーメッセージの表示 -->
-<p th:if="${error}" th:text="${error}" style="color:red;"></p>
+    <!-- エラーメッセージの表示 -->
+    <p th:if="${error}" th:text="${error}" class="error-message"></p>
 
-<form th:action="@{/recruitment/confirm}" method="post">
+    <div class="form-card">
+        <form th:action="@{/recruitment/confirm}" method="post">
 
-    <!-- 部活動名 -->
-    <div>
-        <label>部活動名：</label>
-        <select name="clubId" required>
-            <!-- 何も選んでないとき -->
-            <option value="0" th:selected="${clubId == null}">
-                選択してください
-            </option>
+            <!-- 部活動名 -->
+            <div class="form-row">
+                <label>部活動名：</label>
+                <select name="clubId" required>
+                    <!-- 何も選んでないとき -->
+                    <option value="0" th:selected="${clubId == null}">
+                        選択してください
+                    </option>
 
-            <!-- 部活一覧 -->
-            <option th:each="club : ${clubs}"
-                    th:value="${club.clubId}"
-                    th:selected="${club.clubId == clubId}"
-                    th:text="${club.clubName}">
-            </option>
-        </select>
+                    <!-- 部活一覧 -->
+                    <option th:each="club : ${clubs}"
+                            th:value="${club.clubId}"
+                            th:selected="${club.clubId == clubId}"
+                            th:text="${club.clubName}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- 希望日 -->
+            <div class="form-row">
+                <label>希望日：</label>
+                <input type="date" name="matchDate" th:value="${matchDate}">
+            </div>
+
+            <!-- 時間 -->
+            <div class="form-row">
+                <label>時間：</label>
+                <input type="time" name="matchTime" th:value="${matchTime}">
+            </div>
+
+            <!-- 場所 -->
+            <div class="form-row">
+                <label>場所：</label>
+                <input type="text" name="location" th:value="${location}">
+            </div>
+
+            <!-- 募集の目的 -->
+            <div class="form-row">
+                <label>募集の目的：</label>
+                <select name="purpose">
+                    <option value="">選択してください</option>
+                    <option value="練習試合"   th:selected="${purpose == '練習試合'}">練習試合</option>
+                    <option value="合同練習"   th:selected="${purpose == '合同練習'}">合同練習</option>
+                    <option value="練習相手募集" th:selected="${purpose == '練習相手募集'}">練習相手募集</option>
+                    <option value="交流試合"   th:selected="${purpose == '交流試合'}">交流試合</option>
+                    <option value="その他"     th:selected="${purpose == 'その他'}">その他</option>
+                </select>
+            </div>
+
+            <!-- 活動レベル -->
+            <div class="form-row">
+                <label>活動レベル：</label>
+                <select name="skillLevel">
+                    <option value="">選択してください</option>
+                    <option value="初心者" th:selected="${skillLevel == '初心者'}">初心者</option>
+                    <option value="中級者" th:selected="${skillLevel == '中級者'}">中級者</option>
+                    <option value="上級者" th:selected="${skillLevel == '上級者'}">上級者</option>
+                </select>
+            </div>
+
+            <!-- 参加条件 -->
+            <div class="form-row">
+                <label>参加条件：</label>
+                <input type="text"
+                       name="conditions"
+                       th:value="${conditions}"
+                       placeholder="例：男女混合OK / 顧問同伴必須など">
+            </div>
+
+            <!-- 備考 -->
+            <div class="form-row">
+                <label>備考：</label>
+                <textarea name="remarks" th:text="${remarks}"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="reset" class="btn-sub">クリア</button>
+                <button type="submit">確認画面へ進む</button>
+            </div>
+
+        </form>
+
+        <p class="note">※ 日時、場所、条件は後で調整可能です。</p>
     </div>
+</div>
 
-    <!-- 希望日 -->
-    <div>
-        <label>希望日：</label>
-        <input type="date" name="matchDate" th:value="${matchDate}">
-    </div>
-
-    <!-- 時間 -->
-    <div>
-        <label>時間：</label>
-        <input type="time" name="matchTime" th:value="${matchTime}">
-    </div>
-
-    <!-- 場所 -->
-    <div>
-        <label>場所：</label>
-        <input type="text" name="location" th:value="${location}">
-    </div>
-
-    <!-- 募集の目的 -->
-    <div>
-        <label>募集の目的：</label>
-        <select name="purpose">
-            <option value="">選択してください</option>
-            <option value="練習試合"   th:selected="${purpose == '練習試合'}">練習試合</option>
-            <option value="合同練習"   th:selected="${purpose == '合同練習'}">合同練習</option>
-            <option value="練習相手募集" th:selected="${purpose == '練習相手募集'}">練習相手募集</option>
-            <option value="交流試合"   th:selected="${purpose == '交流試合'}">交流試合</option>
-            <option value="その他"     th:selected="${purpose == 'その他'}">その他</option>
-        </select>
-    </div>
-
-    <!-- 活動レベル -->
-    <div>
-        <label>活動レベル：</label>
-        <select name="skillLevel">
-            <option value="">選択してください</option>
-            <option value="初心者" th:selected="${skillLevel == '初心者'}">初心者</option>
-            <option value="中級者" th:selected="${skillLevel == '中級者'}">中級者</option>
-            <option value="上級者" th:selected="${skillLevel == '上級者'}">上級者</option>
-        </select>
-    </div>
-
-    <!-- 参加条件 -->
-    <div>
-        <label>参加条件：</label>
-        <input type="text"
-               name="conditions"
-               th:value="${conditions}"
-               placeholder="例：男女混合OK / 顧問同伴必須など">
-    </div>
-
-    <!-- 備考 -->
-    <div>
-        <label>備考：</label>
-        <textarea name="remarks" th:text="${remarks}"></textarea>
-    </div>
-
-    <div>
-        <button type="reset">クリア</button>
-        <button type="submit">確認画面へ進む</button>
-    </div>
-
-</form>
-
-<p>※日時、場所、条件は後で調整可能です。</p>
-
+<!--フッターの追加-->
 <div th:replace="common/footer :: footer"></div>
 
 </body>

@@ -183,6 +183,7 @@ public class RecruitmentController {
         return "user/input/recruit_input_complete";
     }
 
+    
     // ===== 自分の募集一覧 =====
     @GetMapping("/list")
     public String MyRecruitList(HttpSession session, Model model) {

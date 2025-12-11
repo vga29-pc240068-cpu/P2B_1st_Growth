@@ -2,6 +2,9 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<link rel="stylesheet" th:href="@{/css/common/common.css}">
+	
+	<link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+	
   <meta charset="UTF-8">
   <title>応募一覧</title>
 </head>
@@ -41,9 +44,7 @@
 
   <p th:if="${#lists.isEmpty(applications)}">現在、応募はありません。</p>
 
-  <p>
-    <a href="/login">トップに戻る</a>
-  </p>
+
 
 <!--  フッター-->
   <div th:replace="common/footer :: footer"></div>
