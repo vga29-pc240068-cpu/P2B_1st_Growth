@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>チャット一覧</title>
-	<link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
 </head>
 <body>
 
@@ -11,40 +12,47 @@
 
 <table border="1">
     <thead>
-		
         <tr>
+            <!-- デバッグ用：applyId 列追加 -->
+            <th>applyId（デバッグ）</th>
             <th>募集タイトル</th>
             <th>相手</th>
             <th>日時</th>
             <th>チャットへ</th>
         </tr>
     </thead>
-	<tbody>
-	    <tr th:each="a : ${applications}">
-	        <!-- 募集タイトル -->
-	      <td th:text="${a.recruitment.club.clubName}"></td>
-	        <!-- 相手 -->
-	        <td>
-	            <!-- ログインしてるのが応募者なら相手は募集者 -->
-	            <span th:if="${loginUserId == a.user.userId}"
-	                  th:text="${a.recruitment.user.name}"></span>
+    <tbody>
+        <tr th:each="a : ${applications}">
+            <!-- ★ ここがさっきのデバッグ列 -->
+            <td>
+                <span th:text="${a.applyId}">?</span>
+            </td>
 
-	            <!-- ログインしてるのが募集者なら相手は応募者 -->
-	            <span th:if="${loginUserId == a.recruitment.user.userId}"
-	                  th:text="${a.user.name}"></span>
-	        </td>
+            <!-- 募集タイトル（部活名） -->
+            <td th:text="${a.recruitment.clubMaster.clubName}"></td>
 
-	        <!-- 日時 -->
-	        <td th:text="${a.applyDate}"></td>
+            <!-- 相手 -->
+            <td>
+                <!-- ログインしてるのが応募者なら相手は募集者 -->
+                <span th:if="${loginUserId == a.user.userId}"
+                      th:text="${a.recruitment.user.name}"></span>
 
-	        <!-- チャットへ -->
-	        <td>
-	            <a th:href="@{/user/chat/room(applyId=${a.applyId})}">
-	                チャットに入る
-	            </a>
-	        </td>
-	    </tr>
-	</tbody>
+                <!-- ログインしてるのが募集者なら相手は応募者 -->
+                <span th:if="${loginUserId == a.recruitment.user.userId}"
+                      th:text="${a.user.name}"></span>
+            </td>
+
+            <!-- 日時 -->
+            <td th:text="${a.applyDate}"></td>
+
+            <!-- チャットへ -->
+            <td>
+                <a th:href="@{/user/chat/room(applyId=${a.applyId})}">
+                    チャットに入る
+                </a>
+            </td>
+        </tr>
+    </tbody>
 </table>
 
 <!-- フッター -->

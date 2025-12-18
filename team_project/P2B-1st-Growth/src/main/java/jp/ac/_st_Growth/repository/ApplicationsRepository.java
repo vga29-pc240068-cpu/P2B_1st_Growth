@@ -13,28 +13,31 @@ import jp.ac._st_Growth.entity.Application;
 
 public interface ApplicationsRepository extends JpaRepository<Application, Integer> {
 
-	@Modifying
-	@Transactional
-	@Query("UPDATE Application a SET a.status = :status WHERE a.applyId = :applyId")
-	void updateStatus(@Param("applyId") Integer applyId,
-	                  @Param("status") Integer status);
+    // 応募詳細（応募者・募集・募集者・部活まで全部まとめて取得）
+    @Query("SELECT a FROM Application a "
+         + "JOIN FETCH a.user "
+         + "JOIN FETCH a.recruitment r "
+         + "JOIN FETCH r.user "
+         + "JOIN FETCH r.clubMaster "
+         + "WHERE a.applyId = :applyId")
+    Optional<Application> fetchDetailByApplyId(@Param("applyId") Integer applyId);
 
-	 
-	// ログインユーザーの応募一覧
-	List<Application> findByUserUserId(@Param("userId") Integer userId);
-	
-	// applyId は主キー → Optional<Application>
-	Optional<Application> findByApplyId(Integer applyId);
-	
-	 // 募集IDから応募一覧を取る
-	 List<Application> findByRecruitmentRecruitId(@Param("recruitId") Integer recruitId);
-	
-	 //自分が応募したapply(userUserId=自分)
-	 //自分の募集に応募されたapply(recruitment.user.userId=自分)を両方まとめて受け取れる
-	 List<Application> findByUserUserIdOrRecruitmentUserUserId(Integer userId1, Integer userId2);
+    // ステータス更新（更新件数を返す / 反映を確実にする）
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("UPDATE Application a SET a.status = :status WHERE a.applyId = :applyId")
+    int updateStatus(@Param("applyId") Integer applyId,
+                     @Param("status") Integer status);
 
-	}
-	
+    // ログインユーザーが応募した一覧
+    List<Application> findByUserUserId(Integer userId);
 
+    // 募集IDから応募一覧を取得
+    List<Application> findByRecruitmentRecruitId(Integer recruitId);
 
+    // 自分が応募した応募 & 自分の募集に来た応募をまとめて取得
+    List<Application> findByUserUserIdOrRecruitmentUserUserId(Integer userId1, Integer userId2);
 
+    // 単体取得（主キー）
+    Optional<Application> findByApplyId(Integer applyId);
+}

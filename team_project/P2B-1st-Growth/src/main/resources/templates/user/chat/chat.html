@@ -1,57 +1,68 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>チャット</title>
-<link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <meta charset="UTF-8">
+  <title>チャット</title>
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
 </head>
 <body>
 
-	<!-- タイトル＋承認拒否ボタン -->
-	<div style="display:flex; justify-content:space-between; align-items:center;">
+  <!-- タイトル＋承認拒否ボタン -->
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2>チャットルーム</h2>
 
-	    <h2>チャットルーム</h2>
-
-	    <!-- 募集者だけ承認/拒否できるように条件 -->
-	    <div th:if="${loginUserId == application.recruitment.user.userId}">
-	        <a th:href="@{/user/chat/approve(applyId=${application.applyId})}">承認</a>
-	        <a th:href="@{/user/chat/deny(applyId=${application.applyId})}">拒否</a>
-	    </div>
-	</div>
-
-    <!-- 応募情報 -->
-    <p>
-		    募集名: <span th:text="${application.recruitment.club.clubName}"></span><br>
-		    応募者: <span th:text="${application.user.name}"></span>
-		
-
-    </p>
-
-    <hr>
-
-    <!-- チャット一覧 -->
-    <div>
-        <div th:each="c:${chats}">
-            <p>
-                <strong th:text="${c.sender.name}"></strong>:
-                <span th:text="${c.message}"></span><br>
-                <small th:text="${c.transmissionDate}"></small>
-            </p>
-            <hr>
-        </div>
+    <!-- 募集者だけ承認/拒否できる（null保険込み） -->
+    <div th:if="${app != null and app.recruitment != null and app.recruitment.user != null
+                 and loginUserId != null and loginUserId == app.recruitment.user.userId}">
+      <a th:href="@{/user/chat/approve_check(applyId=${app.applyId})}">承認</a>
+      <a th:href="@{/user/chat/deny(applyId=${app.applyId})}">拒否</a>
     </div>
+  </div>
 
-    <!-- メッセージ送信 -->
-    <form th:action="@{/user/chat/send}" method="post">
-        <input type="hidden" name="applyId" th:value="${application.applyId}">
-        <textarea name="message" rows="3" cols="40" placeholder="メッセージを入力"></textarea><br>
-        <button type="submit">送信</button>
-    </form>
-	
+  <!-- 応募情報 -->
+  <p>
+    募集名：
+    <span th:text="${app != null ? (app.recruitment != null ? (app.recruitment.clubMaster != null ? (app.recruitment.clubMaster.clubName ?: '不明') : '不明') : '不明') : '不明'}"></span><br>
 
+    応募者：
+    <span th:text="${app != null ? (app.user != null ? (app.user.name ?: '不明') : '不明') : '不明'}"></span>
+  </p>
 
-    <!-- フッターの追加 -->
-    <div th:replace="common/footer :: footer"></div>
+  <hr>
+
+  <!-- チャット一覧（nullでも落ちない） -->
+  <div th:if="${chats != null and !#lists.isEmpty(chats)}">
+    <div th:each="c : ${chats}">
+      <p>
+        <strong th:text="${c != null && c.sender != null ? (c.sender.name ?: '不明') : '不明'}"></strong>：
+        <span th:text="${c != null ? (c.message ?: '') : ''}"></span><br>
+        <small th:text="${c != null ? c.transmissionDate : ''}"></small>
+      </p>
+      <hr>
+    </div>
+  </div>
+
+  <div th:if="${chats == null or #lists.isEmpty(chats)}" style="margin-top:10px;">
+    まだメッセージはないよ〜
+  </div>
+
+  <!-- メッセージ送信 -->
+  <form th:if="${app != null}" th:action="@{/user/chat/send}" method="post" style="margin-top:10px;">
+    <input type="hidden" name="applyId" th:value="${app.applyId}">
+    <textarea name="message" rows="3" cols="40" placeholder="メッセージを入力" required></textarea><br>
+    <button type="submit">送信</button>
+  </form>
+
+  <!-- app が無い時 -->
+  <div th:if="${app == null}" style="color:red; margin-top:10px;">
+    応募情報が取得できませんでした
+  </div>
+
+  <!-- フッター -->
+  <div th:replace="~{common/footer :: footer}"></div>
 
 </body>
 </html>
+
+

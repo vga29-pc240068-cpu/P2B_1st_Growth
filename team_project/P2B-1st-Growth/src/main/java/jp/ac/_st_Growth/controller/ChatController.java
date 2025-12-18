@@ -31,123 +31,14 @@ public class ChatController {
     @Autowired
     private UsersRepository usersRepository;
 
-
-    // ① チャットルーム表示
-    @GetMapping("/user/chat/room")
-    public String chatRoom(
-            @RequestParam("applyId") Integer applyId,
-            HttpSession session,
-            Model model) {
-
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
-
-        Application application = applicationsRepository
-                .findByApplyId(applyId)
-                .orElse(null);
-
-        if (application == null) {
-            model.addAttribute("error", "応募情報が見つかりません");
-            return "error";
-        }
-        
-        // ここでapplicationが正しく取得できているか確認
-        System.out.println("Application: " + application);
-
-        // 未承認 → 確認画面へ
-        if (application.getStatus() == 0) {
-            model.addAttribute("application", application);
-            return "user/chat/apply_possibility";
-
-        }
-
-        // 拒否
-        if (application.getStatus() == 2) {
-            model.addAttribute("message", "この応募は拒否されました。");
-            return "error";
-        }
-
-        // 承認済み → チャット画面表示
-        List<Chat> chats = chatRepository.findByApplicationApplyIdOrderByTransmissionDateAsc(applyId);
-
-        model.addAttribute("application", application);
-        model.addAttribute("chats", chats);
-        model.addAttribute("loginUserId", userId);
-
-        return "user/chat/chat";
-    }
-
-
-    // ② メッセージ送信
-    @PostMapping("/user/chat/send")
-    public String sendMessage(
-            @RequestParam("applyId") Integer applyId,
-            @RequestParam("message") String message,
-            HttpSession session) {
-
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
-
-        User sender = usersRepository.findById(userId).orElse(null);
-        if (sender == null) return "error";
-
-        Application application = applicationsRepository.findByApplyId(applyId).orElse(null);
-        if (application == null) return "error";
-
-        // 相手（受信者）を決定
-        User receiver =
-                sender.getUserId().equals(application.getUser().getUserId())
-                        ? application.getRecruitment().getUser()
-                        : application.getUser();
-
-        // 新規チャット作成
-        Chat chat = new Chat();
-        chat.setApplication(application);
-        chat.setRecruitment(application.getRecruitment());
-        chat.setSender(sender);
-        chat.setReceiver(receiver);
-        chat.setMessage(message);
-        chat.setTransmissionDate(new Timestamp(System.currentTimeMillis()));
-
-        chatRepository.save(chat);
-
-        return "redirect:/user/chat/room?applyId=" + applyId;
-    }
-
-
-    // 応募承認確認ページの表示
-    @GetMapping("/user/chat/apply_possibility")
-    public String applyPossibility(
-            @RequestParam("applyId") Integer applyId,
-            Model model) {
-
-        Application application = applicationsRepository.findByApplyId(applyId).orElse(null);
-
-        if (application == null) {
-            model.addAttribute("error", "応募情報が見つかりません");
-            return "error";
-        }
-
-        model.addAttribute("application", application);
-
-        return "user/chat/apply_possibility";
-
-
-    }
-
-
-    // チャット一覧
+    // ----------------------------------------------------
+    // ① チャット一覧
+    // ----------------------------------------------------
     @GetMapping("/user/chat/list")
     public String chatList(HttpSession session, Model model) {
 
         Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        if (userId == null) return "redirect:/login";
 
         List<Application> applications =
                 applicationsRepository.findByUserUserIdOrRecruitmentUserUserId(userId, userId);
@@ -158,18 +49,189 @@ public class ChatController {
         return "user/chat/list_chat";
     }
 
+    // ----------------------------------------------------
+    // ② チャットルーム
+    // ----------------------------------------------------
+    @GetMapping("/user/chat/room")
+    public String chatRoom(
+            @RequestParam(value = "applyId", required = false) Integer applyId,
+            HttpSession session,
+            Model model) {
 
-    // 承認処理
-    @GetMapping("/user/chat/approve")
-    public String approve(@RequestParam("applyId") Integer applyId) {
-        applicationsRepository.updateStatus(applyId, 1);
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+        if (applyId == null) return "redirect:/user/chat/list";
+
+        Application app = applicationsRepository.fetchDetailByApplyId(applyId).orElse(null);
+        if (app == null) {
+            model.addAttribute("error", "応募情報が見つかりません");
+            return "error";
+        }
+
+        int status = (app.getStatus() == null) ? 0 : app.getStatus();
+
+        // 未承認 → 承認画面
+        if (status == 0) {
+            return "redirect:/user/chat/apply_possibility?applyId=" + applyId;
+        }
+
+        // 拒否済み
+        if (status == 2) {
+            model.addAttribute("message", "この応募は拒否されています");
+            return "error";
+        }
+
+        List<Chat> chats =
+                chatRepository.findByApplicationApplyIdOrderByTransmissionDateAsc(applyId);
+
+        model.addAttribute("app", app);
+        model.addAttribute("chats", chats);
+        model.addAttribute("loginUserId", userId);
+
+        return "user/chat/chat";
+    }
+
+    // ----------------------------------------------------
+    // ③ メッセージ送信
+    // ----------------------------------------------------
+    @PostMapping("/user/chat/send")
+    public String sendMessage(
+            @RequestParam("applyId") Integer applyId,
+            @RequestParam("message") String message,
+            HttpSession session,
+            Model model) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        User sender = usersRepository.findById(userId).orElse(null);
+        Application app = applicationsRepository.fetchDetailByApplyId(applyId).orElse(null);
+
+        if (sender == null || app == null) {
+            model.addAttribute("error", "データ取得に失敗しました");
+            return "error";
+        }
+
+        int status = (app.getStatus() == null) ? 0 : app.getStatus();
+        if (status != 1) {
+            return "redirect:/user/chat/apply_possibility?applyId=" + applyId;
+        }
+
+        User receiver =
+                sender.getUserId().equals(app.getUser().getUserId())
+                        ? app.getRecruitment().getUser()
+                        : app.getUser();
+
+        Chat chat = new Chat();
+        chat.setApplication(app);
+        chat.setRecruitment(app.getRecruitment());
+        chat.setSender(sender);
+        chat.setReceiver(receiver);
+        chat.setMessage(message);
+        chat.setTransmissionDate(new Timestamp(System.currentTimeMillis()));
+
+        chatRepository.save(chat);
+
         return "redirect:/user/chat/room?applyId=" + applyId;
     }
 
-    // 拒否処理
-    @GetMapping("/user/chat/deny")
-    public String deny(@RequestParam("applyId") Integer applyId) {
-        applicationsRepository.updateStatus(applyId, 2);
+    // ----------------------------------------------------
+    // ④ 承認 / 拒否 選択画面
+    // ----------------------------------------------------
+    @GetMapping("/user/chat/apply_possibility")
+    public String applyPossibility(
+            @RequestParam("applyId") Integer applyId,
+            HttpSession session,
+            Model model) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        Application app = applicationsRepository.fetchDetailByApplyId(applyId).orElse(null);
+        if (app == null) {
+            model.addAttribute("error", "応募情報が見つかりません");
+            return "error";
+        }
+
+        model.addAttribute("app", app);
+        model.addAttribute("loginUserId", userId);
+
+        return "user/chat/apply_possibility";
+    }
+
+    // ----------------------------------------------------
+    // ⑤ 承認チェック画面
+    // ----------------------------------------------------
+    @GetMapping("/user/chat/approve_check")
+    public String approveCheck(
+            @RequestParam("applyId") Integer applyId,
+            HttpSession session,
+            Model model) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        Application application = applicationsRepository.fetchDetailByApplyId(applyId).orElse(null);
+        if (application == null) {
+            model.addAttribute("error", "応募情報が見つかりません");
+            return "error";
+        }
+
+        model.addAttribute("application", application);
+        model.addAttribute("loginUserId", userId);
+
+        return "user/chat/apply_possibility_check";
+    }
+
+    // ----------------------------------------------------
+    // ⑥ 承認確定（POST）
+    // ----------------------------------------------------
+    @PostMapping("/user/chat/approve_do")
+    public String approveDo(
+            @RequestParam("applyId") Integer applyId,
+            HttpSession session,
+            Model model) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        Application app = applicationsRepository.fetchDetailByApplyId(applyId).orElse(null);
+        if (app == null ||
+            app.getRecruitment() == null ||
+            !userId.equals(app.getRecruitment().getUser().getUserId())) {
+
+            model.addAttribute("error", "募集者以外は承認できません");
+            return "error";
+        }
+
+        applicationsRepository.updateStatus(applyId, 1);
+
         return "redirect:/user/chat/room?applyId=" + applyId;
+    }
+
+    // ----------------------------------------------------
+    // ⑦ 拒否
+    // ----------------------------------------------------
+    @GetMapping("/user/chat/deny")
+    public String deny(
+            @RequestParam("applyId") Integer applyId,
+            HttpSession session,
+            Model model) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) return "redirect:/login";
+
+        Application app = applicationsRepository.fetchDetailByApplyId(applyId).orElse(null);
+        if (app == null ||
+            app.getRecruitment() == null ||
+            !userId.equals(app.getRecruitment().getUser().getUserId())) {
+
+            model.addAttribute("error", "募集者以外は拒否できません");
+            return "error";
+        }
+
+        applicationsRepository.updateStatus(applyId, 2);
+
+        return "redirect:/user/chat/list";
     }
 }

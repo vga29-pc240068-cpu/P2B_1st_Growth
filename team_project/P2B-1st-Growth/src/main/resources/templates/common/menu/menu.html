@@ -1,23 +1,15 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org">
 <body>
-	
-	<h1>メニュー</h1>
-	<div><a th:href="@{/menu/profile}">プロフィール設定</a></div>
-	
-	
-	<div><a th:href="@{user/setting}">アカウント設定</a></div>
-	
-	
-	
-	<div><a th:href="@{menu/logout}">ログアウト</a></div>
-	
-<!--	フッターの追加-->
-	<div th:replace="common/footer :: footer"></div>
+
+<h2>メニュー</h2>
+
+<ul>
+  <li><a th:href="@{/user/profile}">プロフィール</a></li>
+  
+</ul>
+
+<a th:href="@{/login}">戻る</a>
 
 </body>
 </html>

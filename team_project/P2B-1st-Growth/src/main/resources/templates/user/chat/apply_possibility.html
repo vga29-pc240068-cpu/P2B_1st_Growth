@@ -9,62 +9,76 @@
 
 <h2>応募の承認・拒否</h2>
 
+<!-- ★デバッグ確認用（あとで消してOK） -->
+<div style="color:blue;">app = <span th:text="${app}"></span></div>
+<div style="color:blue;">recruit = <span th:text="${app != null ? app.recruitment : null}"></span></div>
+
 <div class="apply-box">
-
     <p>以下の応募内容を確認してください。</p>
-
     <hr>
 
+    <!-- 募集者 -->
     <p>
-<!--		<strong>募集者:	</strong>-->
-<!--     <span th:text="${application.recruitment.club.clubName}"></span>-->
+        <strong>募集者：</strong>
+        <span th:text="${(app != null and app.recruitment != null and app.recruitment.user != null)
+                        ? app.recruitment.user.name
+                        : '募集者情報なし'}">募集者情報なし</span>
     </p>
 
-  
-		<p>
-		    <strong>応募者：</strong>
-		    <span th:text="${application.user != null ? application.user.name : '応募者情報なし'}"></span>
-		</p>
+    <!-- 応募者 -->
+    <p>
+        <strong>応募者：</strong>
+        <span th:text="${(app != null and app.user != null)
+                        ? app.user.name
+                        : '応募者情報なし'}">応募者情報なし</span>
+    </p>
 
+    <!-- 部活動 -->
+    <p>
+        <strong>部活動：</strong>
+        <span th:text="${(app != null and app.recruitment != null and app.recruitment.clubMaster != null)
+                        ? app.recruitment.clubMaster.clubName
+                        : '部活動情報なし'}">部活動情報なし</span>
+    </p>
+
+    <!-- 応募日 -->
     <p>
         <strong>応募日：</strong>
-        <span th:text="${application.applyDate}"></span>
+        <span th:text="${(app != null and app.applyDate != null)
+                        ? app.applyDate
+                        : '応募日なし'}">応募日なし</span>
     </p>
 
     <hr>
 
     <div style="margin-top:20px;">
 
-		<!-- 承認ボタン -->
-		<form th:action="@{/user/apply/approve(applyId=${application.applyId})}" method="get" style="display:inline;">
-		    <button type="submit" class="btn-approve">承認する</button>
-		</form>
+        <!-- ✅ 承認：チェック画面へ -->
+        <form th:if="${app != null}"
+              th:action="@{/user/chat/approve_check(applyId=${app.applyId})}"
+              method="get" style="display:inline;">
+            <button type="submit" class="btn-approve">承認する</button>
+        </form>
 
-		<!-- 拒否ボタン -->
-		<form th:action="@{/user/apply/deny(applyId=${application.applyId})}" method="get" style="display:inline;">
-		    <button type="submit" class="btn-deny">拒否する</button>
-		</form>
+        <!-- ✅ 拒否 -->
+        <form th:if="${app != null}"
+              th:action="@{/user/chat/deny(applyId=${app.applyId})}"
+              method="get" style="display:inline;">
+            <button type="submit" class="btn-deny">拒否する</button>
+        </form>
 
-		
+        <!-- app が無い時 -->
+        <div th:if="${app == null}" style="color:red; margin-top:10px;">
+            応募情報が取得できませんでした
+        </div>
 
     </div>
-
 </div>
 
-<!--テスト用コマンド-->
-<div style="color:red;">
-    applyId: <span th:text="${application.applyId}"></span>
-</div>
+<!-- フッター（被り疑いある間はOFF推奨） -->
+<!-- <div th:replace="~{common/footer :: footer}"></div> -->
 
+<div style="color:red;font-weight:bold;">★どのHTML読んでるか判定★</div>
 
-<!--テスト用-->
-<span th:text="${application.recruitment != null 
-    ? (application.recruitment.club != null 
-       ? application.recruitment.club.clubName 
-       : 'クラブ未設定') 
-    : '募集情報なし'}"></span>
-
-<!--  フッターの追加-->
-  <div th:replace="common/footer :: footer"></div>
 </body>
 </html>
