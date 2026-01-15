@@ -1,269 +1,115 @@
 @charset "UTF-8";
 
 /* =========================
-   全体の基本設定
+   全体の基本設定（共通）
    ========================= */
-body {
+:root{
+  --g: #2e7d32;
+  --g-dark: #1b5e20;
+  --bg: #f8fff8;
+  --text: #333;
+  --muted: #666;
+  --bd: #c8e6c9;
+}
+
+html, body{ height: 100%; }
+
+body{
   margin: 0;
   padding: 0;
-  background-color: #f8fff8; /* 優しい緑がかった白 */
-  color: #333;
+  background: var(--bg);
+  color: var(--text);
   font-family: "Noto Sans JP", sans-serif;
   line-height: 1.6;
 }
 
-/* ページタイトル */
-h1, h2, h3 {
-  color: #2e7d32;           /* メインカラーの深緑 */
-  border-left: 6px solid #2e7d32;
+/* =========================
+   見出し（共通）
+   ※ 変に装飾しない（個別CSSに任せる）
+   ========================= */
+h1, h2, h3{
+  margin: 0;
+  color: var(--g);
+}
+
+/* 左線ほしい見出しだけ付ける用 */
+.page-title{
+  color: var(--g);
+  border-left: 6px solid var(--g);
   padding-left: 10px;
   margin: 20px 0 15px;
 }
 
-/* リンク */
-a {
-  color: #2e7d32;
+/* =========================
+   リンク（共通）
+   ========================= */
+a{
+  color: var(--g);
   text-decoration: none;
-  transition: 0.2s;
+  transition: .2s;
 }
-
-a:hover {
-  color: #1b5e20;
+a:hover{
+  color: var(--g-dark);
   text-decoration: underline;
 }
 
-/* ボタン共通 */
+/* =========================
+   ボタン（共通）
+   ✅ 個別CSSが勝つように “弱く” する
+   - 共通で border/背景/角丸を固定しない
+   - ただの最低限だけ
+   ========================= */
 button,
-.btn {
-  background-color: #2e7d32;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 18px;
+.btn{
+  font-family: inherit;
   cursor: pointer;
   font-size: 14px;
-  transition: 0.2s;
-}
+  transition: .2s;
 
-button:hover,
-.btn:hover {
-  background-color: #1b5e20;
-}
-
-/* クリアボタンだけ薄めにしたいときは .btn-sub つける */
-.btn-sub {
-  background-color: #ffffff;
-  color: #2e7d32;
-  border: 1px solid #2e7d32;
-}
-.btn-sub:hover {
-  background-color: #e8f5e9;
-}
-
-/* =========================
-   レイアウト
-   ========================= */
-.container {
-  padding: 20px;
-  max-width: 900px;
-  margin: 0 auto 40px;
-}
-
-/* 入力フォームをカードっぽく */
-.form-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 20px 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-/* =========================
-   入力フォーム
-   ========================= */
-.form-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.form-row label {
-  width: 120px;               /* ラベルの幅を揃えて見やすく */
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.form-row input[type="text"],
-.form-row input[type="date"],
-.form-row input[type="time"],
-.form-row select,
-.form-row textarea {
-  flex: 1;
-  max-width: 260px;
-  padding: 6px 8px;
-  border: 1px solid #c8e6c9;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-/* 備考だけは広めに */
-.form-row textarea {
-  max-width: 400px;
-  min-height: 70px;
-  resize: vertical;
-}
-
-/* フォーカス時の見え方 */
-.form-row input:focus,
-.form-row select:focus,
-.form-row textarea:focus {
-  outline: none;
-  border-color: #66bb6a;
-  box-shadow: 0 0 0 2px rgba(102,187,106,0.2);
-}
-
-/* 下のボタン行 */
-.form-actions {
-  margin-top: 18px;
-  display: flex;
-  gap: 10px;
-}
-
-/* 注意書き */
-.note {
-  font-size: 12px;
-  color: #555;
-  margin-top: 10px;
-}
-
-/* エラーメッセージ */
-.error-message {
-  color: #d32f2f;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-/* =========================
-   テーブル（一覧画面用）
-   ========================= */
-table {
-  border-collapse: collapse;
-  width: 90%;
-  margin: 20px auto;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-th, td {
-  border: 1px solid #c8e6c9;
-  padding: 8px 10px;
-  text-align: center;
-}
-
-th {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  font-weight: bold;
-}
-
-/* 行ホバーでどの行見てるか分かるように */
-tbody tr:hover {
-  background-color: #f1f8e9;
-}
-
-/* =========================
-   募集内容の確認画面用
-   ========================= */
-.confirm-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 20px 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  max-width: 600px;
-}
-
-/* ラベル＋値をテーブル風に */
-.confirm-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.confirm-table th,
-.confirm-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid #c8e6c9;
-  text-align: left;
-}
-
-.confirm-table th {
-  width: 140px;
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  font-weight: 600;
-}
-
-/* ボタン横並び */
-.confirm-actions {
-  margin-top: 18px;
-  display: flex;
-  gap: 10px;
-}
-
-/* =========================
-   募集一覧ページ用
-   ========================= */
-
-/* 一覧ページ全体の余白を少し広めに */
-.list-container {
-  max-width: 1000px;
-  margin: 10px auto 40px;
-  padding: 10px 20px;
-}
-
-/* 一覧はカードの枠を弱める（背景そのまま） */
-.list-card {
-  background-color: transparent;
-  box-shadow: none;
+  /* ✅ ここが肝：個別CSSが背景/枠線を持つ前提 */
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-radius: 0;
   padding: 0;
 }
 
-/* タイトルの位置ちょい上＆左寄せ感 */
-.list-card h2 {
-  margin-top: 10px;
+button:hover,
+.btn:hover{
+  filter: none; /* 共通で勝手に変えない */
 }
 
-/* テーブルを少し広げる */
-.list-card table {
-  width: 95%;
-}
-
-/* 一覧のボタン行 */
-.list-actions {
-  margin-top: 15px;
-  text-align: left;         /* 左寄せに戻す */
-}
-
-/* aタグボタンの見た目（共通ボタン流用） */
-.list-actions .btn {
-  display: inline-block;
-  padding: 10px 20px;
-}
-.list-actions .btn:hover {
-  background-color: #1b5e20;
+/* a.btn 用 */
+a.btn{
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =========================
-   新規登録ページ専用レイアウト
+   フォーム（共通）
+   ✅ checkbox を殺さん
    ========================= */
-.register-container {
-  max-width: 1100px;      /* 全体をちょい広めに */
-  margin: 10px auto 40px; /* 上の余白を少なめに */
-  padding: 0 20px;
+input, select, textarea{
+  font-family: inherit;
 }
 
-.register-card {
-  width: 100%;
-  padding: 20px 24px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06); /* ちょい控えめ */
+/* ✅ 絶対にやらない系（事故防止の明文化）
+   input[type=checkbox]{ display:none } とか禁止 */
+input[type="checkbox"]{
+  /* 何も指定しない（個別CSSで整える） */
 }
 
+/* =========================
+   共通 empty 表示
+   ✅ recruit側の .empty を潰さんように名前を変更
+   ========================= */
+.common-empty{
+  padding: 16px 12px;
+  color: var(--muted);
+  border: 1px dashed var(--bd);
+  border-radius: 10px;
+  margin-top: 12px;
+  background: #ffffff;
+}

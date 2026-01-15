@@ -11,93 +11,109 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user_id")
-    @SequenceGenerator(name = "seq_user_id", sequenceName = "seq_user_id", allocationSize = 1)
-    @Column(name="user_id")
-    
+    @SequenceGenerator(
+        name = "seq_user_id",
+        sequenceName = "seq_user_id",
+        allocationSize = 1
+    )
+    @Column(name = "user_id")
     private Integer userId;
 
-    @Column(name="name",nullable=false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name="email",nullable=false,unique=true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
-    
-    @Column(name="phone_number",nullable=false)
+
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
-    
-    @Column(name="password",nullable=false)
+
+    @Column(name = "password", nullable = false)
     private String password;
-    
-    @Column(name="school",nullable=false)
+
+    @Column(name = "school", nullable = false)
     private String school;
-    
-    
+
+    // ✅ プロフィールアイコンのパス
+    @Column(name = "icon_path")
+    private String iconPath;
+
     @ManyToOne
-    @JoinColumn(name = "club_id",referencedColumnName ="club_id",nullable=false)
+    @JoinColumn(
+        name = "club_id",
+        referencedColumnName = "club_id",
+        nullable = false
+    )
     private ClubMaster club;
 
+    // ===== getter / setter =====
+
     public Integer getUserId() {
-		return userId;
-	}
+        return userId;
+    }
 
-	public void setUserId(Integer userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
-	public String getSchool() {
-		return school;
-	}
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
-	public void setSchool(String school) {
-		this.school = school;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public ClubMaster getClub() {
-		return club;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setClub(ClubMaster club) {
-		this.club = club;
-	}
+    public String getSchool() {
+        return school;
+    }
 
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+    public void setSchool(String school) {
+        this.school = school;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getIconPath() {
+        return iconPath;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setIconPath(String iconPath) {
+        this.iconPath = iconPath;
+    }
 
+    public ClubMaster getClub() {
+        return club;
+    }
 
-
-	
-
+    public void setClub(ClubMaster club) {
+        this.club = club;
+    }
 }

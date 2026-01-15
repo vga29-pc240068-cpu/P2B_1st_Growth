@@ -13,11 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jp.ac._st_Growth.entity.ClubMaster;
-import jp.ac._st_Growth.entity.Recruitment;   // ★ 追加
 import jp.ac._st_Growth.entity.User;
 import jp.ac._st_Growth.form.Form;
 import jp.ac._st_Growth.repository.ClubMasterRepository;
-import jp.ac._st_Growth.repository.RecruitmentsRepository;
 import jp.ac._st_Growth.repository.UsersRepository;
 
 @Controller
@@ -25,9 +23,6 @@ public class LoginController {
 
     @Autowired
     private UsersRepository userRepository;
-
-    @Autowired
-    private RecruitmentsRepository recruitmentRepository;
 
     @Autowired
     private ClubMasterRepository clubMasterRepository;
@@ -45,34 +40,37 @@ public class LoginController {
         String email = form.getEmail();
         String password = form.getPassword();
 
-        // メール＆パスワードで検索
         List<User> users = userRepository.findByEmailAndPassword(email, password);
 
         if (users == null || users.isEmpty()) {
-            // 認証失敗
             model.addAttribute("error", "メールまたはパスワードが間違っています。");
             return "common/login/login";
         }
 
-        // ログインユーザー
         User loginUser = users.get(0);
 
-        // ★ セッションにユーザーID＆ユーザー本体を保存
+        // ✅ セッション保存（統一）
         session.setAttribute("userId", loginUser.getUserId());
         session.setAttribute("loginUser", loginUser);
 
-        // ★ 募集一覧を取得してトップ画面へ渡す
-        List<Recruitment> recruitments = recruitmentRepository.findAll();
-        model.addAttribute("recruitments", recruitments);
+        // ✅ ここが肝：一覧はRecruitmentController(/recruitment/all)に任せる
+        return "redirect:/recruitment/all";
+    }
 
-        // ★ ホーム画面を表示する
-        return "common/top";
+    // ==== トップ（古い導線が残っててもOKにする）====
+    @GetMapping("/common/top")
+    public String top(HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+
+        // ✅ ここも /recruitment/all に寄せる
+        return "redirect:/recruitment/all";
     }
 
     // ==== 新規登録画面表示へのリンク（古いパス）====
     @GetMapping("/newUser_regist")
     public String newUserRegist() {
-        return "user/regist/user_regist";
+        return "redirect:/register";
     }
 
     // ==== 新規登録画面表示 ====
@@ -93,7 +91,6 @@ public class LoginController {
             @RequestParam("password") String password,
             Model model) {
 
-        // メール重複チェック
         Optional<User> existUser = userRepository.findByEmail(email);
         if (existUser.isPresent()) {
             model.addAttribute("error", "このメールアドレスは既に登録されています。");
@@ -101,7 +98,6 @@ public class LoginController {
             return "user/regist/user_regist";
         }
 
-        // 新規ユーザー作成
         User user = new User();
         user.setName(name);
         user.setSchool(school);
@@ -109,7 +105,7 @@ public class LoginController {
         user.setEmail(email);
         user.setPassword(password);
 
-        // 部活動セット（ManyToOne）
+        // ✅ club はIDだけセットでOK
         ClubMaster club = new ClubMaster();
         club.setClubId(clubId);
         user.setClub(club);
@@ -117,8 +113,6 @@ public class LoginController {
         userRepository.save(user);
 
         model.addAttribute("message", "登録が完了しました！ログインしてください");
-
         return "common/login/login";
     }
-
 }

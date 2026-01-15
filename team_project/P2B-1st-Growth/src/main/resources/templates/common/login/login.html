@@ -1,24 +1,103 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" th:href="@{/css/common/common.css}">
-    <meta charset="UTF-8">
-    <title>ログイン / 新規登録</title>
+  <meta charset="UTF-8">
+  <title>ログイン / 新規登録</title>
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <style>
+    /* ✅ login画面だけ守る（共通CSSの.btnやbuttonに負けん） */
+    .login-wrap{
+      max-width: 520px;
+      margin: 24px 16px;
+    }
+    .login-title{
+      font-size: 32px;
+      font-weight: 1000;
+      color: #2e7d32;
+      margin: 0 0 14px;
+    }
+    .login-form{
+      display: grid;
+      gap: 12px;
+    }
+    .login-row{
+      display: grid;
+      gap: 6px;
+    }
+    .login-label{
+      font-weight: 900;
+      color: #234f28;
+      font-size: 13px;
+    }
+    .login-input{
+      width: 100%;
+      max-width: 320px;
+      padding: 8px 10px;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      background: #fff;
+      color: #234f28;
+      font-size: 14px;
+    }
+    .login-actions{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .login-btn{
+      background: #2e7d32 !important;
+      color: #fff !important;
+      border: none !important;
+      border-radius: 6px !important;
+      padding: 10px 18px !important;
+      font-weight: 900 !important;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-btn:hover{ filter: brightness(.95); }
+    .login-btn.secondary{
+      background: #ffffff !important;
+      color: #2e7d32 !important;
+      border: 1px solid #c8e6c9 !important;
+    }
+    .login-error{
+      margin-top: 10px;
+      color: #c62828;
+      font-weight: 900;
+    }
+  </style>
 </head>
-<body>
-    <h1>ログイン</h1>
 
-    <form th:action="@{/login}" method="post">
-        <p>メールアドレス：<input type="email" name="email" required></p>
-        <p>パスワード：<input type="password" name="password" required></p>
-        <button type="submit">ログイン</button>
+<body>
+  <div class="login-wrap">
+    <h1 class="login-title">ログイン</h1>
+
+    <form th:action="@{/login}" method="post" class="login-form">
+      <div class="login-row">
+        <div class="login-label">メールアドレス</div>
+        <input class="login-input" type="email" name="email" required>
+      </div>
+
+      <div class="login-row">
+        <div class="login-label">パスワード</div>
+        <input class="login-input" type="password" name="password" required>
+      </div>
+
+      <div class="login-actions">
+        <button class="login-btn" type="submit">ログイン</button>
+      </div>
     </form>
 
-    <!-- ★ 新規登録ボタン（リンク付き） -->
-	<form th:action="@{/register}" method="get">
-	    <button type="submit">新規登録</button>
-	</form>
+    <!-- ✅ 新規登録（GET） -->
+    <form th:action="@{/register}" method="get" style="margin-top:10px;">
+      <button class="login-btn secondary" type="submit">新規登録</button>
+    </form>
 
-    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+    <p class="login-error" th:if="${error}" th:text="${error}"></p>
+  </div>
 </body>
 </html>

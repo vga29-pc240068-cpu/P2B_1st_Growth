@@ -1,77 +1,173 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>新規ユーザー登録</title>
-    <link rel="stylesheet" th:href="@{/css/common/common.css}">
-    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+  <meta charset="UTF-8">
+  <title>新規ユーザー登録</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/auth/register.css}">
 </head>
 <body>
 
-<div class="container register-container">
-    <div class="form-card register-card">
+  <div class="auth-page">
+    <div class="auth-card">
 
-        <!-- タイトルはいらないってことやけん削除 -->
+      <div class="auth-head">
+        <h1 class="auth-title">新規ユーザー登録</h1>
+        <p class="auth-sub">必要な情報を入力してください</p>
+      </div>
 
-        <!-- エラーメッセージ -->
-        <p class="error-message" th:if="${error}" th:text="${error}"></p>
+      <!-- サーバー側エラー（既存仕様は残します） -->
+      <p class="error-message" th:if="${error}" th:text="${error}"></p>
 
-        <form th:action="@{/register}" method="post">
+      <!-- ✅ ブラウザ標準バリデーションを使わず、JSで表示します -->
+      <form class="auth-form" th:action="@{/register}" method="post" novalidate>
 
-            <!-- 名前 -->
-            <div class="form-row">
-                <label>名前：</label>
-                <input type="text" name="name" required>
-            </div>
+        <!-- 名前 -->
+        <div class="field">
+          <label class="label">名前</label>
+          <input class="input" type="text" name="name" required>
+          <p class="field-error" data-for="name"></p>
+        </div>
 
-            <!-- 所属学校 -->
-            <div class="form-row">
-                <label>所属学校：</label>
-                <input type="text" name="school" required>
-            </div>
+        <!-- 所属学校 -->
+        <div class="field">
+          <label class="label">所属学校</label>
+          <input class="input" type="text" name="school" required>
+          <p class="field-error" data-for="school"></p>
+        </div>
 
-            <!-- 部活動 -->
-            <div class="form-row">
-                <label>部活動：</label>
-                <select name="clubId" required>
-                    <option value="">選択してください</option>
-                    <option th:each="c : ${clubMasterList}"
-                            th:value="${c.clubId}"
-                            th:text="${c.clubName}">
-                    </option>
-                </select>
-            </div>
+        <!-- 部活動 -->
+        <div class="field">
+          <label class="label">部活動</label>
+          <select class="select" name="clubId" required>
+            <option value="">選択してください</option>
+            <option th:each="c : ${clubMasterList}"
+                    th:value="${c.clubId}"
+                    th:text="${c.clubName}">
+            </option>
+          </select>
+          <p class="field-error" data-for="clubId"></p>
+        </div>
 
-            <!-- 電話番号 -->
-            <div class="form-row">
-                <label>電話番号：</label>
-                <input type="text" name="phoneNumber" required>
-            </div>
+        <!-- 電話番号 -->
+        <div class="field">
+          <label class="label">電話番号</label>
+          <input class="input" type="text" name="phoneNumber" required>
+          <p class="field-error" data-for="phoneNumber"></p>
+        </div>
 
-            <!-- メール -->
-            <div class="form-row">
-                <label>メールアドレス：</label>
-                <input type="email" name="email" required>
-            </div>
+        <!-- メール -->
+        <div class="field">
+          <label class="label">メールアドレス</label>
+          <input class="input" type="email" name="email" required>
+          <p class="field-error" data-for="email"></p>
+        </div>
 
-            <!-- パスワード -->
-            <div class="form-row">
-                <label>パスワード：</label>
-                <input type="password" name="password" required>
-            </div>
+        <!-- パスワード -->
+        <div class="field">
+          <label class="label">パスワード</label>
+          <input class="input" type="password" name="password" required>
+          <p class="field-error" data-for="password"></p>
+        </div>
 
-            <!-- ボタン -->
-            <div class="form-actions">
-                <button type="submit">登録する</button>
-                <a th:href="@{/login}" class="btn btn-sub">ログイン画面へ</a>
-            </div>
+        <!-- ボタン -->
+        <button class="btn-primary" type="submit">登録する</button>
 
-        </form>
+        <div class="auth-links">
+          <a th:href="@{/login}">ログイン画面へ</a>
+        </div>
+
+      </form>
+
     </div>
-</div>
+  </div>
 
-<!-- フッター -->
-<div th:replace="common/footer :: footer"></div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector(".auth-form");
+      if (!form) return;
+
+      const messages = {
+        name: "名前を入力してください",
+        school: "所属学校を入力してください",
+        clubId: "部活動を選択してください",
+        phoneNumber: "電話番号を入力してください",
+        email: "メールアドレスを入力してください",
+        password: "パスワードを入力してください"
+      };
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      const getField = (name) => form.querySelector(`[name="${name}"]`);
+      const getErrorEl = (name) => form.querySelector(`.field-error[data-for="${name}"]`);
+
+      const clearError = (name) => {
+        const el = getErrorEl(name);
+        const field = getField(name);
+        if (el) el.textContent = "";
+        if (field) field.classList.remove("is-error");
+      };
+
+      const setError = (name, msg) => {
+        const el = getErrorEl(name);
+        const field = getField(name);
+        if (el) el.textContent = msg;
+        if (field) field.classList.add("is-error");
+      };
+
+      const validate = () => {
+        let ok = true;
+
+        // ✅ すべてのエラーを初期化します
+        Object.keys(messages).forEach(clearError);
+
+        // ✅ 必須チェックを行います
+        for (const name of Object.keys(messages)) {
+          const field = getField(name);
+          if (!field) continue;
+
+          const value = (field.value ?? "").trim();
+
+          // selectは空文字が未選択です
+          if (value.length === 0) {
+            setError(name, messages[name]);
+            ok = false;
+          }
+        }
+
+        // ✅ メール形式をチェックします（空の場合は必須で引っかかるため除外します）
+        const email = (getField("email")?.value ?? "").trim();
+        if (email.length > 0 && !emailRegex.test(email)) {
+          setError("email", "メールアドレスの形式が違うみたいやけん確認してね");
+          ok = false;
+        }
+
+        return ok;
+      };
+
+      // ✅ 送信時にチェックして、NGなら送信を止めます
+      form.addEventListener("submit", (e) => {
+        if (!validate()) {
+          e.preventDefault();
+        }
+      });
+
+      // ✅ 入力したらその項目のエラーを消します
+      Object.keys(messages).forEach((name) => {
+        const field = getField(name);
+        if (!field) return;
+
+        field.addEventListener("input", () => clearError(name));
+        field.addEventListener("change", () => clearError(name));
+        field.addEventListener("blur", () => {
+          // ✅ 離れたタイミングでも軽くチェックします
+          const v = (field.value ?? "").trim();
+          if (v.length === 0) setError(name, messages[name]);
+        });
+      });
+    });
+  </script>
 
 </body>
 </html>

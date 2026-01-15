@@ -1,53 +1,116 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{common/layout :: html(
+        title=${'応募一覧'},
+        pageCss=~{::link},
+        body=~{::section}
+      )}">
+
 <head>
-	<link rel="stylesheet" th:href="@{/css/common/common.css}">
-	
-	<link rel="stylesheet" th:href="@{/css/footer/footer.css}">
-	
-  <meta charset="UTF-8">
-  <title>応募一覧</title>
+  <!-- ✅ layout側の pageCss=~{::link} に刺さる -->
+  <link th:fragment="link" rel="stylesheet" th:href="@{/css/apply/apply_list.css}">
 </head>
-<body>
-  <h1>応募一覧</h1>
 
-  <table border="1">
-    <thead>
-      <tr>
-        <th>応募ID</th>
-        <th>募集ID</th>
-        <th>応募日</th>
-        <th>希望日</th>
-        <th>時間</th>
-        <th>場所</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr th:each="a : ${applications}">
-        <td th:text="${a.applyId}"></td>
-        <td th:text="${a.recruitment.recruitId}"></td>
-        <td th:text="${a.applyDate}"></td>
-        <td th:text="${a.recruitment.matchDate}"></td>
-        <td th:text="${a.recruitment.matchTime}"></td>
-        <td th:text="${a.recruitment.location}"></td>
+<section th:fragment="section">
+  <div class="pageWrap">
 
-        <!-- ★ ここ追加（応募確認画面へ） -->
-        <td>
-            <a th:href="@{/user/chat/apply_possibility(applyId=${a.applyId})}">
-                確認する
-            </a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <div class="pageHead">
+      <h1 class="pageTitle">応募一覧</h1>
+      <p class="pageSub">応募した一覧画面を確認できます。</p>
+    </div>
 
-  <p th:if="${#lists.isEmpty(applications)}">現在、応募はありません。</p>
+    <p class="emptyText" th:if="${#lists.isEmpty(applications)}">
+      現在、応募はありません。
+    </p>
 
+    <!-- ✅ 一覧（右側なし） -->
+    <div class="applyList" th:if="${not #lists.isEmpty(applications)}">
 
+      <article class="applyCard"
+               th:each="a : ${applications}"
+               th:with="
+                 rec=${a.recruitment},
+                 club=${rec != null ? rec.clubMaster : null},
+                 clubName=${(club != null and club.clubName != null and !#strings.isEmpty(club.clubName)) ? club.clubName : '部活'},
+                 rtitle=${(rec != null and rec.title != null and !#strings.isEmpty(rec.title)) ? rec.title : '募集タイトル'},
+                 start=${rec != null ? rec.startDateTime : null},
+                 end=${rec != null ? rec.endDateTime : null},
+                 place=${(rec != null and rec.locationText != null and !#strings.isEmpty(rec.locationText)) ? rec.locationText : ''},
+                 u=${rec != null ? rec.user : null},
+                 icon=${(u != null and u.iconPath != null and !#strings.isEmpty(u.iconPath)) ? u.iconPath : ''},
+                 initial=${(u != null and u.name != null and !#strings.isEmpty(u.name)) ? #strings.substring(u.name,0,1) : '教'},
+                 recruitId=${rec != null ? rec.recruitId : ''},
+                 applyId=${a.applyId},
+                 applyDate=${a.applyDate}
+               ">
 
-<!--  フッター-->
-  <div th:replace="common/footer :: footer"></div>
+        <!-- ✅ 上段（アイコン＋タイトル＋ボタン） -->
+        <div class="cardTop">
 
-</body>
+          <div class="cardLeft">
+            <div class="cardAvatar" aria-hidden="true">
+              <img class="cardIcon" th:if="${icon != ''}" th:src="@{${icon}}" alt="アイコン">
+              <span class="cardInitial" th:unless="${icon != ''}" th:text="${initial}">教</span>
+            </div>
+
+            <div class="cardTitleBox">
+              <div class="cardTitle">
+                <span th:text="${clubName}">部活</span>
+                <span class="dot">・</span>
+                <span th:text="${rtitle}">募集タイトル</span>
+              </div>
+
+              <div class="cardSub">
+                応募ID <span th:text="${applyId}">-</span>
+                <span class="subDot">・</span>
+                募集ID <span th:text="${recruitId}">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ✅ 詳細へ（承認/拒否なしの詳細画面） -->
+          <a class="cardBtn"
+             th:href="@{/user/apply/detail(applyId=${applyId})}">
+            確認する
+          </a>
+
+        </div>
+
+        <!-- ✅ 横線 -->
+        <div class="cardDivider" aria-hidden="true"></div>
+
+        <!-- ✅ 下段（情報） -->
+        <div class="cardBottom">
+
+          <div class="infoRow">
+            <div class="infoLabel">日程</div>
+            <div class="infoValue">
+              <span th:text="${start != null ? #temporals.format(start,'M/d(E)') : '未定'}">未定</span>
+              <span class="sep"></span>
+              <span th:text="${start != null ? #temporals.format(start,'H:mm') : ''}"></span>
+              <span class="sep" th:if="${end != null}">〜</span>
+              <span th:text="${end != null ? #temporals.format(end,'H:mm') : ''}"></span>
+            </div>
+          </div>
+
+          <div class="infoRow">
+            <div class="infoLabel">場所</div>
+            <div class="infoValue"
+                 th:text="${(place != null and !#strings.isEmpty(place)) ? place : '未定'}">未定</div>
+          </div>
+
+          <div class="infoRow">
+            <div class="infoLabel">応募日</div>
+            <div class="infoValue"
+                 th:text="${applyDate != null ? #dates.format(applyDate,'yyyy-MM-dd') : '未定'}">未定</div>
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </div>
+</section>
 </html>

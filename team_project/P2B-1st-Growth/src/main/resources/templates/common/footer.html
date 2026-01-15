@@ -1,10 +1,93 @@
-<!-- 共通フッター断片：余計な <!DOCTYPE> / <html> / <head> / <body> は不要 -->
+<!-- 共通フッター断片：SVG風アイコン版 -->
 <div th:fragment="footer">
-  <div class="footer">
-    <a th:href="@{/common/top}" class="footer-btn">ホーム</a>
-	<a th:href="@{/recruitment/list}" class="footer-btn">募集</a>
-    <a th:href="@{/user/apply/list}" class="footer-btn">応募</a>
-	<a th:href="@{/user/chat/list}" class="footer-btn">チャット</a>
-    <a th:href="@{/common/menu}" class="footer-btn">メニュー</a>
+
+  <!-- ✅ メニューモーダル（最初は非表示） -->
+  <div class="menu-modal" id="menuModal" style="display:none;">
+    <div class="menu-box" id="menuBox" role="dialog" aria-modal="true">
+      <a th:href="@{/user/profile}">プロフィール</a>
+      <a th:href="@{/logout/confirm}">ログアウト</a>
+    </div>
   </div>
+
+  <!-- ===== フッター本体 ===== -->
+  <div class="footer">
+	
+	
+    <a th:href="@{/common/top}" class="footer-btn">
+      <svg viewBox="0 0 24 24" class="ico">
+        <path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>
+      </svg>
+      <span class="txt">ホーム</span>
+    </a>
+	
+	
+    <a th:href="@{/recruitment/list}" class="footer-btn">
+      <svg viewBox="0 0 24 24" class="ico">
+        <rect x="6" y="4" width="12" height="16" rx="2"/>
+        <path d="M9 8h6M9 12h6M9 16h4"/>
+      </svg>
+      <span class="txt">募集</span>
+    </a>
+
+    <a th:href="@{/user/apply/list}" class="footer-btn">
+      <svg viewBox="0 0 24 24" class="ico">
+        <path d="M3 7l9 6 9-6v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <path d="M21 7l-9 6-9-6"/>
+      </svg>
+      <span class="txt">応募</span>
+    </a>
+
+    <a th:href="@{/user/chat/list}" class="footer-btn">
+      <svg viewBox="0 0 24 24" class="ico">
+        <path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-5a8 8 0 0 1 18-6z"/>
+        <path d="M8 12h.01M12 12h.01M16 12h.01"/>
+      </svg>
+      <span class="txt">チャット</span>
+    </a>
+
+    <!-- ✅ 右端メニュー -->
+    <button type="button" class="footer-btn" id="menuOpenBtn">
+      <svg viewBox="0 0 24 24" class="ico">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+      <span class="txt">メニュー</span>
+    </button>
+
+  </div>
+
+  <!-- ===== 既存JSそのまま ===== -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const modal = document.getElementById("menuModal");
+      const openBtn = document.getElementById("menuOpenBtn");
+      const box = document.getElementById("menuBox");
+
+      if (!modal || !openBtn || !box) return;
+
+      const open = () => {
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      };
+
+      const close = () => {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      };
+
+      openBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        open();
+      });
+
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) close();
+      });
+      box.addEventListener("click", (e) => e.stopPropagation());
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+      });
+    });
+  </script>
+
 </div>

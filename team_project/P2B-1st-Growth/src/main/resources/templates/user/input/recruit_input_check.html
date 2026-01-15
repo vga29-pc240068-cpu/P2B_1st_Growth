@@ -1,75 +1,99 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>募集内容の確認</title>
-    <link rel="stylesheet" th:href="@{/css/common/common.css}">
-    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+  <meta charset="UTF-8">
+  <title>募集内容の確認</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+  <link rel="stylesheet" th:href="@{/css/recruit/recruit_input_check.css}">
 </head>
 <body>
 
-<div class="container">
-    <h2>募集内容の確認</h2>
+<div class="page"
+     th:with="
+       r=${recruitment},
+       club=${r != null ? r.clubMaster : null},
+       clubId=${club != null ? club.clubId : null}
+     ">
 
-    <div class="confirm-card">
-        <table class="confirm-table">
-            <tr>
-                <th>部活動</th>
-                <td th:text="${club.clubName}"></td>
-            </tr>
-            <tr>
-                <th>希望日</th>
-                <td th:text="${matchDate}"></td>
-            </tr>
-            <tr>
-                <th>時間</th>
-                <td th:text="${matchTime}"></td>
-            </tr>
-            <tr>
-                <th>場所</th>
-                <td th:text="${location}"></td>
-            </tr>
-            <tr>
-                <th>募集の目的</th>
-                <td th:text="${purpose}"></td>
-            </tr>
-            <tr>
-                <th>活動レベル</th>
-                <td th:text="${skillLevel}"></td>
-            </tr>
-            <tr>
-                <th>参加条件</th>
-                <td th:text="${conditions}"></td>
-            </tr>
-            <tr>
-                <th>備考</th>
-                <td th:text="${remarks}"></td>
-            </tr>
-        </table>
+  <div class="card">
 
-        <div class="confirm-actions">
-            <!-- 登録ボタン -->
-            <form th:action="@{/recruitment/regist}" method="post">
-                <input type="hidden" name="clubId"     th:value="${club.clubId}">
-                <input type="hidden" name="matchDate"  th:value="${matchDate}">
-                <input type="hidden" name="matchTime"  th:value="${matchTime}">
-                <input type="hidden" name="location"   th:value="${location}">
-                <input type="hidden" name="purpose"    th:value="${purpose}">
-                <input type="hidden" name="skillLevel" th:value="${skillLevel}">
-                <input type="hidden" name="conditions" th:value="${conditions}">
-                <input type="hidden" name="remarks"    th:value="${remarks}">
-                <button type="submit">この内容で登録する</button>
-            </form>
+    <!-- ヘッダー -->
+    <div class="cardHead">
+      <div class="cardTitle">募集内容の確認</div>
 
-            <!-- 修正ボタン -->
-            <form th:action="@{/recruitment/input}" method="get">
-                <button type="submit" class="btn-sub">修正する</button>
-            </form>
-        </div>
+      <!-- 要点チップ -->
+      <div class="chips">
+        <span class="chip chip-main"
+              th:text="${club != null ? club.clubName : '部活未設定'}">部活未設定</span>
+
+        <span class="chip"
+              th:text="${r != null && r.capacityRange != null ? r.capacityRange.label : '人数未設定'}">人数未設定</span>
+
+        <span class="chip"
+              th:text="${r != null && r.locationText != null && !#strings.isEmpty(r.locationText) ? '場所あり' : '場所未定'}">場所未定</span>
+      </div>
     </div>
+
+    <!-- 本文 -->
+    <dl class="kv">
+
+      <div class="row">
+        <dt>部活動</dt>
+        <dd th:text="${club != null ? club.clubName : '未設定'}">未設定</dd>
+      </div>
+
+      <div class="row">
+        <dt>タイトル</dt>
+        <dd th:text="${r != null && r.title != null && !#strings.isEmpty(r.title) ? r.title : '未設定'}">未設定</dd>
+      </div>
+
+      <div class="row">
+        <dt>日程</dt>
+        <dd class="time">
+          <span th:text="${r != null && r.startDateTime != null ? #temporals.format(r.startDateTime,'yyyy/MM/dd HH:mm') : '未設定'}">未設定</span>
+          <span class="sep">〜</span>
+          <span th:text="${r != null && r.endDateTime != null ? #temporals.format(r.endDateTime,'HH:mm') : '未設定'}">未設定</span>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt>人数</dt>
+        <dd th:text="${r != null && r.capacityRange != null ? r.capacityRange.label : '未設定'}">未設定</dd>
+      </div>
+
+      <div class="row">
+        <dt>場所</dt>
+        <dd class="wrap"
+            th:text="${r != null && r.locationText != null && !#strings.isEmpty(r.locationText) ? r.locationText : '未定'}">未定</dd>
+      </div>
+
+      <div class="row">
+        <dt>備考</dt>
+        <dd class="wrap"
+            th:text="${r != null && r.notes != null && !#strings.isEmpty(r.notes) ? r.notes : 'なし'}">なし</dd>
+      </div>
+
+    </dl>
+
+    <!-- ボタン -->
+    <div class="actions">
+
+      <!-- ✅ ここが重要：clubId を hidden で必ず送る -->
+      <form th:action="@{/recruitment/regist}" method="post">
+        <input type="hidden" name="clubId" th:value="${clubId}">
+        <button type="submit" class="btnPrimary">この内容で登録</button>
+      </form>
+
+      <form th:action="@{/recruitment/input}" method="get">
+        <button type="submit" class="btnSecondary">修正する</button>
+      </form>
+    </div>
+
+  </div>
 </div>
 
-<!-- フッター -->
 <div th:replace="common/footer :: footer"></div>
 
 </body>

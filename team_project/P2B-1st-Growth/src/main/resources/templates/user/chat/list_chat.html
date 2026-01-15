@@ -1,62 +1,115 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>チャット一覧</title>
-    <link rel="stylesheet" th:href="@{/css/common/common.css}">
-    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+  <meta charset="UTF-8">
+  <title>チャット一覧</title>
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/chat/chat_list.css}">
+  <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
 </head>
 <body>
 
-<h2>チャット一覧</h2>
+<div class="chatListWrap">
+  <h2 class="chatListTitle">チャット</h2>
 
-<table border="1">
-    <thead>
-        <tr>
-            <!-- デバッグ用：applyId 列追加 -->
-            <th>applyId（デバッグ）</th>
-            <th>募集タイトル</th>
-            <th>相手</th>
-            <th>日時</th>
-            <th>チャットへ</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr th:each="a : ${applications}">
-            <!-- ★ ここがさっきのデバッグ列 -->
-            <td>
-                <span th:text="${a.applyId}">?</span>
-            </td>
+  <div class="empty" th:if="${applications == null or #lists.isEmpty(applications)}">
+    チャットはまだありません。
+  </div>
 
-            <!-- 募集タイトル（部活名） -->
-            <td th:text="${a.recruitment.clubMaster.clubName}"></td>
+  <div th:if="${applications != null and !#lists.isEmpty(applications)}">
+    <div th:each="a : ${applications}"
+         th:with="
+           st=${a != null and a.status != null ? a.status : 0},
+           rec=${a != null ? a.recruitment : null},
+           recUser=${rec != null ? rec.user : null},
+           loginId=${loginUserId},
+           isOwner=${recUser != null and loginId != null and loginId == recUser.userId},
+           isApplicant=${a != null and a.user != null and loginId != null and loginId == a.user.userId},
+           partner=${isApplicant ? recUser : (isOwner ? a.user : null)},
+           partnerName=${(partner != null and partner.name != null and !#strings.isEmpty(partner.name)) ? partner.name : '不明'},
+           icon=${(partner != null and partner.iconPath != null and !#strings.isEmpty(partner.iconPath)) ? partner.iconPath : '/icon/default.png'},
+           clubName=${(rec != null and rec.clubMaster != null and rec.clubMaster.clubName != null and !#strings.isEmpty(rec.clubMaster.clubName)) ? rec.clubMaster.clubName : '不明'},
+           dateText=${(a != null and a.applyDate != null) ? #dates.format(a.applyDate, 'yyyy/MM/dd') : ''}
+         ">
 
-            <!-- 相手 -->
-            <td>
-                <!-- ログインしてるのが応募者なら相手は募集者 -->
-                <span th:if="${loginUserId == a.user.userId}"
-                      th:text="${a.recruitment.user.name}"></span>
+      <!-- ✅ 募集者：未承認（ボタン無し／行クリックでチャットへ） -->
+      <div class="chatRow isLink"
+           th:if="${isOwner and st == 0}"
+           th:attr="data-href=@{/user/chat/room(applyId=${a.applyId})}">
+        <img class="avatar" th:src="@{${icon}}" alt="icon">
 
-                <!-- ログインしてるのが募集者なら相手は応募者 -->
-                <span th:if="${loginUserId == a.recruitment.user.userId}"
-                      th:text="${a.user.name}"></span>
-            </td>
+        <div class="mid">
+          <div class="name" th:text="${partnerName}">不明</div>
+          <div class="sub">
+            <span th:text="${clubName}">不明</span>・未承認（チャットで確認）
+          </div>
+        </div>
 
-            <!-- 日時 -->
-            <td th:text="${a.applyDate}"></td>
+        <div class="right">
+          <div class="date" th:text="${dateText}"></div>
+          <span class="badge gray">未承認</span>
+        </div>
+      </div>
 
-            <!-- チャットへ -->
-            <td>
-                <a th:href="@{/user/chat/room(applyId=${a.applyId})}">
-                    チャットに入る
-                </a>
-            </td>
-        </tr>
-    </tbody>
-</table>
+      <!-- ✅ 承認済み → チャットへ -->
+      <div class="chatRow isLink"
+           th:if="${st == 1 and (isOwner or isApplicant)}"
+           th:attr="data-href=@{/user/chat/room(applyId=${a.applyId})}">
+        <img class="avatar" th:src="@{${icon}}" alt="icon">
+        <div class="mid">
+          <div class="name" th:text="${partnerName}">不明</div>
+          <div class="sub"><span th:text="${clubName}">不明</span>・チャットに入る</div>
+        </div>
+        <div class="right">
+          <div class="date" th:text="${dateText}"></div>
+          <span class="badge">開く</span>
+        </div>
+      </div>
 
-<!-- フッター -->
-<div th:replace="common/footer :: footer"></div>
+      <!-- ✅ 応募者：未承認（押したらチャットへ＝読むだけ） -->
+      <div class="chatRow isLink"
+           th:if="${isApplicant and st == 0}"
+           th:attr="data-href=@{/user/chat/room(applyId=${a.applyId})}">
+        <img class="avatar" th:src="@{${icon}}" alt="icon">
+        <div class="mid">
+          <div class="name" th:text="${partnerName}">不明</div>
+          <div class="sub"><span th:text="${clubName}">不明</span>・承認待ち（チャットで確認）</div>
+        </div>
+        <div class="right">
+          <div class="date" th:text="${dateText}"></div>
+          <span class="badge gray">承認待ち</span>
+        </div>
+      </div>
 
+      <!-- ✅ 拒否（押せない） -->
+      <div class="chatRow plain"
+           th:if="${(isOwner or isApplicant) and st == 2}">
+        <img class="avatar" th:src="@{${icon}}" alt="icon">
+        <div class="mid">
+          <div class="name" th:text="${partnerName}">不明</div>
+          <div class="sub"><span th:text="${clubName}">不明</span>・拒否</div>
+        </div>
+        <div class="right">
+          <div class="date" th:text="${dateText}"></div>
+          <span class="badge red"
+                th:text="${isOwner ? '拒否済み' : '拒否されました'}">拒否</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ 行クリックで遷移
+  document.addEventListener('click', (e) => {
+    const row = e.target.closest('.chatRow.isLink');
+    if (!row) return;
+    const href = row.getAttribute('data-href');
+    if (href) location.href = href;
+  });
+</script>
+
+<div th:replace="~{common/footer :: footer}"></div>
 </body>
 </html>

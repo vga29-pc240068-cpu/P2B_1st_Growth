@@ -1,68 +1,309 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
   <meta charset="UTF-8">
   <title>チャット</title>
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/chat/chat_room.css}">
   <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
 </head>
 <body>
 
-  <!-- タイトル＋承認拒否ボタン -->
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <h2>チャットルーム</h2>
+  <div class="chatRoomWrap">
 
-    <!-- 募集者だけ承認/拒否できる（null保険込み） -->
-    <div th:if="${app != null and app.recruitment != null and app.recruitment.user != null
-                 and loginUserId != null and loginUserId == app.recruitment.user.userId}">
-      <a th:href="@{/user/chat/approve_check(applyId=${app.applyId})}">承認</a>
-      <a th:href="@{/user/chat/deny(applyId=${app.applyId})}">拒否</a>
+    <!-- ヘッダー -->
+    <div class="chatHeader">
+
+      <div class="chatHeadLeft">
+        <div class="chatTitle">チャットルーム</div>
+
+        <div class="chatMeta">
+          <span class="chatMetaItem">
+            募集名：
+            <span th:text="${app != null and app.recruitment != null and app.recruitment.clubMaster != null
+                            ? app.recruitment.clubMaster.clubName
+                            : '不明'}">不明</span>
+          </span>
+
+          <span class="chatMetaDot">・</span>
+
+          <span class="chatMetaItem">
+            応募者：
+            <span th:text="${app != null and app.user != null ? app.user.name : '不明'}">不明</span>
+          </span>
+
+          <span class="chatMetaDot" th:if="${status != null}">・</span>
+          <span class="chatMetaItem metaBadge"
+                th:if="${status != null}"
+                th:classappend="${status == 1} ? ' metaBadgeOk' : ''"
+                th:text="${status == 0 ? '未承認' : (status == 1 ? '承認済み' : '拒否')}">未承認</span>
+        </div>
+      </div>
+
+      <!-- ✅ 募集者のみ：未承認のときだけ 承認/拒否/一覧へ -->
+      <div class="chatHeadRight"
+           th:if="${app != null and isRecruitOwner == true and status == 0}">
+        <a class="btnChip"
+           th:href="@{/user/chat/approve_do(applyId=${app.applyId})}">
+          承認
+        </a>
+
+        <a class="btnChip btnChipDanger"
+           th:href="@{/user/chat/deny(applyId=${app.applyId})}">
+          拒否
+        </a>
+
+        <a class="btnChip btnChipGhost"
+           th:href="@{/user/chat/list}">
+          一覧へ
+        </a>
+      </div>
+
+      <!-- ✅ それ以外は一覧へだけ -->
+      <a class="btn btn-sub"
+         th:if="${!(app != null and isRecruitOwner == true and status == 0)}"
+         th:href="@{/user/chat/list}">
+        一覧へ
+      </a>
+
     </div>
-  </div>
 
-  <!-- 応募情報 -->
-  <p>
-    募集名：
-    <span th:text="${app != null ? (app.recruitment != null ? (app.recruitment.clubMaster != null ? (app.recruitment.clubMaster.clubName ?: '不明') : '不明') : '不明') : '不明'}"></span><br>
-
-    応募者：
-    <span th:text="${app != null ? (app.user != null ? (app.user.name ?: '不明') : '不明') : '不明'}"></span>
-  </p>
-
-  <hr>
-
-  <!-- チャット一覧（nullでも落ちない） -->
-  <div th:if="${chats != null and !#lists.isEmpty(chats)}">
-    <div th:each="c : ${chats}">
-      <p>
-        <strong th:text="${c != null && c.sender != null ? (c.sender.name ?: '不明') : '不明'}"></strong>：
-        <span th:text="${c != null ? (c.message ?: '') : ''}"></span><br>
-        <small th:text="${c != null ? c.transmissionDate : ''}"></small>
-      </p>
-      <hr>
+    <!-- ✅ 未承認 안내（全員見える） -->
+    <div class="pendingNote" th:if="${status == 0}">
+      未承認やけん、応募者だけ送信OKたい。募集者は承認するまで送れんばい♡
     </div>
+
+    <!-- ✅ 拒否 안내（念のため） -->
+    <div class="chatEmpty" th:if="${status == 2}">
+      この応募は拒否済みたい♡
+    </div>
+
+    <!-- メッセージ一覧 -->
+    <div class="chatBody" id="chatBody">
+
+      <div class="chatEmpty" th:if="${chats == null or #lists.isEmpty(chats)}">
+        まだメッセージはないよ〜
+      </div>
+
+      <div th:if="${chats != null and !#lists.isEmpty(chats)}">
+        <div th:each="c : ${chats}"
+             th:with="
+                isMe=${c != null and c.sender != null and loginUserId != null and c.sender.userId == loginUserId},
+                icon=${(c != null and c.sender != null and c.sender.iconPath != null and !#strings.isEmpty(c.sender.iconPath))
+                      ? c.sender.iconPath : '/icon/default.png'},
+                timeText=${(c != null and c.transmissionDate != null) ? #dates.format(c.transmissionDate, 'yyyy/MM/dd HH:mm') : ''}
+             "
+             class="msgRow"
+             th:classappend="${isMe} ? ' me' : ' you'">
+
+          <!-- ✅ 相手だけアイコン -->
+          <img class="msgAvatar"
+               th:if="${!isMe}"
+               th:src="@{${icon}}"
+               alt="プロフィールアイコン"/>
+
+          <div class="msgCol">
+
+            <!-- ✅ 相手だけ名前 -->
+            <div class="msgName"
+                 th:if="${!isMe}"
+                 th:text="${c != null and c.sender != null ? c.sender.name : '不明'}">不明</div>
+
+            <!-- ✅ 吹き出し（テキスト / 画像 / 書類）＋時間 -->
+            <div class="msgLine">
+
+              <!-- テキスト -->
+              <div class="bubble"
+                   th:if="${c != null and c.message != null and !#strings.isEmpty(c.message)}"
+                   th:text="${c.message}"></div>
+
+              <!-- ✅ 画像：hrefはダミーにして確実にモーダルだけで開く -->
+              <a class="imgBubble js-open-img"
+                 th:if="${c != null and c.imagePath != null and !#strings.isEmpty(c.imagePath)}"
+                 href="javascript:void(0);"
+                 th:attr="data-full=@{${c.imagePath}}">
+                <img class="chatImg" th:src="@{${c.imagePath}}" alt="image">
+              </a>
+
+              <!-- ✅ 書類：ダウンロード/新規タブで開く -->
+              <a class="fileBubble"
+                 th:if="${c != null and c.filePath != null and !#strings.isEmpty(c.filePath)}"
+                 th:href="@{${c.filePath}}"
+                 target="_blank" rel="noopener"
+                 th:with="fn=${(c.fileName != null and !#strings.isEmpty(c.fileName)) ? c.fileName : '添付ファイル'}">
+                <span class="fileIcon">📎</span>
+                <span class="fileName" th:text="${fn}">添付ファイル</span>
+              </a>
+
+              <div class="msgTime" th:text="${timeText}"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ✅ 送信フォーム：画像＋書類（enctype必須） -->
+    <form class="chatForm"
+          th:if="${app != null and status != 2 and (status == 1 or (status == 0 and isApplicant == true))}"
+          th:action="@{/user/chat/send}"
+          method="post"
+          enctype="multipart/form-data">
+
+      <input type="hidden" name="applyId" th:value="${app.applyId}">
+
+      <!-- ✅ 画像ボタン -->
+      <label class="iconBtn" title="画像を送る">
+        <input id="imageInput" type="file" name="image" accept="image/*">
+        📷
+      </label>
+
+      <!-- ✅ 書類ボタン -->
+      <label class="iconBtn" title="書類を送る">
+        <input id="fileInput" type="file" name="file"
+               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain">
+        📎
+      </label>
+
+      <!-- ✅ 画像プレビュー（選んだ時だけ出る） -->
+      <div class="imgPreview" id="imgPreview" style="display:none;">
+        <img id="previewImg" alt="preview">
+        <button type="button" class="previewX" id="previewX">×</button>
+      </div>
+
+      <!-- ✅ 書類プレビュー（ファイル名表示） -->
+      <div class="filePreview" id="filePreview" style="display:none;">
+        <span class="fileIcon">📎</span>
+        <span class="fileName" id="filePreviewName">ファイル</span>
+        <button type="button" class="previewX" id="filePreviewX">×</button>
+      </div>
+
+      <textarea class="chatInput" name="message" placeholder="メッセージを入力"></textarea>
+
+      <button class="btn" type="submit">送信</button>
+    </form>
+
+    <!-- ✅ 募集者が未承認のとき：送れない説明だけ -->
+    <div class="sendLock"
+         th:if="${app != null and status == 0 and isRecruitOwner == true}">
+      まだ未承認やけん、承認/拒否してから送信できるばい♡
+    </div>
+
+    <!-- app が無い時 -->
+    <div class="chatEmpty" th:if="${app == null}">
+      応募情報が取得できませんでした
+    </div>
+
   </div>
 
-  <div th:if="${chats == null or #lists.isEmpty(chats)}" style="margin-top:10px;">
-    まだメッセージはないよ〜
-  </div>
-
-  <!-- メッセージ送信 -->
-  <form th:if="${app != null}" th:action="@{/user/chat/send}" method="post" style="margin-top:10px;">
-    <input type="hidden" name="applyId" th:value="${app.applyId}">
-    <textarea name="message" rows="3" cols="40" placeholder="メッセージを入力" required></textarea><br>
-    <button type="submit">送信</button>
-  </form>
-
-  <!-- app が無い時 -->
-  <div th:if="${app == null}" style="color:red; margin-top:10px;">
-    応募情報が取得できませんでした
-  </div>
-
-  <!-- フッター -->
   <div th:replace="~{common/footer :: footer}"></div>
+
+  <!-- ✅ 画像モーダル（背景クリック/×/ESCで閉じれる） -->
+  <div class="imgModal" id="imgModal" aria-hidden="true" style="display:none;">
+    <div class="imgModalBg" id="imgModalBg"></div>
+
+    <div class="imgModalInner" role="dialog" aria-modal="true">
+      <button type="button" class="imgModalClose" id="imgModalClose" aria-label="close">×</button>
+      <img id="imgModalImg" alt="full image">
+    </div>
+  </div>
+
+  <script>
+    // ✅ 下まで自動スクロール
+    const body = document.getElementById('chatBody');
+    if (body) body.scrollTop = body.scrollHeight;
+
+    // =========================
+    // 画像プレビュー（送信用）
+    // =========================
+    const imageInput = document.getElementById('imageInput');
+    const imgPreviewWrap = document.getElementById('imgPreview');
+    const previewImg = document.getElementById('previewImg');
+    const previewX = document.getElementById('previewX');
+
+    function clearImagePreview(){
+      if (!imageInput) return;
+      imageInput.value = '';
+      if (imgPreviewWrap) imgPreviewWrap.style.display = 'none';
+      if (previewImg) previewImg.src = '';
+    }
+
+    if (imageInput) {
+      imageInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return clearImagePreview();
+        const url = URL.createObjectURL(file);
+        previewImg.src = url;
+        imgPreviewWrap.style.display = 'flex';
+      });
+    }
+    if (previewX) previewX.addEventListener('click', clearImagePreview);
+
+    // =========================
+    // 書類プレビュー（送信用）
+    // =========================
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const filePreviewName = document.getElementById('filePreviewName');
+    const filePreviewX = document.getElementById('filePreviewX');
+
+    function clearFilePreview(){
+      if (!fileInput) return;
+      fileInput.value = '';
+      if (filePreview) filePreview.style.display = 'none';
+      if (filePreviewName) filePreviewName.textContent = 'ファイル';
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return clearFilePreview();
+        if (filePreviewName) filePreviewName.textContent = f.name || 'ファイル';
+        if (filePreview) filePreview.style.display = 'flex';
+      });
+    }
+    if (filePreviewX) filePreviewX.addEventListener('click', clearFilePreview);
+
+    // =========================
+    // チャット画像：モーダルで開く＆閉じる
+    // =========================
+    const modal = document.getElementById('imgModal');
+    const modalBg = document.getElementById('imgModalBg');
+    const modalImg = document.getElementById('imgModalImg');
+    const modalClose = document.getElementById('imgModalClose');
+
+    function openModal(src){
+      if (!modal || !modalImg) return;
+      modalImg.src = src;
+      modal.style.display = 'block';
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(){
+      if (!modal || !modalImg) return;
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      modalImg.src = '';
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.js-open-img').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const src = a.getAttribute('data-full');
+        if (src) openModal(src);
+      });
+    });
+
+    if (modalClose) modalClose.addEventListener('click', closeModal);
+    if (modalBg) modalBg.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
 
 </body>
 </html>
-
-

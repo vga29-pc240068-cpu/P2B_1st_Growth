@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jp.ac._st_Growth.entity.CompetitionRecord;
 import jp.ac._st_Growth.entity.User;
 import jp.ac._st_Growth.repository.CompetitionRecordRepository;
+import jp.ac._st_Growth.repository.UsersRepository;
 
 @Controller
 public class ProfileController {
@@ -31,11 +32,15 @@ public class ProfileController {
     @Autowired
     private CompetitionRecordRepository recordRepo;
 
-    // アップロード保存先（プロジェクト直下に uploads/records）
-    private static final String UPLOAD_DIR = "uploads/records";
+    @Autowired
+    private UsersRepository usersRepository;
+
+    // ===== 保存先（実行中でも反映される場所）=====
+    private static final String RECORD_DIR = "uploads/records";
+    private static final String ICON_DIR  = "uploads/icon";
 
     // =========================
-    // プロフィール表示（大会記録一覧も表示）
+    // プロフィール表示
     // =========================
     @GetMapping("/user/profile")
     public String profile(HttpSession session, Model model) {
@@ -56,7 +61,46 @@ public class ProfileController {
     }
 
     // =========================
-    // 大会記録アップロード（jpg/png/pdf）
+    // ✅ プロフィールアイコンアップロード
+    // =========================
+    @PostMapping("/user/icon/upload")
+    public String uploadIcon(
+            @RequestParam("iconFile") MultipartFile file,
+            HttpSession session
+    ) throws IOException {
+
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+        if (file == null || file.isEmpty()) return "redirect:/user/profile";
+
+        // 画像だけ許可（雑でもOK）
+        String ct = file.getContentType();
+        if (ct == null || !ct.startsWith("image/")) return "redirect:/user/profile";
+
+        Files.createDirectories(Paths.get(ICON_DIR));
+
+        String originalName = file.getOriginalFilename();
+        String ext = "";
+        if (originalName != null && originalName.contains(".")) {
+            ext = originalName.substring(originalName.lastIndexOf(".")).toLowerCase();
+        }
+        if (ext.isBlank()) ext = ".png";
+
+        String fileName = loginUser.getUserId() + "_" + UUID.randomUUID() + ext;
+
+        Path savePath = Paths.get(ICON_DIR, fileName);
+        Files.copy(file.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // DB & セッション更新（表示URLは /icon/xxxx）
+        loginUser.setIconPath("/icon/" + fileName);
+        usersRepository.save(loginUser);
+        session.setAttribute("loginUser", loginUser);
+
+        return "redirect:/user/profile";
+    }
+
+    // =========================
+    // 大会記録アップロード
     // =========================
     @PostMapping("/user/profile/record/upload")
     public String uploadRecord(
@@ -79,10 +123,10 @@ public class ProfileController {
 
         if (file.isEmpty() || !allowed) return "redirect:/user/profile";
 
-        Files.createDirectories(Paths.get(UPLOAD_DIR));
+        Files.createDirectories(Paths.get(RECORD_DIR));
 
         String storedName = UUID.randomUUID() + "_" + originalName.replaceAll("[\\\\/]", "_");
-        Path savePath = Paths.get(UPLOAD_DIR, storedName);
+        Path savePath = Paths.get(RECORD_DIR, storedName);
         Files.copy(file.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
 
         CompetitionRecord r = new CompetitionRecord();
@@ -99,7 +143,7 @@ public class ProfileController {
     }
 
     // =========================
-    // 記録ファイル表示（画像は<img>で表示、PDFは別タブで開ける）
+    // 記録ファイル表示
     // =========================
     @GetMapping("/user/profile/record/file/{id}")
     public void recordFile(
@@ -120,18 +164,43 @@ public class ProfileController {
             return;
         }
 
-        Path p = Paths.get(UPLOAD_DIR, r.getStoredName());
+        Path p = Paths.get(RECORD_DIR, r.getStoredName());
         if (!Files.exists(p)) {
             res.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        String ct = (r.getContentType() != null) ? r.getContentType() : "application/octet-stream";
-        res.setContentType(ct);
-
-        // 画面表示（PDFもブラウザで開く）
-        res.setHeader("Content-Disposition", "inline; filename=\"" + r.getOriginalName() + "\"");
+        res.setContentType(
+            r.getContentType() != null ? r.getContentType() : "application/octet-stream"
+        );
+        res.setHeader(
+            "Content-Disposition",
+            "inline; filename=\"" + r.getOriginalName() + "\""
+        );
 
         Files.copy(p, res.getOutputStream());
+    }
+
+    // =========================
+    // 記録削除
+    // =========================
+    @PostMapping("/user/profile/record/delete/{id}")
+    public String deleteRecord(@PathVariable("id") Long id, HttpSession session) throws IOException {
+
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) return "redirect:/login";
+
+        CompetitionRecord r = recordRepo.findById(id).orElse(null);
+        if (r == null) return "redirect:/user/profile";
+
+        if (!r.getUserId().equals(loginUser.getUserId())) {
+            return "redirect:/user/profile";
+        }
+
+        Path p = Paths.get(RECORD_DIR, r.getStoredName());
+        Files.deleteIfExists(p);
+        recordRepo.deleteById(id);
+
+        return "redirect:/user/profile";
     }
 }

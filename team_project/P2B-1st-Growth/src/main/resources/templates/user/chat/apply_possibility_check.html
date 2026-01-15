@@ -8,49 +8,65 @@
 <body>
 
 <h2>承認確認</h2>
-
-<p>この応募を承認しますか</p>
-
-<hr>
-
-<p><strong>募集者：</strong>
-  <span th:text="${application != null ? (application.recruitment?.user?.name ?: '募集者情報なし') : '募集者情報なし'}"></span>
-</p>
-
-<p><strong>応募者：</strong>
-  <span th:text="${application != null ? (application.user?.name ?: '応募者情報なし') : '応募者情報なし'}"></span>
-</p>
-
-<p><strong>部活動：</strong>
-  <span th:text="${application != null ? (application.recruitment?.clubMaster?.clubName ?: '部活動情報なし') : '部活動情報なし'}"></span>
-</p>
-
-<p><strong>応募日：</strong>
-  <span th:text="${application != null ? (application.applyDate ?: '応募日なし') : '応募日なし'}"></span>
-</p>
+<p>この応募を承認しますか？</p>
 
 <hr>
-
-<!-- ✅ 承認確定（GETで確実に通す） -->
-<a th:if="${application != null}"
-   th:href="@{/user/chat/approve_do(applyId=${application.applyId})}"
-   class="btn-approve">
-  承認を確定する
-</a>
-
-<!-- 戻る -->
-<a th:if="${application != null}"
-   th:href="@{/user/chat/apply_possibility(applyId=${application.applyId})}">
-  戻る
-</a>
 
 <!-- application が無い時 -->
-<div th:if="${application == null}" style="color:red; margin-top:10px;">
-  応募情報が取得できませんでした
+<div th:if="${application == null}" style="color:red;">
+  応募情報が取得できませんでした<br>
+  <a th:href="@{/user/chat/list}">一覧へ戻る</a>
 </div>
 
-<!-- フッター（被り疑いある間はOFF） -->
-<!-- <div th:replace="~{common/footer :: footer}"></div> -->
+<!-- application がある時 -->
+<div th:if="${application != null}">
+
+  <p>
+    <strong>募集者：</strong>
+    <span th:text="${application.recruitment != null and application.recruitment.user != null
+                    ? application.recruitment.user.name : '募集者情報なし'}">募集者情報なし</span>
+  </p>
+
+  <p>
+    <strong>応募者：</strong>
+    <span th:text="${application.user != null
+                    ? application.user.name : '応募者情報なし'}">応募者情報なし</span>
+  </p>
+
+  <p>
+    <strong>部活動：</strong>
+    <span th:text="${application.recruitment != null and application.recruitment.clubMaster != null
+                    ? application.recruitment.clubMaster.clubName : '部活動情報なし'}">部活動情報なし</span>
+  </p>
+
+  <p>
+    <strong>応募日：</strong>
+    <span th:text="${application.applyDate != null
+                    ? application.applyDate : '応募日なし'}">応募日なし</span>
+  </p>
+
+  <hr>
+
+  <!-- ✅ 承認確定（POST）※ applyIdは modelのapplyId を優先して必ず渡す -->
+  <form th:action="@{/user/chat/approve_do}" method="post" style="display:inline;">
+    <input type="hidden" name="applyId"
+           th:value="${applyId != null ? applyId : application.applyId}">
+    <button type="submit" class="btn-approve">承認を確定する</button>
+  </form>
+
+  &nbsp;&nbsp;
+
+  <!-- 戻る -->
+  <a th:href="@{/user/chat/apply_possibility(applyId=${applyId != null ? applyId : application.applyId})}">
+    戻る
+  </a>
+
+  &nbsp;&nbsp;
+
+  <!-- 一覧へ -->
+  <a th:href="@{/user/chat/list}">一覧へ</a>
+
+</div>
 
 </body>
 </html>

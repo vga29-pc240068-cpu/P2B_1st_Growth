@@ -1,41 +1,244 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{common/layout :: html(
+        title=${'応募確認'},
+        pageCss=~{::link},
+        body=~{::section}
+      )}">
 <head>
-	<link rel="stylesheet" th:href="@{/css/common/common.css}">
-
-  <meta charset="UTF-8">
-  <title>応募確認</title>
-  
+  <link rel="stylesheet" th:href="@{/css/apply/apply_check.css}">
 </head>
-<body>
-  <h1>応募確認</h1>
 
-  <p>以下の募集に応募しますか？</p>
+<section>
+  <div class="applyCheckWrap">
 
-  <table border="1">
-    <tr>
-      <th>募集ID</th>
-      <td th:text="${recruitment.recruitId}"></td>
-    </tr>
-    <tr>
-      <th>希望日</th>
-      <td th:text="${recruitment.matchDate}"></td>
-    </tr>
-    <tr>
-      <th>時間</th>
-      <td th:text="${recruitment.matchTime}"></td>
-    </tr>
-    <tr>
-      <th>場所</th>
-      <td th:text="${recruitment.location}"></td>
-    </tr>
-  </table>
+    <div class="applyHead">
+      <h1 class="applyHeadTitle">応募確認</h1>
+      <p class="applyHeadSub">以下の募集に応募しますか？</p>
+    </div>
 
-  <form th:action="@{/user/apply/regist}" method="post">
-    <input type="hidden" name="recruitId" th:value="${recruitment.recruitId}">
-    <button type="submit">応募する</button>
-  </form>
+    <div class="applyPanel"
+         th:with="
+           owner=${recruitment != null ? recruitment.user : null},
+           ownerName=${(owner != null and owner.name != null and !#strings.isEmpty(owner.name)) ? owner.name : '未定'},
+           ownerIcon=${(owner != null and owner.iconPath != null and !#strings.isEmpty(owner.iconPath)) ? owner.iconPath : null},
+           ownerInitial=${(owner != null and owner.name != null and !#strings.isEmpty(owner.name)) ? #strings.substring(owner.name,0,1) : '教'},
+           addr=${(recruitment != null and recruitment.locationText != null and !#strings.isEmpty(recruitment.locationText)) ? recruitment.locationText : ''},
+           sched=${(recruitment != null and recruitment.scheduleText != null and !#strings.isEmpty(recruitment.scheduleText)) ? recruitment.scheduleText : ''}
+         ">
 
-  <p><a href="/login">戻る</a></p>
-</body>
+      <!-- 上段：左（アイコン+名前） / 右（応募+戻る） -->
+      <div class="applyTopRow">
+
+        <div class="ownerRow">
+          <div class="ownerAvatar" aria-hidden="true">
+            <img class="ownerIcon" th:if="${ownerIcon != null}" th:src="@{${ownerIcon}}" alt="募集者アイコン">
+            <span class="ownerInitial" th:unless="${ownerIcon != null}" th:text="${ownerInitial}">教</span>
+          </div>
+
+          <div class="ownerMeta">
+            <div class="ownerName" th:text="${ownerName}">募集者</div>
+            <div class="ownerSub">
+              <span class="pill">
+                募集ID <span th:text="${recruitment != null ? recruitment.recruitId : ''}">0</span>
+              </span>
+              <span class="pill"
+                    th:if="${recruitment != null and recruitment.clubMaster != null}"
+                    th:text="${recruitment.clubMaster.clubName}">部活</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="applyActions">
+          <form th:action="@{/user/apply/regist}" method="post" class="applyForm">
+            <input type="hidden" name="recruitId"
+                   th:value="${recruitment != null ? recruitment.recruitId : ''}">
+            <button type="submit" class="btnPrimary">応募する</button>
+          </form>
+          <a href="javascript:history.back()" class="btnGhost">戻る</a>
+        </div>
+
+      </div>
+
+      <!-- タイトル（右詳細と同じ） -->
+      <div class="d-title">
+        <span th:text="${recruitment != null and recruitment.clubMaster != null ? recruitment.clubMaster.clubName : '部活未設定'}">部活</span>
+        <span class="dot">・</span>
+        <span th:text="${recruitment != null and recruitment.title != null and !#strings.isEmpty(recruitment.title) ? recruitment.title : 'タイトル未設定'}">タイトル</span>
+      </div>
+
+      <p class="applyNote">応募後は募集者の承認が必要です。</p>
+
+      <!-- 日程（右詳細と同じ） -->
+      <div class="detail-when">
+        <!-- ✅ 01-01 -> 1-1 -->
+        <div class="detail-when-date"
+             th:text="${recruitment != null and recruitment.startDateTime != null
+                      ? #temporals.format(recruitment.startDateTime,'M-d')
+                      : '未定'}">1-1</div>
+
+        <div class="detail-when-time">
+          <span class="badge">日程</span>
+          <span class="time"
+                th:text="${recruitment != null and recruitment.startDateTime != null
+                         ? #temporals.format(recruitment.startDateTime,'HH:mm')
+                         : '未定'}">05:02</span>
+          <span class="sep">〜</span>
+          <span class="time"
+                th:text="${recruitment != null and recruitment.endDateTime != null
+                         ? #temporals.format(recruitment.endDateTime,'HH:mm')
+                         : '未定'}">07:02</span>
+        </div>
+      </div>
+
+      <!-- ✅ 条件：ラベル消して“ミニ文字だけ” -->
+      <div class="miniChips">
+
+        <span class="miniChip" th:if="${recruitment != null and recruitment.altDateOption != null}"
+              th:text="${recruitment.altDateOption.label}">別日程も可</span>
+
+        <span class="miniChip" th:if="${recruitment != null and recruitment.capacityRange != null}"
+              th:text="${recruitment.capacityRange.label}">1〜5人</span>
+
+        <span class="miniChip isMuted"
+              th:if="${recruitment != null and recruitment.noPreference != null and recruitment.noPreference == 1}">
+          こだわらない
+        </span>
+
+        <th:block th:unless="${recruitment != null and recruitment.noPreference != null and recruitment.noPreference == 1}">
+          <span class="miniChip" th:if="${recruitment != null and recruitment.genderPref != null}"
+                th:text="${recruitment.genderPref.label}">男女混合</span>
+
+          <span class="miniChip" th:if="${recruitment != null and recruitment.travelOption != null}"
+                th:text="${recruitment.travelOption.label}">指定場所にこれる方のみ</span>
+
+          <span class="miniChip" th:if="${recruitment != null and recruitment.targetTeam != null}"
+                th:text="${recruitment.targetTeam.label}">高校生</span>
+
+          <span class="miniChip" th:if="${recruitment != null and recruitment.matchContent != null}"
+                th:text="${recruitment.matchContent.label}">練習試合</span>
+
+          <span class="miniChip" th:if="${recruitment != null and recruitment.teamLevel != null}"
+                th:text="${recruitment.teamLevel.label}">全国ベスト8</span>
+        </th:block>
+
+      </div>
+
+      <!-- ✅ 場所 + マップ（JSで生成：urlEncodeは使わん） -->
+      <div class="place-wrap">
+        <div class="place-box">
+          <div class="place-title">場所</div>
+          <div class="place-addr" th:text="${addr != '' ? addr : '未定'}">未定</div>
+
+          <!-- ✅ JSに渡す（非表示） -->
+          <div id="addrSrc" class="isHidden" th:text="${addr}"></div>
+        </div>
+
+        <div class="detail-map" id="mapBox">
+          <div class="map-empty">場所未定</div>
+        </div>
+      </div>
+
+      <!-- ✅ スケジュール（右詳細の縦タイムライン） -->
+      <div class="detail-textbox">
+        <div class="detail-textbox-title">スケジュール</div>
+
+        <!-- 元テキスト保持（JSでタイムライン化） -->
+        <div id="scheduleSrc" class="isHidden" th:text="${sched}"></div>
+
+        <div id="scheduleTimeline" class="detail-textbox-body">
+          <div class="tl-empty">未定</div>
+        </div>
+      </div>
+
+      <!-- 形式 -->
+      <div class="detail-textbox">
+        <div class="detail-textbox-title">形式</div>
+        <div class="detail-textbox-body"
+             th:text="${recruitment != null and recruitment.matchFormat != null and !#strings.isEmpty(recruitment.matchFormat)
+                      ? recruitment.matchFormat
+                      : '未定'}">未定</div>
+      </div>
+
+      <!-- 注意事項 -->
+      <div class="detail-textbox">
+        <div class="detail-textbox-title">注意事項</div>
+        <div class="detail-textbox-body"
+             th:text="${recruitment != null and recruitment.notes != null and !#strings.isEmpty(recruitment.notes)
+                      ? recruitment.notes
+                      : 'なし'}">なし</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function esc(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;").replaceAll("<","&lt;")
+        .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    }
+
+    function buildTimeline(scheduleText){
+      const s = String(scheduleText ?? "").trim();
+      if(!s) return `<div class="tl-empty">未定</div>`;
+
+      const lines = s.includes("\n")
+        ? s.split("\n").map(x=>x.trim()).filter(Boolean)
+        : s.split(/(?=\d{1,2}:\d{2})/).map(x=>x.trim()).filter(Boolean);
+
+      const items = lines.map(line=>{
+        const m = line.match(/^(\d{1,2}:\d{2})\s*(.*)$/);
+        if(m){
+          return { time:m[1], text:(m[2]||"").trim() || "内容未設定" };
+        }
+        return { time:"", text:line };
+      });
+
+      return `
+        <div class="timeline">
+          ${items.map(it=>`
+            <div class="tl-item">
+              <div class="tl-time">${it.time ? esc(it.time) : ""}</div>
+              <div class="tl-dot"></div>
+              <div class="tl-text">${esc(it.text)}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function buildMapIframe(addr){
+      const a = String(addr ?? "").trim();
+      if(!a) return "";
+      const q = encodeURIComponent(a);
+      return `
+        <iframe class="map-iframe"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps?q=${q}&output=embed">
+        </iframe>
+      `;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      // timeline
+      const src = document.getElementById("scheduleSrc");
+      const out = document.getElementById("scheduleTimeline");
+      if(out){
+        const text = src ? src.textContent : "";
+        out.innerHTML = buildTimeline(text);
+      }
+
+      // map
+      const addrSrc = document.getElementById("addrSrc");
+      const mapBox  = document.getElementById("mapBox");
+      const addr = addrSrc ? addrSrc.textContent : "";
+      if(mapBox){
+        const iframe = buildMapIframe(addr);
+        mapBox.innerHTML = iframe ? iframe : `<div class="map-empty">場所未定</div>`;
+      }
+    });
+  </script>
+</section>
 </html>

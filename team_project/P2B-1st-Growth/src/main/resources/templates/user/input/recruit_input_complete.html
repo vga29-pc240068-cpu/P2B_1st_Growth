@@ -1,42 +1,40 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>募集登録完了</title>
-    <link rel="stylesheet" th:href="@{/css/common/common.css}">
-    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+  <meta charset="UTF-8">
+  <title>募集登録完了</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+
+  <!-- ✅ キャッシュ回避（反映されない対策） -->
+  <link rel="stylesheet" th:href="@{/css/recruit/recruit_input_complete.css(v=${#dates.createNow().time})}">
 </head>
 <body>
 
-<div class="container">
-    <div class="form-card">
+<div class="complete-page">
+  <div class="complete-card">
 
-        <h2>募集登録が完了しました</h2>
+    <h1 class="complete-title">募集登録が完了しました</h1>
 
-        <p>募集情報の登録が正常に完了しました。</p>
-        <p class="note">
-            確認や修正が必要な場合は、募集項目選択画面から再度アクセスしてください。
-        </p>
+    <p class="complete-msg">募集情報の登録が正常に完了しました。</p>
+    <p class="complete-note">
+      内容の確認や修正が必要な場合は、募集項目選択画面から再度アクセスしてください。
+    </p>
 
-        <!-- ★ ボタンを横並び＋中央寄せ -->
-        <div class="form-actions">
+    <div class="complete-actions">
+      <a th:href="@{/recruitment/input}" class="btn-primary">
+        新しい募集を登録する
+      </a>
 
-            <!-- 新しい募集作成 -->
-            <button onclick="location.href='/1st_growth/recruitment/input'">
-                新しい募集を登録する
-            </button>
-
-            <!-- 戻るボタンはサブボタンのデザイン -->
-            <button class="btn-sub" onclick="history.back()">
-                募集項目選択画面に戻る
-            </button>
-
-        </div>
-
+      <button type="button" class="btn-ghost" onclick="history.back()">
+        募集項目選択画面に戻る
+      </button>
     </div>
+
+  </div>
 </div>
 
-<!-- フッター -->
 <div th:replace="common/footer :: footer"></div>
 
 </body>

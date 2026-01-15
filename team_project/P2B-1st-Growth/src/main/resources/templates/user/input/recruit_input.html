@@ -1,111 +1,597 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>募集項目入力</title>
+  <meta charset="UTF-8">
+  <title>募集項目入力</title>
 
-    <link rel="stylesheet" th:href="@{/css/common/common.css}">
-    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+  <link rel="stylesheet" th:href="@{/css/recruit/recruit_input.css}">
 </head>
 <body>
 
 <div class="container">
-    <h2>募集項目入力</h2>
+  <h2>募集項目入力</h2>
 
-    <!-- エラーメッセージの表示 -->
-    <p th:if="${error}" th:text="${error}" class="error-message"></p>
+  <!-- ✅ サーバー側エラー（既存） -->
+  <p th:if="${error}" th:text="${error}" class="error-message"></p>
 
-    <div class="form-card">
-        <form th:action="@{/recruitment/confirm}" method="post">
+  <div class="form-card">
+    <form th:action="@{/recruitment/confirm}" method="post" id="recruitForm" novalidate>
 
-            <!-- 部活動名 -->
-            <div class="form-row">
-                <label>部活動名：</label>
-                <select name="clubId" required>
-                    <!-- 何も選んでないとき -->
-                    <option value="0" th:selected="${clubId == null}">
-                        選択してください
-                    </option>
+      <!-- 0) 部活動（必須） -->
+      <div class="form-row">
+        <label>部活動名：</label>
+        <select name="clubId" required>
+          <option value="0" th:selected="${clubId == null || clubId == 0}">選択してください</option>
+          <option th:each="club : ${clubs}"
+                  th:value="${club.clubId}"
+                  th:selected="${club.clubId == clubId}"
+                  th:text="${club.clubName}">
+          </option>
+        </select>
+        <p class="field-error" data-for="clubId"></p>
+      </div>
 
-                    <!-- 部活一覧 -->
-                    <option th:each="club : ${clubs}"
-                            th:value="${club.clubId}"
-                            th:selected="${club.clubId == clubId}"
-                            th:text="${club.clubName}">
-                    </option>
-                </select>
+      <!-- 1) タイトル（必須） -->
+      <div class="form-row">
+        <label>タイトル：</label>
+        <input type="text" name="title" th:value="${title}" required
+               placeholder="例：練習試合募集 / 交流試合を希望します など">
+        <div class="help">※ 一目で内容が分かるようにご記入ください。</div>
+        <p class="field-error" data-for="title"></p>
+      </div>
+
+      <!-- 2) 日程（必須）開始＆終了 -->
+      <div class="form-row">
+        <label>開始：</label>
+        <input type="datetime-local" name="startDateTime" th:value="${startDateTime}" required>
+        <p class="field-error" data-for="startDateTime"></p>
+      </div>
+
+      <div class="form-row">
+        <label>終了：</label>
+        <input type="datetime-local" name="endDateTime" th:value="${endDateTime}" required>
+        <p class="field-error" data-for="endDateTime"></p>
+      </div>
+
+      <!-- 2-② 別日程OKか（必須） -->
+      <div class="form-row">
+        <label>別日程の調整：</label>
+
+        <label style="margin-right:12px;">
+          <input type="radio" name="altDateOption" value="SAME_DAY_ONLY"
+                 th:checked="${altDateOption == 'SAME_DAY_ONLY'}" required>
+          当日のみ
+        </label>
+
+        <label style="margin-right:12px;">
+          <input type="radio" name="altDateOption" value="AROUND_OK"
+                 th:checked="${altDateOption == 'AROUND_OK'}">
+          前後日も可能
+        </label>
+
+        <label>
+          <input type="radio" name="altDateOption" value="OTHER_DAY_OK"
+                 th:checked="${altDateOption == 'OTHER_DAY_OK'}">
+          別日程も可能
+        </label>
+
+        <div class="help">※ 当日が難しい場合の調整可否をご選択ください。</div>
+        <p class="field-error" data-for="altDateOption"></p>
+      </div>
+
+      <!-- 3) 募集人数（必須） -->
+      <div class="form-row">
+        <label>募集人数：</label>
+        <select name="capacityRange" required>
+          <option value="" th:selected="${capacityRange == null || capacityRange == ''}">選択してください</option>
+          <option value="P1_5"  th:selected="${capacityRange == 'P1_5'}">1〜5人</option>
+          <option value="P6_10" th:selected="${capacityRange == 'P6_10'}">6〜10人</option>
+          <option value="P11_15" th:selected="${capacityRange == 'P11_15'}">11〜15人</option>
+          <option value="P16_20" th:selected="${capacityRange == 'P16_20'}">16〜20人</option>
+          <option value="P21_30" th:selected="${capacityRange == 'P21_30'}">21〜30人</option>
+        </select>
+        <p class="field-error" data-for="capacityRange"></p>
+      </div>
+
+      <!-- 4) 場所 -->
+      <div class="form-row">
+        <label>場所：</label>
+
+      
+
+        <div class="addr-grid">
+          <div class="addr-item">
+            <div class="addr-label">都道府県</div>
+            <input type="text" name="locationPrefecture" id="locationPrefecture"
+                   th:value="${locationPrefecture}"
+                   placeholder="例： 東京都">
+          </div>
+
+          <div class="addr-item">
+            <div class="addr-label">市区町村</div>
+            <input type="text" name="locationCity" id="locationCity"
+                   th:value="${locationCity}"
+                   placeholder="例：  千代田区">
+          </div>
+
+          <div class="addr-item addr-wide">
+            <div class="addr-label">番地・町名</div>
+            <input type="text" name="locationAddressLine" id="locationAddressLine"
+                   th:value="${locationAddressLine}"
+                   placeholder="例：〇〇1-2-3 / ○○1丁目 など">
+          </div>
+
+          <div class="addr-item addr-wide">
+            <div class="addr-label">施設名（任意）</div>
+            <input type="text" name="locationFacility" id="locationFacility"
+                   th:value="${locationFacility}"
+                   placeholder="例：〇〇体育館 / 〇〇高校グラウンド">
+          </div>
+
+          <div class="addr-item">
+            <div class="addr-label">郵便番号（任意）</div>
+            <input type="text" name="locationPostalCode" id="locationPostalCode"
+                   th:value="${locationPostalCode}"
+                   inputmode="numeric" maxlength="8"
+                   placeholder="例：810-0001">
+          </div>
+        </div>
+
+        <div class="addr-preview">
+          <div class="addr-preview-title">表示用（自動）</div>
+          <div id="addrPreviewText" class="addr-preview-body">未入力です。</div>
+        </div>
+      </div>
+
+      <input type="hidden" name="locationText" id="locationText" th:value="${locationText}">
+      <input type="hidden" name="latitude"  th:value="${latitude}">
+      <input type="hidden" name="longitude" th:value="${longitude}">
+
+      <!-- 5) スケジュール -->
+      <div class="form-row">
+        <label>スケジュール：</label>
+
+        <div class="schedule-box">
+          <div class="schedule-top">
+            <div class="schedule-title">当日の流れ（時間と内容）</div>
+            <div class="schedule-actions">
+              <button type="button" class="btn-mini" onclick="addScheduleRow()">＋ 追加</button>
+              <button type="button" class="btn-mini" onclick="applyTemplate()">テンプレート</button>
+              <button type="button" class="btn-mini danger" onclick="clearScheduleRows()">クリア</button>
             </div>
+          </div>
 
-            <!-- 希望日 -->
-            <div class="form-row">
-                <label>希望日：</label>
-                <input type="date" name="matchDate" th:value="${matchDate}">
-            </div>
+          <div class="hint">※ 例：10:00「集合」→ 10:15「アップ」→ 11:00「練習試合」→ 12:00「解散」</div>
 
-            <!-- 時間 -->
-            <div class="form-row">
-                <label>時間：</label>
-                <input type="time" name="matchTime" th:value="${matchTime}">
-            </div>
+          <div id="scheduleList" class="schedule-list"></div>
 
-            <!-- 場所 -->
-            <div class="form-row">
-                <label>場所：</label>
-                <input type="text" name="location" th:value="${location}">
-            </div>
+          <div class="schedule-preview">
+            <div class="pv-title">プレビュー（確認画面・詳細画面ではこちらの形式で表示されます）</div>
+            <div id="schedulePreview" class="pv-body">未入力です。</div>
+          </div>
+        </div>
 
-            <!-- 募集の目的 -->
-            <div class="form-row">
-                <label>募集の目的：</label>
-                <select name="purpose">
-                    <option value="">選択してください</option>
-                    <option value="練習試合"   th:selected="${purpose == '練習試合'}">練習試合</option>
-                    <option value="合同練習"   th:selected="${purpose == '合同練習'}">合同練習</option>
-                    <option value="練習相手募集" th:selected="${purpose == '練習相手募集'}">練習相手募集</option>
-                    <option value="交流試合"   th:selected="${purpose == '交流試合'}">交流試合</option>
-                    <option value="その他"     th:selected="${purpose == 'その他'}">その他</option>
-                </select>
-            </div>
+        <textarea name="scheduleText" id="scheduleText" style="display:none;"
+                  th:text="${scheduleText}"></textarea>
+      </div>
 
-            <!-- 活動レベル -->
-            <div class="form-row">
-                <label>活動レベル：</label>
-                <select name="skillLevel">
-                    <option value="">選択してください</option>
-                    <option value="初心者" th:selected="${skillLevel == '初心者'}">初心者</option>
-                    <option value="中級者" th:selected="${skillLevel == '中級者'}">中級者</option>
-                    <option value="上級者" th:selected="${skillLevel == '上級者'}">上級者</option>
-                </select>
-            </div>
+      <!-- 6) 試合形式 -->
+      <div class="form-row">
+        <label>試合形式：</label>
+        <input type="text" name="matchFormat" th:value="${matchFormat}"
+               placeholder="例：練習試合 / 交流試合 / 合同練習 など">
+      </div>
 
-            <!-- 参加条件 -->
-            <div class="form-row">
-                <label>参加条件：</label>
-                <input type="text"
-                       name="conditions"
-                       th:value="${conditions}"
-                       placeholder="例：男女混合OK / 顧問同伴必須など">
-            </div>
+      <!-- 7) 注意事項 -->
+      <div class="form-row">
+        <label>注意事項：</label>
+        <textarea name="notes" th:text="${notes}"
+                  placeholder="例：雨天時は中止となります / 駐車場があります / 服装は自由です など"></textarea>
+      </div>
 
-            <!-- 備考 -->
-            <div class="form-row">
-                <label>備考：</label>
-                <textarea name="remarks" th:text="${remarks}"></textarea>
-            </div>
+      <!-- 8) こだわり条件（任意） -->
+      <div class="form-row">
+        <label>こだわり条件：</label>
 
-            <div class="form-actions">
-                <button type="reset" class="btn-sub">クリア</button>
-                <button type="submit">確認画面へ進む</button>
-            </div>
+        <label>
+          <input type="checkbox" name="noPreference" value="1" id="noPreference"
+                 th:checked="${noPreference == '1' || noPreference == 1}">
+          こだわりません
+        </label>
 
-        </form>
+        <div class="help">※ 「こだわりません」を選択した場合、下記項目は入力しなくてOKです。</div>
+      </div>
 
-        <p class="note">※ 日時、場所、条件は後で調整可能です。</p>
+      <div id="prefFields">
+        <div class="form-row">
+          <label>性別：</label>
+          <select name="genderPref" id="genderPref">
+            <option value="" th:selected="${genderPref == null || genderPref == ''}">未指定</option>
+            <option value="BOYS_ONLY" th:selected="${genderPref == 'BOYS_ONLY'}">男子のみ</option>
+            <option value="GIRLS_ONLY" th:selected="${genderPref == 'GIRLS_ONLY'}">女子のみ</option>
+            <option value="MIXED" th:selected="${genderPref == 'MIXED'}">男女混合</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>チームレベル：</label>
+          <select name="teamLevelText" id="teamLevelText">
+            <option value="" th:selected="${teamLevelText == null or #strings.isEmpty(teamLevelText)}">選択してください</option>
+            <option value="全国ベスト8" th:selected="${teamLevelText == '全国ベスト8'}">全国ベスト8</option>
+            <option value="県大会ベスト8" th:selected="${teamLevelText == '県大会ベスト8'}">県大会ベスト8</option>
+            <option value="地区大会ベスト8" th:selected="${teamLevelText == '地区大会ベスト8'}">地区大会ベスト8</option>
+            <option value="全国大会出場経験あり" th:selected="${teamLevelText == '全国大会出場経験あり'}">全国大会出場経験あり</option>
+            <option value="県大会出場経験あり" th:selected="${teamLevelText == '県大会出場経験あり'}">県大会出場経験あり</option>
+            <option value="地区大会出場経験あり" th:selected="${teamLevelText == '地区大会出場経験あり'}">地区大会出場経験あり</option>
+            <option value="試合経験あり" th:selected="${teamLevelText == '試合経験あり'}">試合経験あり</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>試合内容：</label>
+          <input type="text" name="matchContentText" id="matchContentText" th:value="${matchContentText}"
+                 placeholder="例：練習試合 / 交流試合 など">
+        </div>
+
+        <div class="form-row">
+          <label>移動可否：</label>
+          <select name="travelOption" id="travelOption">
+            <option value="" th:selected="${travelOption == null || travelOption == ''}">未指定</option>
+            <option value="COME_ONLY" th:selected="${travelOption == 'COME_ONLY'}">指定場所に来られる方のみ</option>
+            <option value="PROVIDE_ONLY" th:selected="${travelOption == 'PROVIDE_ONLY'}">場所提供が可能な方のみ</option>
+            <option value="EITHER_OK" th:selected="${travelOption == 'EITHER_OK'}">どちらでも可能</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>対象チーム：</label>
+          <select name="targetTeamText" id="targetTeamText">
+            <option value="" th:selected="${targetTeamText == null or #strings.isEmpty(targetTeamText)}">選択してください</option>
+            <option value="中学生" th:selected="${targetTeamText == '中学生'}">中学生</option>
+            <option value="高校生" th:selected="${targetTeamText == '高校生'}">高校生</option>
+            <option value="大学生" th:selected="${targetTeamText == '大学生'}">大学生</option>
+            <option value="社会人" th:selected="${targetTeamText == '社会人'}">社会人</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 送信 -->
+      <div class="form-actions">
+        <button type="reset" class="btn-sub" id="btnReset">クリア</button>
+        <button type="submit" class="btn-next" id="btnConfirm">確認画面へ進む</button>
+      </div>
+
+    </form>
+
+    <div class="note">
+      <p>※ 日程や場所は後で調整できる前提です。</p>
     </div>
+  </div>
 </div>
 
-<!--フッターの追加-->
 <div th:replace="common/footer :: footer"></div>
+
+<script>
+  // =========================
+  // ✅ 入力チェック（各項目のエラーだけ表示）
+  // =========================
+  const recruitForm = document.getElementById("recruitForm");
+  const btnConfirm = document.getElementById("btnConfirm");
+  const btnReset = document.getElementById("btnReset");
+
+  function val(name){
+    const el = recruitForm?.querySelector(`[name="${name}"]`);
+    return (el?.value ?? "").toString().trim();
+  }
+
+  function setFieldError(name, msg){
+    const el = recruitForm?.querySelector(`.field-error[data-for="${name}"]`);
+    if(el) el.textContent = msg || "";
+    const field = recruitForm?.querySelector(`[name="${name}"]`);
+    if(field){
+      if(msg) field.classList.add("is-error");
+      else field.classList.remove("is-error");
+    }
+  }
+
+  function clearAllErrors(){
+    ["clubId","title","startDateTime","endDateTime","altDateOption","capacityRange"]
+      .forEach(n => setFieldError(n, ""));
+  }
+
+  function validateRecruit(){
+    clearAllErrors();
+
+    let ok = true;
+
+    const clubId = val("clubId");
+    if(!clubId || clubId === "0"){
+      setFieldError("clubId", "部活動名を選択してください");
+      ok = false;
+    }
+
+    const title = val("title");
+    if(!title){
+      setFieldError("title", "タイトルを入力してください");
+      ok = false;
+    }
+
+    const start = val("startDateTime");
+    const end = val("endDateTime");
+
+    if(!start){
+      setFieldError("startDateTime", "開始日時を入力してください");
+      ok = false;
+    }
+    if(!end){
+      setFieldError("endDateTime", "終了日時を入力してください");
+      ok = false;
+    }
+
+    if(start && end){
+      const s = new Date(start);
+      const e = new Date(end);
+      if(!isNaN(s.getTime()) && !isNaN(e.getTime()) && s > e){
+        setFieldError("endDateTime", "日程が変やけん、開始と終了を確認してください");
+        ok = false;
+      }
+    }
+
+    const altChecked = recruitForm?.querySelector(`input[name="altDateOption"]:checked`);
+    if(!altChecked){
+      setFieldError("altDateOption", "別日程の調整を選択してください");
+      ok = false;
+    }
+
+    const cap = val("capacityRange");
+    if(!cap){
+      setFieldError("capacityRange", "募集人数を選択してください");
+      ok = false;
+    }
+
+    // ✅ どれかエラーがあったら一番上へ戻します
+    if(!ok){
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    return ok;
+  }
+
+  function wireClear(name, ev="input"){
+    const el = recruitForm?.querySelector(`[name="${name}"]`);
+    if(!el) return;
+    el.addEventListener(ev, ()=> setFieldError(name, ""));
+    if(ev !== "change") el.addEventListener("change", ()=> setFieldError(name, ""));
+  }
+
+  wireClear("clubId","change");
+  wireClear("title","input");
+  wireClear("startDateTime","change");
+  wireClear("endDateTime","change");
+  wireClear("capacityRange","change");
+
+  document.querySelectorAll(`input[name="altDateOption"]`).forEach(r=>{
+    r.addEventListener("change", ()=> setFieldError("altDateOption",""));
+  });
+
+  // =========================
+  // ✅ 場所：分割 → locationText 自動生成
+  // =========================
+  const locPref = document.getElementById("locationPrefecture");
+  const locCity = document.getElementById("locationCity");
+  const locAddr = document.getElementById("locationAddressLine");
+  const locFac  = document.getElementById("locationFacility");
+  const locZip  = document.getElementById("locationPostalCode");
+  const locText = document.getElementById("locationText");
+  const addrPreviewText = document.getElementById("addrPreviewText");
+
+  function n(v){ return (v ?? "").toString().trim(); }
+
+  function normalizeZip(z){
+    const s = n(z).replace(/[^\d]/g,"");
+    if(s.length === 7) return `${s.slice(0,3)}-${s.slice(3)}`;
+    return n(z);
+  }
+
+  function joinAddr(){
+    const p = n(locPref?.value);
+    const c = n(locCity?.value);
+    const a = n(locAddr?.value);
+    const f = n(locFac?.value);
+    const z = normalizeZip(locZip?.value);
+
+    let main = `${p}${c}${a}`.trim();
+    if(f) main = (main ? `${main} ${f}` : f);
+    if(z) main = `〒${z} ${main}`.trim();
+    return main.trim();
+  }
+
+  function syncLocationText(){
+    const out = joinAddr();
+    if(locText) locText.value = out;
+    if(addrPreviewText) addrPreviewText.textContent = out ? out : "未入力です。";
+  }
+
+  [locPref, locCity, locAddr, locFac, locZip].forEach(el=>{
+    if(!el) return;
+    el.addEventListener("input", syncLocationText);
+    el.addEventListener("change", syncLocationText);
+  });
+
+  // =========================
+  // スケジュール：行入力 → scheduleText に反映
+  // =========================
+  const scheduleList = document.getElementById("scheduleList");
+  const scheduleText = document.getElementById("scheduleText");
+  const schedulePreview = document.getElementById("schedulePreview");
+
+  function escapeAttr(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;");
+  }
+
+  function addScheduleRow(t="", memo=""){
+    const row = document.createElement("div");
+    row.className = "schedule-row";
+    row.innerHTML = `
+      <input type="time" class="sch-time" value="${escapeAttr(t)}" aria-label="時間">
+      <input type="text" class="sch-memo" value="${escapeAttr(memo)}" placeholder="例：集合 / アップ / 練習試合 / 解散" aria-label="内容">
+      <button type="button" onclick="removeScheduleRow(this)" aria-label="削除">×</button>
+    `;
+    scheduleList.appendChild(row);
+
+    row.querySelectorAll("input").forEach(inp=>{
+      inp.addEventListener("input", syncScheduleText);
+      inp.addEventListener("change", syncScheduleText);
+    });
+  }
+
+  function removeScheduleRow(btn){
+    const row = btn.closest(".schedule-row");
+    if(row) row.remove();
+    syncScheduleText();
+  }
+
+  function clearScheduleRows(){
+    scheduleList.innerHTML = "";
+    syncScheduleText();
+  }
+
+  function applyTemplate(){
+    clearScheduleRows();
+    addScheduleRow("10:00", "集合");
+    addScheduleRow("10:15", "アップ");
+    addScheduleRow("11:00", "練習試合");
+    addScheduleRow("12:00", "解散");
+    syncScheduleText();
+  }
+
+  function syncScheduleText(){
+    const rows = Array.from(scheduleList.querySelectorAll(".schedule-row"));
+    const items = rows.map(r=>{
+      const t = (r.querySelector(".sch-time")?.value || "").trim();
+      const m = (r.querySelector(".sch-memo")?.value || "").trim();
+      if(!t && !m) return null;
+      if(t && m) return `${t} ${m}`;
+      if(t && !m) return `${t}`;
+      return `${m}`;
+    }).filter(Boolean);
+
+    const withTime = [];
+    const noTime = [];
+    items.forEach(s=>{
+      const mt = s.match(/^(\d{2}:\d{2})\s*(.*)$/);
+      if(mt) withTime.push({t:mt[1], s});
+      else noTime.push(s);
+    });
+    withTime.sort((a,b)=> a.t.localeCompare(b.t));
+
+    const out = [...withTime.map(x=>x.s), ...noTime].join("\n");
+    if(scheduleText) scheduleText.value = out;
+    if(schedulePreview) schedulePreview.textContent = out ? out : "未入力です。";
+  }
+
+  // =========================
+  // こだわり「こだわりません」→ 値を送らない
+  // =========================
+  const noPref = document.getElementById("noPreference");
+  const prefFields = document.getElementById("prefFields");
+
+  const prefTargets = [
+    document.getElementById("genderPref"),
+    document.getElementById("teamLevelText"),
+    document.getElementById("matchContentText"),
+    document.getElementById("travelOption"),
+    document.getElementById("targetTeamText")
+  ].filter(Boolean);
+
+  function syncPrefDisable(){
+    if(!noPref || !prefFields) return;
+    const on = noPref.checked;
+
+    prefFields.classList.toggle("is-disabled-field", on);
+
+    prefTargets.forEach(el=>{
+      el.disabled = on;
+      if(on){
+        if(el.tagName === "SELECT") el.value = "";
+        if(el.tagName === "INPUT")  el.value = "";
+      }
+    });
+  }
+
+  if(noPref){
+    noPref.addEventListener("change", ()=>{
+      syncPrefDisable();
+      syncLocationText();
+      syncScheduleText();
+    });
+  }
+
+  // =========================
+  // ✅ 二重送信防止（確認ボタン）
+  // =========================
+  function refreshAfterReset(){
+    setTimeout(()=>{
+      clearAllErrors();
+      syncLocationText();
+      scheduleList.innerHTML = "";
+      addScheduleRow("", "");
+      syncScheduleText();
+      syncPrefDisable();
+    }, 0);
+  }
+
+  if(btnReset){
+    btnReset.addEventListener("click", refreshAfterReset);
+  }
+
+  if(recruitForm){
+    recruitForm.addEventListener("submit", (e)=>{
+      // ✅ 送信前に入力チェックを行います
+      if(!validateRecruit()){
+        e.preventDefault();
+        return;
+      }
+
+      // ✅ 問題ない場合のみ二重送信防止を行います
+      if(btnConfirm){
+        btnConfirm.disabled = true;
+        btnConfirm.textContent = "確認画面へ移動中…";
+      }
+    });
+  }
+
+  // =========================
+  // 初期化
+  // =========================
+  window.addEventListener("DOMContentLoaded", ()=>{
+    syncLocationText();
+
+    const raw = (scheduleText?.value || "").trim();
+    scheduleList.innerHTML = "";
+
+    if(raw){
+      raw.split(/\r?\n/).forEach(line=>{
+        const s = line.trim();
+        if(!s) return;
+        const m = s.match(/^(\d{2}:\d{2})\s+(.*)$/);
+        if(m) addScheduleRow(m[1], m[2]);
+        else addScheduleRow("", s);
+      });
+    }else{
+      addScheduleRow("", "");
+    }
+    syncScheduleText();
+
+    syncPrefDisable();
+  });
+</script>
 
 </body>
 </html>

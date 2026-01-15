@@ -1,47 +1,121 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{common/layout :: html(
+        title='トップページ',
+        pageCss=~{::link},
+        body=~{::section}
+      )}">
 <head>
-	<link rel="stylesheet" th:href="@{/css/common/common.css}">
-
-	<link rel="stylesheet" th:href="@{/css/footer/footer.css}">
-
-  <meta charset="UTF-8">
-  <title>トップページ</title>
+  <!-- トップ専用CSS -->
+  <link rel="stylesheet" th:href="@{/css/recruit/recruit_card.css}">
 </head>
-<body>
-  <h1>ログイン成功！</h1>
-  <p>ようこそ、システムへ</p>
-  
-  
-  <h2>募集一覧</h2>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>希望日</th>
-        <th>時間</th>
-        <th>場所</th>
-		<th>操作</th>
-      </tr>
-    </thead>
-	
-    <tbody>
-      <tr th:each="r : ${recruitments}">
-        <td th:text="${r.recruitId}"></td>
-        <td th:text="${r.matchDate}"></td>
-        <td th:text="${r.matchTime}"></td>
-        <td th:text="${r.location}"></td>
-		<td>
-			 <a th:href="@{/user/apply/check(recruitId=${r.recruitId})}">応募</a>
-	 </td>	 
-      </tr>
-    </tbody>
-  </table>
-  <p th:if="${#lists.isEmpty(recruitments)}" class="empty-message">現在、募集はありません。</p>
 
-<!--  フッターの追加-->
-  <div th:replace="common/footer :: footer"></div>
+<section>
 
+  <!-- 🔍 検索バー -->
+  <form th:action="@{/recruit/search}" method="get" class="search-box">
+    <input type="text"
+           name="keyword"
+           placeholder="キーワードで探す"
+           th:value="${param.keyword}">
+    <button type="submit">検索</button>
+  </form>
 
-</body>
+  <div class="recruit-page">
+
+    <div class="recruit-head">
+      <h1>募集一覧</h1>
+      <p class="recruit-sub">カードをタップすると詳細画面が開けます</p>
+    </div>
+
+    <p class="empty" th:if="${#lists.isEmpty(recruitments)}">
+      現在、募集はありません。
+    </p>
+
+    <div class="recruit-card-list" th:if="${!#lists.isEmpty(recruitments)}">
+      <article class="recruit-card" th:each="r : ${recruitments}">
+
+        <!-- カード全体リンク -->
+        <a class="recruit-card-link"
+           th:href="@{/recruitment/detail(id=${r.recruitId})}"
+           aria-label="募集詳細へ"></a>
+
+        <!-- 左：アイコン -->
+        <div class="recruit-avatar" aria-hidden="true">
+          <img class="recruit-avatar-img"
+               th:if="${r.user != null and r.user.iconPath != null and !#strings.isEmpty(r.user.iconPath)}"
+               th:src="@{${r.user.iconPath}}"
+               alt="プロフィールアイコン">
+
+          <span class="recruit-avatar-initial"
+                th:unless="${r.user != null and r.user.iconPath != null and !#strings.isEmpty(r.user.iconPath)}"
+                th:text="${(r.user != null and r.user.name != null and !#strings.isEmpty(r.user.name))
+                          ? #strings.substring(r.user.name,0,1)
+                          : '教'}">
+          </span>
+        </div>
+
+        <!-- 中：本文 -->
+        <div class="recruit-content">
+          <div class="recruit-title-row">
+            <h2 class="recruit-title">
+              <span th:text="${r.clubMaster != null ? r.clubMaster.clubName : '部活未設定'}">部活</span>
+              <span class="dot">・</span>
+              <span th:text="${r.purpose != null && !#strings.isEmpty(r.purpose) ? r.purpose : '練習試合'}">目的</span>
+            </h2>
+            <span class="recruit-id-badge">ID <span th:text="${r.recruitId}">0</span></span>
+          </div>
+
+          <div class="recruit-meta meta-compact">
+            <div class="recruit-meta-item">
+              <span class="label">希望日</span>
+              <span class="value" th:text="${r.matchDate != null ? r.matchDate : '未定'}">未定</span>
+            </div>
+
+            <div class="recruit-meta-item">
+              <span class="label">時間</span>
+              <span class="value"
+                    th:text="${r.matchTime != null && !#strings.isEmpty(r.matchTime) ? r.matchTime : '未定'}">未定</span>
+            </div>
+
+            <div class="recruit-meta-item recruit-meta-wide">
+              <span class="label">場所</span>
+              <span class="value"
+                    th:text="${r.location != null && !#strings.isEmpty(r.location) ? r.location : '未定'}">未定</span>
+            </div>
+          </div>
+
+          <div class="recruit-chips">
+            <span class="recruit-chip"
+                  th:text="${r.skill_level != null && !#strings.isEmpty(r.skill_level) ? r.skill_level : 'レベル未設定'}">
+            </span>
+
+            <span class="recruit-chip"
+                  th:if="${r.conditions != null && !#strings.isEmpty(r.conditions)}"
+                  th:text="${r.conditions}">
+            </span>
+
+            <span class="recruit-chip muted"
+                  th:if="${r.remarks != null && !#strings.isEmpty(r.remarks)}"
+                  th:text="${#strings.abbreviate(r.remarks, 20)}">
+            </span>
+          </div>
+        </div>
+
+        <!-- 右：操作 -->
+        <div class="recruit-actions">
+          <a class="recruit-link"
+             th:href="@{/recruitment/detail(id=${r.recruitId})}">詳細</a>
+
+          <a class="btn primary"
+             th:href="@{/user/apply/check(recruitId=${r.recruitId})}">
+            応募
+          </a>
+        </div>
+
+      </article>
+    </div>
+
+  </div>
+</section>
 </html>

@@ -1,55 +1,162 @@
 @charset "UTF-8";
 
-/* 全体設定 */
-body {
+/* =========================
+   全体設定
+   ========================= */
+body{
   margin: 0;
-  padding-bottom: 60px; /* フッターの高さ分だけ余白を確保 */
+  padding-bottom: 74px; /* フッター分の余白（高さ+影） */
   font-family: "Noto Sans JP", sans-serif;
 }
 
-/* フッター全体 */
-.footer {
+/* =========================
+   フッター（SVG風A案）
+   ========================= */
+.footer{
   position: fixed;
-  bottom: 0;
   left: 0;
+  bottom: 0;
   width: 100%;
-  background-color: #2e7d32; /* 落ち着いた深緑 */
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 8px 0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  height: 64px;
+
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+
+  background: #ffffff;
+  border-top: 1px solid #cfe6cf;
+  box-shadow: 0 -10px 22px rgba(0,0,0,0.06);
   z-index: 1000;
 }
 
-/* 各ボタン */
-.footer-btn {
+/* フッターボタン（a / button 共通） */
+.footer-btn{
+  background: none;
+  border: none;
+  outline: none;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #ffffff;
+  justify-content: center;
+  gap: 4px;
+
+  color: #6a8f6a;           /* 通常：薄緑 */
   text-decoration: none;
-  font-size: 12px;
-  transition: 0.2s;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+
+  transition: background 0.15s, color 0.15s, transform 0.15s;
 }
 
-.footer-btn:hover {
-  color: #c8e6c9; /* 柔らかい薄緑のハイライト */
-  transform: translateY(-2px);
+/* SVG風アイコン */
+.footer-btn .ico{
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-/* アイコン */
-.footer-btn .icon {
-  font-size: 22px;
-  margin-bottom: 2px;
+.footer-btn .txt{
+  line-height: 1;
 }
 
-/* スマホ対応 */
-@media screen and (max-width: 480px) {
-  .footer-btn span {
+/* ホバー（PC用） */
+.footer-btn:hover{
+  background: #f3fff3;
+  color: #1f5f26;
+}
+
+/* 押した感（モバイルも気持ちよく） */
+.footer-btn:active{
+  transform: translateY(1px);
+}
+
+/* ✅ アクティブ表示（今いるページ） */
+.footer-btn.is-active{
+  color: #1f5f26;
+  position: relative;
+}
+
+.footer-btn.is-active::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 34px;
+  height: 3px;
+  border-radius: 999px;
+  background: #2e7d32;
+}
+
+/* =========================
+   メニューモーダル
+   ========================= */
+.menu-modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* 中央のメニュー箱 */
+.menu-box{
+  background: #ffffff;
+  border-radius: 18px;
+  min-width: 240px;
+  padding: 8px 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  text-align: center;
+  animation: popup 0.18s ease-out;
+}
+
+/* メニュー項目 */
+.menu-box a{
+  display: block;
+  padding: 14px 0;
+  color: #1f5f26;
+  font-weight: 900;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.menu-box a:hover{
+  background: #f3fff3;
+}
+
+.menu-box a + a{
+  border-top: 1px solid #e0e0e0;
+}
+
+@keyframes popup{
+  from{ transform: scale(0.92); opacity: 0; }
+  to  { transform: scale(1); opacity: 1; }
+}
+
+/* =========================
+   スマホ対応
+   ========================= */
+@media screen and (max-width: 480px){
+  body{ padding-bottom: 72px; }
+
+  .footer{ height: 62px; }
+
+  .footer-btn{
     font-size: 10px;
+    gap: 3px;
   }
-  .footer-btn .icon {
-    font-size: 20px;
+
+  .footer-btn .ico{
+    width: 19px;
+    height: 19px;
+  }
+
+  .menu-box{
+    min-width: 220px;
   }
 }

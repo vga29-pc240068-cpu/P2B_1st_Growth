@@ -1,92 +1,95 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{common/layout :: html(
+        title=${'プロフィール'},
+        pageCss=~{::link},
+        body=~{::section}
+      )}">
 
-<!-- ===== プロフィール画面 ===== -->
-<h2>プロフィール</h2>
+<head>
+  <!-- ✅ ページ専用CSSだけ（共通はlayoutが読む） -->
+  <link rel="stylesheet" th:href="@{/css/profile/profile.css}">
+</head>
 
-<p>
-  名前：
-  <span th:text="${user != null ? user.name : '未設定'}"></span>
-</p>
+<section>
+  <div class="profile-wrap">
 
-<p>
-  メール：
-  <span th:text="${user != null ? user.email : '未設定'}"></span>
-</p>
+    <h2>プロフィール</h2>
 
-<p>
-  学校：
-  <span th:text="${user != null ? user.school : '未設定'}"></span>
-</p>
-
-<p>
-  部活：
-  <span th:text="${user != null and user.club != null ? user.club.clubName : '未設定'}"></span>
-</p>
-
-<hr>
-
-<!-- ===== 大会記録アップロード ===== -->
-<h3>大会記録アップロード</h3>
-
-<form th:action="@{/user/profile/record/upload}" method="post" enctype="multipart/form-data">
-  <!-- タイトル（任意） -->
-  <input type="text" name="title" placeholder="大会名・タイトル（任意）">
-  <!-- jpg/png/pdf だけ選べる -->
-  <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required>
-  <button type="submit">アップロード</button>
-</form>
-
-<hr>
-
-<!-- ===== 大会記録一覧 ===== -->
-<h3>大会記録</h3>
-
-<!-- 記録がない場合 -->
-<div th:if="${#lists.isEmpty(records)}">
-  まだ記録ないよ〜
-</div>
-
-<!-- 記録がある場合 -->
-<ul th:if="${!#lists.isEmpty(records)}">
-  <li th:each="r : ${records}" style="margin-bottom:16px;">
-    <!-- 日付（Timestamp→表示用に軽く） -->
-    <div>
-      <span th:text="${#dates.format(r.uploadedAt, 'yyyy/MM/dd HH:mm')}"></span>
+    <!-- アイコン表示（URL化＋null対策） -->
+    <div class="profile-icon-wrap"
+         th:with="icon=${(user != null and user.iconPath != null) ? user.iconPath : '/icon/default.png'}">
+      <img th:src="@{${icon}}" class="profile-icon" alt="profile">
     </div>
 
-    <!-- タイトル（空なら未設定表示） -->
-    <div>
-      タイトル：
-      <span th:text="${r.title != null and !#strings.isEmpty(r.title) ? r.title : '（未設定）'}"></span>
-    </div>
-
-    <!-- 元ファイル名 -->
-    <div>
-      ファイル：
-      <span th:text="${r.originalName}"></span>
-      /
-      <!-- どの形式でも開けるリンク（画像もPDFも） -->
-      <a th:href="@{/user/profile/record/file/{id}(id=${r.id})}" target="_blank">開く</a>
-    </div>
-
-    <!-- 画像ならその場でプレビュー -->
-    <div th:if="${r.contentType != null and r.contentType.startsWith('image/')}" style="margin-top:8px;">
-      <img th:src="@{/user/profile/record/file/{id}(id=${r.id})}" style="max-width:420px;">
-    </div>
-
-    <!-- PDFなら案内だけ（リンクは上の「開く」） -->
-    <div th:if="${r.contentType != null and r.contentType.startsWith('application/pdf')}" style="margin-top:8px;">
-      ※PDFは「開く」から見れるよ
-    </div>
+    <p>名前：<span th:text="${user != null ? user.name : '未設定'}"></span></p>
+    <p>メール：<span th:text="${user != null ? user.email : '未設定'}"></span></p>
+    <p>学校：<span th:text="${user != null ? user.school : '未設定'}"></span></p>
+    <p>部活：<span th:text="${user != null and user.club != null ? user.club.clubName : '未設定'}"></span></p>
 
     <hr>
-  </li>
-</ul>
 
-<!-- ===== プロフィール編集（あとで） ===== -->
-<a th:href="@{/user/profile/edit}">プロフィール編集</a>
+    <h3>プロフィールアイコン変更</h3>
+    <form th:action="@{/user/icon/upload}" method="post" enctype="multipart/form-data">
+      <input type="file" name="iconFile" accept="image/*" required>
+      <button type="submit">変更する</button>
+    </form>
 
-</body>
+    <hr>
+
+    <h3>大会記録アップロード</h3>
+    <form th:action="@{/user/profile/record/upload}" method="post" enctype="multipart/form-data">
+      <input type="text" name="title" placeholder="大会名・タイトル（任意）">
+      <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required>
+      <button type="submit">アップロード</button>
+    </form>
+
+    <hr>
+
+    <h3>大会記録</h3>
+
+    <div th:if="${#lists.isEmpty(records)}">まだ記録ないよ〜</div>
+
+    <ul th:if="${!#lists.isEmpty(records)}">
+      <li th:each="r : ${records}" class="record-item">
+
+        <div class="record-date">
+          <span th:text="${#dates.format(r.uploadedAt, 'yyyy/MM/dd HH:mm')}"></span>
+        </div>
+
+        <div class="record-title">
+          タイトル：
+          <span th:text="${r.title != null and !#strings.isEmpty(r.title) ? r.title : '（未設定）'}"></span>
+        </div>
+
+        <div class="record-file">
+          ファイル：
+          <span th:text="${r.originalName}"></span>
+          /
+          <a th:href="@{/user/profile/record/file/{id}(id=${r.id})}" target="_blank">開く</a>
+
+          <form th:action="@{/user/profile/record/delete/{id}(id=${r.id})}"
+                method="post" style="display:inline;">
+            <button type="submit" onclick="return confirm('削除する？')">削除</button>
+          </form>
+        </div>
+
+        <div th:if="${r.contentType != null and r.contentType.startsWith('image/')}"
+             class="record-preview">
+          <img th:src="@{/user/profile/record/file/{id}(id=${r.id})}" alt="preview">
+        </div>
+
+        <div th:if="${r.contentType != null and r.contentType.startsWith('application/pdf')}"
+             class="record-pdf">
+          ※PDFは「開く」から見れるよ
+        </div>
+
+        <hr>
+      </li>
+    </ul>
+
+    <a class="profile-edit-link" th:href="@{/user/profile/edit}">プロフィール編集</a>
+
+  </div>
+</section>
 </html>

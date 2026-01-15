@@ -1,56 +1,542 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>あなたの募集一覧</title>
-    <link rel="stylesheet" th:href="@{/css/common/common.css}">
-    <link rel="stylesheet" th:href="@{/css/footer/footer.css}">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{common/layout :: html(
+        title=${mode == 'all' ? '募集一覧' : 'あなたの募集一覧'},
+        pageCss=~{user/input/recruit_list :: pageCss},
+        body=~{user/input/recruit_list :: body}
+      )}">
+
+<head th:fragment="pageCss">
+  <link rel="stylesheet" th:href="@{/css/recruit/recruit_card.css}">
 </head>
-<body>
 
-<div class="list-container">
-    <div class="list-card">
+<section th:fragment="body">
+  <div class="recruit-page">
+    <div class="recruit-head">
+      <h1 th:text="${mode == 'all' ? '募集一覧' : 'あなたの募集一覧'}">募集一覧</h1>
+      <p class="recruit-sub">左で選ぶと、右に詳細が出ます。</p>
+    </div>
 
-        <h2>あなたの募集一覧</h2>
+    <!-- 🔍 検索（既存機能は残します：表示は all の時だけです） -->
+    <form th:if="${mode == 'all'}"
+          th:action="@{/recruitment/search}"
+          method="get"
+          class="search-box">
 
-        <!-- 募集がない場合 -->
-        <p th:if="${#lists.isEmpty(recruitments)}">現在、募集はありません。</p>
+      <!-- ✅ mode固定で送信します（modeズレ事故防止のためです） -->
+      <input type="hidden" name="mode" value="all">
 
-        <!-- 募集がある場合 -->
-        <table th:if="${!#lists.isEmpty(recruitments)}">
-            <tr>
-                <th>ID</th>
-                <th>希望日</th>
-                <th>時間</th>
-                <th>場所</th>
-                <th>操作</th>
-            </tr>
+      <div class="search-row">
+        <input type="text" name="keyword"
+               th:value="${keyword != null ? keyword : (param.keyword != null ? param.keyword : '')}"
+               placeholder="キーワードで探す">
 
-            <tr th:each="r : ${recruitments}">
-                <td th:text="${r.recruitId}"></td>
-                <td th:text="${r.matchDate}"></td>
-                <td th:text="${r.matchTime}"></td>
-                <td th:text="${r.location}"></td>
+        <button type="button" class="btn-filter" id="filterBtn"
+                aria-expanded="false" aria-controls="filterPanel">
+          絞り込み条件 <span id="filterCount" class="filter-count" aria-hidden="true"></span>
+        </button>
 
-                <td>
-                    <a th:href="@{/recruitment/detail(id=${r.recruitId})}">
-                        詳細
-                    </a>
-                </td>
-            </tr>
-        </table>
+        <button type="submit" class="btn-search">検索</button>
+        <a class="btn-reset" th:href="@{/recruitment/all}">リセット</a>
+      </div>
 
-        <div class="list-actions">
-            <a th:href="@{/recruitment/input}" class="btn">
-                新しい募集を作成する
-            </a>
+      <div class="filter-panel" id="filterPanel" aria-hidden="true" role="dialog" aria-label="絞り込み条件">
+        <div class="filter-head">
+          <div class="filter-title">絞り込み条件</div>
+          <button type="button" class="btn-close" id="filterClose" aria-label="閉じる">×</button>
         </div>
 
+        <div class="filter-grid">
+
+          <!-- 部活 -->
+          <div class="fbox">
+            <div class="flabel">部活</div>
+            <label class="chk" th:each="c : ${clubs}">
+              <input type="checkbox"
+                     name="clubId"
+                     th:value="${c.clubId}"
+                     th:checked="${paramValues != null and paramValues['clubId'] != null and #lists.contains(paramValues['clubId'], #strings.toString(c.clubId))}">
+              <span th:text="${c.clubName}">サッカー</span>
+            </label>
+          </div>
+
+          <!-- 日程 -->
+          <div class="fbox">
+            <div class="flabel">日程</div>
+            <label class="chk" th:each="o : ${altDateOptions}">
+              <input type="checkbox"
+                     name="altDateOption"
+                     th:value="${o.name()}"
+                     th:checked="${paramValues != null and paramValues['altDateOption'] != null and #lists.contains(paramValues['altDateOption'], o.name())}">
+              <span th:text="${o.label}">未指定</span>
+            </label>
+          </div>
+
+          <!-- 人数 -->
+          <div class="fbox">
+            <div class="flabel">人数</div>
+            <label class="chk" th:each="capa : ${capacityRanges}">
+              <input type="checkbox"
+                     name="capacityRange"
+                     th:value="${capa.name()}"
+                     th:checked="${paramValues != null and paramValues['capacityRange'] != null and #lists.contains(paramValues['capacityRange'], capa.name())}">
+              <span th:text="${capa.label}">6〜10人</span>
+            </label>
+          </div>
+
+          <!-- 性別 -->
+          <div class="fbox">
+            <div class="flabel">性別</div>
+            <label class="chk" th:each="g : ${genderPrefs}">
+              <input type="checkbox"
+                     name="genderPref"
+                     th:value="${g.name()}"
+                     th:checked="${paramValues != null and paramValues['genderPref'] != null and #lists.contains(paramValues['genderPref'], g.name())}">
+              <span th:text="${g.label}">男女混合</span>
+            </label>
+          </div>
+
+          <!-- 移動 -->
+          <div class="fbox">
+            <div class="flabel">移動</div>
+            <label class="chk" th:each="t : ${travelOptions}">
+              <input type="checkbox"
+                     name="travelOption"
+                     th:value="${t.name()}"
+                     th:checked="${paramValues != null and paramValues['travelOption'] != null and #lists.contains(paramValues['travelOption'], t.name())}">
+              <span th:text="${t.label}">前後日OK</span>
+            </label>
+          </div>
+
+          <!-- 対象チーム -->
+          <div class="fbox">
+            <div class="flabel">対象チーム</div>
+            <label class="chk" th:each="tt : ${targetTeams}">
+              <input type="checkbox"
+                     name="targetTeam"
+                     th:value="${tt.name()}"
+                     th:checked="${paramValues != null and paramValues['targetTeam'] != null and #lists.contains(paramValues['targetTeam'], tt.name())}">
+              <span th:text="${tt.label}">高校生</span>
+            </label>
+          </div>
+
+          <!-- 試合内容 -->
+          <div class="fbox">
+            <div class="flabel">試合内容</div>
+            <label class="chk" th:each="mc : ${matchContents}">
+              <input type="checkbox"
+                     name="matchContent"
+                     th:value="${mc.name()}"
+                     th:checked="${paramValues != null and paramValues['matchContent'] != null and #lists.contains(paramValues['matchContent'], mc.name())}">
+              <span th:text="${mc.label}">練習試合</span>
+            </label>
+          </div>
+
+          <!-- チームレベル -->
+          <div class="fbox">
+            <div class="flabel">チームレベル</div>
+            <label class="chk" th:each="lv : ${teamLevels}">
+              <input type="checkbox"
+                     name="teamLevel"
+                     th:value="${lv.name()}"
+                     th:checked="${paramValues != null and paramValues['teamLevel'] != null and #lists.contains(paramValues['teamLevel'], lv.name())}">
+              <span th:text="${lv.label}">全国ベスト8</span>
+            </label>
+
+            <div style="margin-top:8px; padding-top:8px; border-top:1px solid #e3f3e3;">
+              <label class="chk">
+                <input type="checkbox" id="noPref"
+                       name="noPreference" value="1"
+                       th:checked="${paramValues != null and paramValues['noPreference'] != null and #lists.contains(paramValues['noPreference'], '1')}">
+                <span>こだわらない</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn-apply">この条件で絞り込む</button>
+          <button type="button" class="btn-clear" id="filterClear">チェック外す</button>
+        </div>
+      </div>
+    </form>
+
+    <p class="search-msg"
+       th:if="${message != null and !#strings.isEmpty(message)}"
+       th:text="${message}"></p>
+
+    <p class="empty" th:if="${#lists.isEmpty(recruitments)}">現在、募集はありません。</p>
+
+    <div class="recruit-split" th:if="${!#lists.isEmpty(recruitments)}">
+
+      <div class="recruit-left">
+        <div class="recruit-card-list">
+          <article class="recruit-card"
+                   th:each="r : ${recruitments}"
+                   th:attr="data-id=${r.recruitId}">
+            <div class="recruit-avatar" aria-hidden="true">
+              <img class="recruit-avatar-img"
+                   th:if="${r.user != null and r.user.iconPath != null and !#strings.isEmpty(r.user.iconPath)}"
+                   th:src="@{${r.user.iconPath}}"
+                   alt="プロフィールアイコン">
+              <span class="recruit-avatar-initial"
+                    th:unless="${r.user != null and r.user.iconPath != null and !#strings.isEmpty(r.user.iconPath)}"
+                    th:text="${(r.user != null and r.user.name != null and !#strings.isEmpty(r.user.name))
+                              ? #strings.substring(r.user.name,0,1)
+                              : '教'}">教</span>
+            </div>
+
+            <div class="recruit-content">
+              <div class="recruit-title-row">
+                <h2 class="recruit-title">
+                  <span th:text="${r.clubMaster != null ? r.clubMaster.clubName : '部活未設定'}">部活</span>
+                  <span class="dot">・</span>
+                  <span th:text="${r.title != null && !#strings.isEmpty(r.title) ? r.title : 'タイトル未設定'}">タイトル</span>
+                </h2>
+              </div>
+
+              <div class="recruit-chips">
+                <span class="recruit-chip"
+                      th:text="${r.altDateOption != null ? r.altDateOption.label : '未指定'}">未指定</span>
+
+                <span class="recruit-chip"
+                      th:text="${r.capacityRange != null ? r.capacityRange.label : '未指定'}">未指定</span>
+
+                <span class="recruit-chip"
+                      th:if="${r.noPreference != null and r.noPreference == 1}">こだわらない</span>
+
+                <th:block th:unless="${r.noPreference != null and r.noPreference == 1}">
+                  <span class="recruit-chip"
+                        th:if="${r.genderPref != null}"
+                        th:text="${r.genderPref.label}">男女混合</span>
+
+                  <span class="recruit-chip"
+                        th:if="${r.teamLevelText != null && !#strings.isEmpty(r.teamLevelText)}"
+                        th:text="${r.teamLevelText}">全国ベスト8</span>
+
+                  <span class="recruit-chip"
+                        th:if="${r.matchContentText != null && !#strings.isEmpty(r.matchContentText)}"
+                        th:text="${r.matchContentText}">練習試合</span>
+
+                  <span class="recruit-chip"
+                        th:if="${r.travelOption != null}"
+                        th:text="${r.travelOption.label}">前後日OK</span>
+
+                  <span class="recruit-chip"
+                        th:if="${r.targetTeamText != null && !#strings.isEmpty(r.targetTeamText)}"
+                        th:text="${r.targetTeamText}">高校生</span>
+                </th:block>
+              </div>
+            </div>
+
+            <!-- ✅ 削除ボタン（mine の時だけ表示します） -->
+            <div class="recruit-actions" th:if="${mode != 'all'}">
+              <!-- ✅ 既存のアクセス先は変更しません -->
+              <form th:action="@{/recruitment/delete}" method="post"
+                    onsubmit="event.stopPropagation(); return confirm('この募集を削除してもよろしいですか？');">
+                <!-- ✅ 募集IDを送信いたします -->
+                <input type="hidden" name="recruitId" th:value="${r.recruitId}">
+                <!-- ✅ modeも送信いたします（リダイレクト先の判断に利用するためです） -->
+                <input type="hidden" name="mode" th:value="${mode}">
+                <!-- ✅ カードクリックの選択処理へ伝播しないようにしております -->
+                <button type="submit" class="btn-delete" onclick="event.stopPropagation();">削除</button>
+              </form>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <aside class="recruit-right">
+        <div class="detail-panel">
+          <div class="detail-head">
+            <div class="detail-title">詳細</div>
+            <div class="detail-sub">カードを選択するとこちらに表示されます</div>
+          </div>
+
+          <div id="detailBody" class="detail-body">左のカードを選択してください。</div>
+
+          <!-- ✅ 応募ボタンは all の時だけ（既存通りです） -->
+          <div class="detail-footer" th:if="${mode == 'all'}">
+            <a id="applyBtn" class="btn-apply is-disabled" href="#" aria-disabled="true"
+               onclick="return applyGuard();">
+              応募画面に進む
+            </a>
+          </div>
+        </div>
+      </aside>
+
     </div>
-</div>
 
-<!-- フッター -->
-<div th:replace="common/footer :: footer"></div>
+    <div class="recruit-bottom">
+      <a class="btn" th:if="${mode != 'all'}" th:href="@{/recruitment/input}">新しい募集を作成</a>
+      <a class="btn" th:if="${mode == 'all'}" th:href="@{/recruitment/list}">あなたの募集へ</a>
+      <a class="btn ghost" th:if="${mode != 'all'}" th:href="@{/recruitment/all}">募集一覧へ</a>
+    </div>
+  </div>
 
-</body>
+  <script th:inline="javascript">
+    const ctx = /*[[@{/}]]*/ "/";
+
+    function applyGuard(){
+      const btn = document.getElementById("applyBtn");
+      return btn && !btn.classList.contains("is-disabled");
+    }
+
+    function esc(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;").replaceAll("<","&lt;")
+        .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    }
+
+    function md(dateOrDateTime){
+      const s = String(dateOrDateTime ?? "").trim();
+      if(!s) return "";
+      const d = s.includes("T") ? s.split("T")[0] : s.split(" ")[0];
+      const p = d.split("-");
+      if(p.length < 3) return d;
+      const m = Number(p[1]);
+      const day = Number(p[2]);
+      if(!m || !day) return d;
+      return `${m}-${day}`;
+    }
+
+    function hm(dateTime){
+      const s = String(dateTime ?? "").trim();
+      if(!s) return "";
+      const t = s.includes("T") ? s.split("T")[1] : s.split(" ")[1];
+      return String(t ?? "").slice(0,5);
+    }
+
+    function buildTimeline(scheduleText){
+      const s = String(scheduleText ?? "").trim();
+      if(!s) return `<div class="tl-empty">スケジュール未設定</div>`;
+
+      const lines = s.includes("\n")
+        ? s.split("\n").map(x=>x.trim()).filter(Boolean)
+        : s.split(/(?=\d{1,2}:\d{2})/).map(x=>x.trim()).filter(Boolean);
+
+      const items = lines.map(line=>{
+        const m = line.match(/^(\d{1,2}:\d{2})\s*(.*)$/);
+        if(m){
+          return { time:m[1], text:(m[2]||"").trim() || "内容未設定" };
+        }
+        return { time:"", text:line };
+      });
+
+      return `
+        <div class="timeline">
+          ${items.map(it=>`
+            <div class="tl-item">
+              <div class="tl-time">${it.time ? esc(it.time) : ""}</div>
+              <div class="tl-dot"></div>
+              <div class="tl-text">${esc(it.text)}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function buildMap(addr){
+      const a = String(addr ?? "").trim();
+      if(!a) return `<div class="map-empty">場所未設定</div>`;
+      const q = encodeURIComponent(a);
+      return `
+        <iframe
+          class="map-iframe"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps?q=${q}&output=embed">
+        </iframe>
+      `;
+    }
+
+    function chip(label, value){
+      const v = String(value ?? "").trim();
+      if(!v) return "";
+      return `
+        <div class="detail-chip">
+          <span class="label">${esc(label)}</span>
+          <span class="value">${esc(v)}</span>
+        </div>
+      `;
+    }
+
+    async function selectRecruit(el){
+      const id = el?.dataset?.id;
+      if(!id) return;
+
+      document.querySelectorAll(".recruit-card.is-selected")
+        .forEach(x => x.classList.remove("is-selected"));
+      el.classList.add("is-selected");
+
+      const res = await fetch(`${ctx}recruitment/api/detail?id=${id}`);
+      const data = await res.json();
+
+      const detail = document.getElementById("detailBody");
+      if(!detail) return;
+
+      if(data.error){
+        detail.textContent = "詳細の取得に失敗したばい…";
+        return;
+      }
+
+      const start = String(data.startDateTime ?? "");
+      const end   = String(data.endDateTime ?? "");
+
+      const dateMMDD = md(start);
+      const startHM = hm(start);
+      const endHM   = hm(end);
+
+      detail.innerHTML = `
+        <div class="d-title">${esc(data.clubName)} ・ ${esc(data.title)}</div>
+
+        <div class="detail-when">
+          <div class="detail-when-date">${esc(dateMMDD)}</div>
+          <div class="detail-when-time">
+            <span class="badge">日程</span>
+            <span class="time">${esc(startHM || start)}</span>
+            <span class="sep">〜</span>
+            <span class="time">${esc(endHM || end)}</span>
+          </div>
+        </div>
+
+        <div class="detail-chips">
+          ${chip("別日程", data.altDateOption)}
+          ${chip("人数", data.capacityRange)}
+          ${chip("性別", data.genderPref)}
+          ${chip("移動", data.travelOption)}
+          ${chip("対象", data.targetTeam)}
+          ${chip("内容", data.matchContent)}
+          ${chip("レベル", data.teamLevel)}
+        </div>
+
+        <div class="place-wrap">
+          <div class="place-box">
+            <div class="place-title">場所</div>
+            <div class="place-addr">${esc(data.locationText || "未設定")}</div>
+          </div>
+          <div class="detail-map">
+            ${buildMap(data.locationText)}
+          </div>
+        </div>
+
+        <div class="detail-textbox">
+          <div class="detail-textbox-title">スケジュール</div>
+          <div class="detail-textbox-body">
+            ${buildTimeline(data.scheduleText)}
+          </div>
+        </div>
+
+        <div class="detail-textbox">
+          <div class="detail-textbox-title">形式</div>
+          <div class="detail-textbox-body">${esc(data.matchFormat || "未設定")}</div>
+        </div>
+
+        <div class="detail-textbox">
+          <div class="detail-textbox-title">備考</div>
+          <div class="detail-textbox-body">${esc(data.notes || "なし")}</div>
+        </div>
+      `;
+
+      const btn = document.getElementById("applyBtn");
+      if(btn){
+        btn.classList.remove("is-disabled");
+        btn.removeAttribute("aria-disabled");
+        btn.href = `${ctx}application/apply?recruitId=${id}`;
+      }
+    }
+
+    function updateFilterCount(){
+      const panel = document.getElementById("filterPanel");
+      const countEl = document.getElementById("filterCount");
+      if(!panel || !countEl) return;
+
+      const checked = panel.querySelectorAll('input[type="checkbox"]:checked').length;
+      if(checked <= 0){
+        countEl.textContent = "";
+        countEl.style.display = "none";
+      }else{
+        countEl.textContent = String(checked);
+        countEl.style.display = "inline-flex";
+      }
+    }
+
+    function bindNoPreference(){
+      const panel = document.getElementById("filterPanel");
+      const noPref = document.getElementById("noPref");
+      if(!panel || !noPref) return;
+
+      const targets = panel.querySelectorAll(
+        'input[name="targetTeam"], input[name="matchContent"], input[name="teamLevel"]'
+      );
+
+      const sync = () => {
+        if(noPref.checked){
+          targets.forEach(ch => ch.checked = false);
+        }
+        updateFilterCount();
+      };
+
+      noPref.addEventListener("change", sync);
+
+      targets.forEach(ch => ch.addEventListener("change", () => {
+        if(ch.checked) noPref.checked = false;
+        updateFilterCount();
+      }));
+
+      sync();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      // ✅ 右表示（一覧は mine/all 関係なく動かします）
+      document.querySelectorAll(".recruit-card").forEach(card => {
+        card.addEventListener("click", () => selectRecruit(card));
+      });
+
+      const first = document.querySelector(".recruit-card");
+      if(first) selectRecruit(first);
+
+      // ✅ 絞り込みUI（all の時だけ要素があるため、存在チェックしてから動かします）
+      const btn   = document.getElementById("filterBtn");
+      const panel = document.getElementById("filterPanel");
+      const close = document.getElementById("filterClose");
+      const clear = document.getElementById("filterClear");
+
+      if(!btn || !panel) return;
+
+      const openPanel = () => {
+        panel.classList.add("is-open");
+        panel.setAttribute("aria-hidden","false");
+        btn.setAttribute("aria-expanded","true");
+      };
+
+      const closePanel = () => {
+        panel.classList.remove("is-open");
+        panel.setAttribute("aria-hidden","true");
+        btn.setAttribute("aria-expanded","false");
+      };
+
+      closePanel();
+
+      btn.addEventListener("click", () => {
+        panel.classList.contains("is-open") ? closePanel() : openPanel();
+      });
+
+      close?.addEventListener("click", closePanel);
+
+      clear?.addEventListener("click", () => {
+        panel.querySelectorAll("input[type=checkbox]").forEach(ch => ch.checked = false);
+        updateFilterCount();
+      });
+
+      panel.addEventListener("change", (e) => {
+        if(e.target && e.target.matches('input[type="checkbox"]')) updateFilterCount();
+      });
+
+      updateFilterCount();
+      bindNoPreference();
+    });
+  </script>
+</section>
 </html>
